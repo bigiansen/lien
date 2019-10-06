@@ -29,8 +29,6 @@ namespace ien::img
         void set_pixel(int x, int y, uint8_t* data);
 
         uint8_t* data() noexcept;
-        const uint8_t* cdata() const noexcept;
-
-        void truncate_channel_bits(int r, int g, int b, int a);
+        const uint8_t* cdata() const noexcept;        
     };
 }
