@@ -4,3 +4,4 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE 	${PROJECT_BINARY_DIR}/output/bin/lie
 
 add_subdirectory(parallel)
 add_subdirectory(strutils)
+add_subdirectory(image)

@@ -7,7 +7,13 @@ namespace ien::img
 	struct truncate_args
 	{
 		uint8_t* image_data;
-		int width, height, channels, r, g, b, a;
+		int image_width, 
+			image_height,
+			image_channels,
+			bits_r, 
+			bits_g,
+			bits_b,
+			bits_a;
 	};
 
 	void truncate_channel_bits(const truncate_args& args);

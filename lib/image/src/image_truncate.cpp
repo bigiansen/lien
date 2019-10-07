@@ -6,22 +6,23 @@ namespace ien::img
 {
 	void truncate_channel_bits(const truncate_args& args)
 	{
-		#if defined(LIEN_ARCH_X86_64)
+	#if defined(LIEN_ARCH_X86_64)
 		static void (*fptr)(uint8_t*, long, int, int, int, int) =
 			&_internal::truncate_channel_bits_sse2;
-		#elif defined(LIEN_ARCH_X86)
+	#elif defined(LIEN_ARCH_X86)
 		static void (*fptr)(uint8_t*, long, int, int, int, int) =
 			ien::platform::x86::get_feature(ien::platform::x86::feature::SSE2)
 			? &_internal::truncate_channel_bits_sse2
 			: &_internal::truncate_channel_bits_std;
-		#else
+	#else
 		static void (*fptr)(uint8_t*, long, int, int, int, int) =
 			&_internal::truncate_channel_bits_std;
-		#endif
-		if (args.r || args.g || args.b || args.a)
+	#endif
+
+		if (args.bits_r || args.bits_g || args.bits_b || args.bits_a)
 		{
-			auto img_datalen = (args.width * args.height * args.channels);
-			fptr(args.image_data, img_datalen, args.r, args.g, args.b, args.a);
+			auto img_datalen = (args.image_width * args.image_height * args.image_channels);
+			fptr(args.image_data, img_datalen, args.bits_r, args.bits_g, args.bits_b, args.bits_a);
 		}
 	}
 
