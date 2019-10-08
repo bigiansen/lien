@@ -2,7 +2,14 @@
 
 #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
 
-#include <intrin.h>
+#if __has_include(<intrin.h>)
+    #include <intrin.h>
+#elif __has_include(<x86intrin.h>)
+    #include <x86intrin.h>
+#else
+    #error "Could not find intrinsics header for CPUID!"
+#endif
+
 #include <iostream>
 #include <unordered_map>
 

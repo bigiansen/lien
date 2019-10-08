@@ -19,9 +19,9 @@
     #define LIEN_ARCH_ARM64
 #endif
 
-//--------------------------------------------
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 // OS
-//--------------------------------------------
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 #if defined(_WIN64)
     #define LIEN_OS_WIN64
 #elif defined(_WIN32)
@@ -44,6 +44,33 @@
     #define LIEN_OS_FREEBSD
 #endif
 
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// COMPILER
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+#if defined(__GNUC__) && !defined(__clang__)
+    #define LIEN_COMPILER_GNU
+
+#elif defined(__clang__)
+    #define LIEN_COMPILER_CLANG
+
+#elif defined(_MSC_VER)
+    #define LIEN_COMPILER_MSVC
+
+#elif defined(__INTEL_COMPILER)
+    #define LIEN_COMPILER_INTEL
+
+#elif defined(__EMSCRIPTEN__)
+    #define LIEN_COMPILER_EMSCRIPTEN
+
+#elif defined(__wasm__)
+    #define LIEN_COMPILER_WASM
+
+#endif
+
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// PLATFORM FEATURES (x86)
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
 
