@@ -180,9 +180,9 @@ namespace ien::img
             debug_assert(len % 4 == 0, "Length must be a multiple of 4 (4-bytes per channel)");
             std::vector<uint8_t> result;
             result.resize(len / 4);
+            static __m128i shuf_mask = _mm_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1);
             for (size_t i = 0; i < len; i += 16)
             {
-                static __m128i shuf_mask = _mm_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1);
                 __m128i v0 = _mm_load_si128(reinterpret_cast<const __m128i*>(data + i));
                 __m128i v1 = _mm_shuffle_epi8(v0, shuf_mask);
                 __m128i v2 = _mm_shuffle_epi8(v1, shuf_mask);

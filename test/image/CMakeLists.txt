@@ -1,5 +1,5 @@
 SET(LIEN_TEST_IMAGE_SOURCES
-	src/image_truncate_sse.cpp
+	src/image_ops.cpp
     src/main.cpp
 )
 
