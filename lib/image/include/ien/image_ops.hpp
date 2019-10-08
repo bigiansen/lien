@@ -33,7 +33,19 @@ namespace ien::img
     namespace _internal
     {
         std::vector<uint8_t> max_channel_rgba_std(const uint8_t* data, size_t len);
-		std::vector<uint8_t> max_channel_rgba_sse2(const uint8_t* data, size_t len);
+        std::vector<uint8_t> max_channel_rgba_sse2(const uint8_t* data, size_t len);
         std::vector<uint8_t> max_channel_rgba_ssse3(const uint8_t* data, size_t len);
+    }
+
+    //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    // VISUAL DATA
+    //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    std::vector<uint8_t> channel_red(const uint8_t* data, size_t len);
+    std::vector<uint8_t> channel_green(const uint8_t* data, size_t len);
+    std::vector<uint8_t> channel_blue(const uint8_t* data, size_t len);
+    std::vector<uint8_t> channel_alpha(const uint8_t* data, size_t len);
+    namespace _internal
+    {
+        std::vector<uint8_t> get_channel_std(const uint8_t* data, size_t len, size_t ch_idx);
     }
 }
