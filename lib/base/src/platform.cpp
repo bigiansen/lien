@@ -4,14 +4,29 @@
 
 #if __has_include(<intrin.h>)
     #include <intrin.h>
-#elif __has_include(<x86intrin.h>)
-    #include <x86intrin.h>
-#else
-    #error "Could not find intrinsics header for CPUID!"
 #endif
 
 #include <iostream>
+#include <memory>
 #include <unordered_map>
+
+#ifndef LIEN_COMPILER_MSVC
+    // https://github.com/01org/linux-sgx/blob/master/common/inc/internal/linux/cpuid_gnu.h
+    void __cpuidex(int cpuid[4], int func_id, int subfunc_id)
+    {
+    #if defined(LIEN_ARCH_X86_64)
+        asm volatile ("cpuid"
+                : "=a" (cpuid[0]), "=b" (cpuid[1]), "=c" (cpuid[2]), "=d" (cpuid[3])
+                : "0" (func_id), "2" (subfunc_id));
+    #elif definedLIEN_ARCH_X86)
+        asm volatile ("xchgl %%ebx, %1; cpuid; xchgl %%ebx, %1"
+                : "=a" (cpuid[0]), "=r" (cpuid[1]), "=c" (cpuid[2]), "=d" (cpuid[3])
+                : "0" (func_id), "2" (subfunc_id));
+    #else
+        #error "Unsupported MSVC platform"
+    #endif
+    }
+#endif
 
 namespace ien::platform::x86
 {

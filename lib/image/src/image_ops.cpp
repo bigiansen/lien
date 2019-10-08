@@ -82,10 +82,10 @@ namespace ien::img
                 (uint8_t)(1 << r), (uint8_t)(1 << g), (uint8_t)(1 << b), (uint8_t)(1 << a),
             };
 
-            __m128i vtrunc_mask = _mm_loadu_si32(trunc_mask);
+            __m128i vtrunc_mask = _mm_load_si128(reinterpret_cast<__m128i*>(trunc_mask));
             for (size_t i = 0; i < size; i += 16)
             {
-                __m128i vdata = _mm_loadu_si32(data + i);
+                __m128i vdata = _mm_load_si128(reinterpret_cast<__m128i*>(data + i));
                 vdata = _mm_and_si128(vdata, vtrunc_mask);
                 _mm_store_si128(reinterpret_cast<__m128i*>(data + i), vdata);
             }

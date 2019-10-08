@@ -26,6 +26,9 @@ namespace ien::tt
         >
     > : std::true_type { };
 
+    template<typename T>
+    using enable_if_is_iterable = std::enable_if_t<is_iterable<T>::value>;
+
     template<typename T, typename = tt::enable_if_is_iterable<T>>
     using iterable_value_type = decltype(*(std::declval<T>().begin()));
 
@@ -34,10 +37,7 @@ namespace ien::tt
 
     template<typename T, typename TElem>
     constexpr bool is_iterable_of = 
-        is_iterable<T>::value && is_same_decay<iterable_value_type<T>, TElem>;
-
-    template<typename T>
-    using enable_if_is_iterable = std::enable_if_t<is_iterable<T>::value>;
+        is_iterable<T>::value && is_same_decay<iterable_value_type<T>, TElem>;    
 
     template<typename T, typename TElem>
     using enable_if_is_iterable_of = std::enable_if_t<
