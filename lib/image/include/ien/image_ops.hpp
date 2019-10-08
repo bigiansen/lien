@@ -3,6 +3,8 @@
 #include <cinttypes>
 #include <vector>
 
+#include <ien/platform.hpp>
+
 namespace ien::img
 {
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -23,7 +25,12 @@ namespace ien::img
     namespace _internal
     {
         void truncate_channel_bits_std(uint8_t* data, size_t size, int r, int g, int b, int a);
-        void truncate_channel_bits_sse2(uint8_t* data, size_t size, int r, int g, int b, int a);
+        #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
+        namespace x86
+        {
+            void truncate_channel_bits_sse2(uint8_t* data, size_t size, int r, int g, int b, int a);
+        }
+        #endif
     }
 
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -33,8 +40,14 @@ namespace ien::img
     namespace _internal
     {
         std::vector<uint8_t> max_channel_rgba_std(const uint8_t* data, size_t len);
-        std::vector<uint8_t> max_channel_rgba_sse2(const uint8_t* data, size_t len);
-        std::vector<uint8_t> max_channel_rgba_ssse3(const uint8_t* data, size_t len);
+        #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
+        namespace x86
+        {
+            std::vector<uint8_t> max_channel_rgba_sse2(const uint8_t* data, size_t len);
+            std::vector<uint8_t> max_channel_rgba_ssse3(const uint8_t* data, size_t len);
+            std::vector<uint8_t> max_channel_rgba_avx2(const uint8_t* data, size_t len);
+        }
+        #endif
     }
 
     //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+

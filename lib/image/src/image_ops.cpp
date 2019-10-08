@@ -1,7 +1,6 @@
 #include <ien/image_ops.hpp>
 
 #include <ien/assert.hpp>
-#include <ien/platform.hpp>
 
 #include <algorithm>
 
@@ -19,12 +18,9 @@ namespace ien::img
     {
         using fptr_t = void (*)(uint8_t*, size_t, int, int, int, int);
 
-        #ifdef defined(LIEN_ARCH_X86_64)
-        static fptr_t internal_func = &_internal::truncate_channel_bits_sse2;
-
-        #elif defined(LIEN_ARCH_X86)
+        #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
         static fptr_t internal_func = platform::x86::get_feature(platform::x86::feature::SSE2)
-            ? &_internal::truncate_channel_bits_sse2
+            ? &_internal::x86::truncate_channel_bits_sse2
             : &_internal::truncate_channel_bits_std;
 
         #else
@@ -35,7 +31,14 @@ namespace ien::img
         if (args.bits_r || args.bits_g || args.bits_b || args.bits_a)
         {
             auto img_datalen = (args.image_width * args.image_height * args.image_channels);
-            internal_func(args.image_data, img_datalen, args.bits_r, args.bits_g, args.bits_b, args.bits_a);
+            internal_func(
+                args.image_data, 
+                img_datalen, 
+                args.bits_r, 
+                args.bits_g, 
+                args.bits_b, 
+                args.bits_a
+            );
         }
     }
 
@@ -60,8 +63,11 @@ namespace ien::img
                 *iptr &= trunc_mask;
             }
         }
+    }
 
-        #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
+    #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
+    namespace _internal::x86
+    {
         void truncate_channel_bits_sse2(uint8_t* data, size_t size, int r, int g, int b, int a)
         {
             if (size % 4 != 0)
@@ -84,8 +90,8 @@ namespace ien::img
                 _mm_store_si128(reinterpret_cast<__m128i*>(data + i), vdata);
             }
         }
-        #endif
     }
+    #endif
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 // MAX CHANNEL RGBA
@@ -93,16 +99,15 @@ namespace ien::img
     std::vector<uint8_t> max_channel_rgba(const uint8_t* data, size_t len)
     {
         using fptr_t = std::vector<uint8_t> (*)(const uint8_t*, size_t);
-
-        #if defined(LIEN_ARCH_X86_64)
-        static fptr_t internal_func = &_internal::max_channel_rgba_ssse3;
-
-        #elif defined(LIEN_ARCH_X86)
-        static fptr_t internal_func = platform::x86::get_feature(platform::x86::feature::SSSE3)
-            ? &_internal::max_channel_rgba_ssse3
+        #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
+        static fptr_t internal_func = 
+              platform::x86::get_feature(platform::x86::feature::AVX2)
+            ? &_internal::x86::max_channel_rgba_avx2
+            : platform::x86::get_feature(platform::x86::feature::SSSE3)
+            ? &_internal::x86::max_channel_rgba_ssse3
             : platform::x86::get_feature(platform::x86::feature::SSE2)
-                ? &_internal::max_channel_rgba_sse2
-                : &_internal::max_channel_rgba_std
+            ? &_internal::x86::max_channel_rgba_sse2
+            : &_internal::max_channel_rgba_std;
 
         #else 
         static fptr_t internal_func = _internal::max_channel_rgba_str;
@@ -128,9 +133,10 @@ namespace ien::img
             }
             return result;
         }
-
-        #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
-
+    }
+    #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
+    namespace _internal::x86
+    {
         std::vector<uint8_t> max_channel_rgba_sse2(const uint8_t* data, size_t len)
         {
             debug_assert(len % 4 == 0, "Length must be a multiple of 4 (4-bytes per channel)");
@@ -175,7 +181,7 @@ namespace ien::img
             std::vector<uint8_t> result;
             result.resize(len / 4);
             for (size_t i = 0; i < len; i += 16)
-            {				
+            {
                 static __m128i shuf_mask = _mm_set_epi8(12, 15, 14, 13, 8, 11, 10, 9, 4, 7, 6, 5, 0, 3, 2, 1);
                 __m128i v0 = _mm_load_si128(reinterpret_cast<const __m128i*>(data + i));
                 __m128i v1 = _mm_shuffle_epi8(v0, shuf_mask);
@@ -207,8 +213,38 @@ namespace ien::img
             
             return result;
         }
-        #endif
+
+        std::vector<uint8_t> max_channel_rgba_avx2(const uint8_t* data, size_t len)
+        {
+            debug_assert(len % 4 == 0, "Length must be a multiple of 4 (4-bytes per channel)");
+            std::vector<uint8_t> result;
+            result.resize(len / 4);
+            for (size_t i = 0; i < len; i += 32)
+            {
+                __m256i v0 = _mm256_load_si256(reinterpret_cast<const __m256i*>(data + i));
+                __m256i v1 = _mm256_srai_epi32(v0, 8);
+                __m256i v2 = _mm256_srai_epi32(v1, 8);
+                __m256i v3 = _mm256_srai_epi32(v2, 8);
+
+                v0 = _mm256_max_epu8(v0, v1);
+                v0 = _mm256_max_epu8(v0, v2);
+                v0 = _mm256_max_epu8(v0, v3);
+
+                static uint8_t aux[32];
+                _mm256_store_si256(reinterpret_cast<__m256i*>(aux), v0);
+                result[(i / 4) + 0] = aux[0];
+                result[(i / 4) + 1] = aux[4];
+                result[(i / 4) + 2] = aux[8];
+                result[(i / 4) + 3] = aux[12];
+                result[(i / 4) + 4] = aux[16];
+                result[(i / 4) + 5] = aux[20];
+                result[(i / 4) + 6] = aux[24];
+                result[(i / 4) + 7] = aux[28];
+            }
+            return result;
+        }
     }
+    #endif
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 // VISUAL DATA - CHANNELS
