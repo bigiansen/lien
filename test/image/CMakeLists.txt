@@ -1,5 +1,4 @@
 SET(LIEN_TEST_IMAGE_SOURCES
-	src/image_ops.cpp
     src/main.cpp
 )
 
