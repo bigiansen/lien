@@ -3,6 +3,8 @@
 #include <ien/assert.hpp>
 #include <ien/platform.hpp>
 #include <stb_image.h>
+#include <stb_image_write.h>
+#include <stb_image_resize.h>
 #include <stdexcept>
 
 namespace ien::img
@@ -40,7 +42,7 @@ namespace ien::img
 
     size_t image_unpacked_data::size() const noexcept { return _size; }
 
-    std::vector<uint8_t> image_unpacked_data::packed_data()
+    std::vector<uint8_t> image_unpacked_data::pack_data()
     {
         std::vector<uint8_t> result;
         result.resize(_size * 4);
@@ -100,5 +102,38 @@ namespace ien::img
             throw std::invalid_argument("Unable to load image with path: " + path);
         }
         _data = unpack_image_data(packed_data, (_width * _height * 4));
+        stbi_image_free(packed_data);
+    }
+
+    image_unpacked_data* image::data() noexcept { return &_data; }
+
+    const image_unpacked_data* image::cdata() const noexcept { return &_data; }
+
+    void image::save_to_file_png(const std::string& path, int compression_level)
+    {
+        std::vector<uint8_t> packed_data = _data.pack_data();
+        stbi_write_png_compression_level = compression_level;
+        stbi_write_png(path.c_str(), _width, _height, 4, packed_data.data(), _width * 4);
+    }
+
+    size_t image::pixel_count() const noexcept
+    {
+        return static_cast<size_t>(_width) * _height;
+    }
+
+    int image::width() const noexcept { return _width; }
+    
+    int image::height() const noexcept { return _height; }
+
+    void image::save_to_file_jpeg(const std::string& path, int quality)
+    {
+        std::vector<uint8_t> packed_data = _data.pack_data();
+        stbi_write_jpg(path.c_str(), _width, _height, 4, packed_data.data(), quality);
+    }
+
+    void image::save_to_file_tga(const std::string& path)
+    {
+        std::vector<uint8_t> packed_data = _data.pack_data();
+        stbi_write_tga(path.c_str(), _width, _height, 4, packed_data.data());
     }
 }

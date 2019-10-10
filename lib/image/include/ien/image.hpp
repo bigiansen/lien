@@ -6,6 +6,9 @@
 
 namespace ien::img
 {
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+// class image_unpacked_data
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
     class image;
     class image_unpacked_data
     {
@@ -36,11 +39,14 @@ namespace ien::img
 
         size_t size() const noexcept;
 
-        [[nodiscard]] std::vector<uint8_t> packed_data();
+        [[nodiscard]] std::vector<uint8_t> pack_data();
     };
 
     extern image_unpacked_data unpack_image_data(uint8_t* data, size_t len);
 
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+// class image
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
     class image
     {
     private:
@@ -50,5 +56,16 @@ namespace ien::img
     public:
         image(int width, int height);
         image(const std::string& path);
+
+        image_unpacked_data* data() noexcept;
+        const image_unpacked_data* cdata() const noexcept;
+
+        size_t pixel_count() const noexcept;
+        int width() const noexcept;
+        int height() const noexcept;
+
+        void save_to_file_png(const std::string& path, int compression_level = 8);
+        void save_to_file_jpeg(const std::string& path, int quality = 100);
+        void save_to_file_tga(const std::string& path);
     };
 }
