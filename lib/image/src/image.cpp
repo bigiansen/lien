@@ -83,10 +83,11 @@ namespace ien::img
     image::image(int width, int height)
         : _width(width)
         , _height(height)
-        , _data(width * height)
+        , _data(static_cast<size_t>(width) * height)
     { }
 
     image::image(const std::string& path)
+		: _width(0), _height(0)
     {
         int channels_dummy = 0;
         uint8_t* packed_data = stbi_load(
@@ -101,7 +102,7 @@ namespace ien::img
         {
             throw std::invalid_argument("Unable to load image with path: " + path);
         }
-        _data = unpack_image_data(packed_data, (_width * _height * 4));
+        _data = unpack_image_data(packed_data, (static_cast<size_t>(_width) * _height * 4));
         stbi_image_free(packed_data);
     }
 
