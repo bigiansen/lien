@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ien/platform.hpp>
-
 #include <ien/internal/image_ops_args.hpp>
 #include <cinttypes>
 #include <vector>
