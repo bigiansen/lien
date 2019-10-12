@@ -4,6 +4,7 @@ find_package(Threads REQUIRED)
 
 SET(LIEN_IMAGE_SOURCES
     src/image.cpp
+    src/image_ops.cpp
 )
 
 FILE(GLOB LIEN_IMAGE_HEADERS include/ien/*.hpp)
