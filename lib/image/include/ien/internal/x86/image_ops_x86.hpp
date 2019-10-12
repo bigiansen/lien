@@ -13,11 +13,14 @@ namespace ien::img::_internal
     void truncate_channel_data_sse2(const truncate_channel_args& args);
     void truncate_channel_data_avx2(const truncate_channel_args& args);
 
-    std::vector<uint8_t> channel_average_sse2(const channel_average_args& args);
-    std::vector<uint8_t> channel_average_avx2(const channel_average_args& args);
+    std::vector<uint8_t> rgba_average_sse2(const channel_info_extract_args& args);
+    std::vector<uint8_t> rgba_average_avx2(const channel_info_extract_args& args);
 
-    std::vector<uint8_t> channel_max_sse2(const channel_max_args& args);
-    std::vector<uint8_t> channel_max_avx2(const channel_max_args& args);
+    std::vector<uint8_t> rgba_max_sse2(const channel_info_extract_args& args);
+    std::vector<uint8_t> rgba_max_avx2(const channel_info_extract_args& args);
+
+	std::vector<uint8_t> rgba_sum_saturated_sse2(const channel_info_extract_args& args);
+	std::vector<uint8_t> rgba_sum_saturated_avx2(const channel_info_extract_args& args);
 }
 
 #endif

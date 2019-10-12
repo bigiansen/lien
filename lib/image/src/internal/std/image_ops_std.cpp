@@ -42,7 +42,7 @@ namespace ien::img::_internal
         }
     }
 
-    std::vector<uint8_t> channel_average_std(const channel_average_args& args)
+    std::vector<uint8_t> rgba_average_std(const channel_info_extract_args& args)
     {
         const size_t img_sz = args.len;
         
@@ -62,7 +62,7 @@ namespace ien::img::_internal
         return result;
     }
 
-	std::vector<uint8_t> channel_max_std(const channel_max_args& args)
+	std::vector<uint8_t> rgba_max_std(const channel_info_extract_args& args)
 	{
 		const size_t img_sz = args.len;
 
@@ -77,6 +77,26 @@ namespace ien::img::_internal
 		for (size_t i = 0; i < img_sz; ++i)
 		{
 			result[i] = std::max({ r[i], g[i], b[i], a[i] });
+		}
+		return result;
+	}
+
+	std::vector<uint8_t> rgba_sum_saturated_std(const channel_info_extract_args& args)
+	{
+		const size_t img_sz = args.len;
+
+		std::vector<uint8_t> result;
+		result.resize(args.len);
+
+		const uint8_t* r = args.ch_r;
+		const uint8_t* g = args.ch_g;
+		const uint8_t* b = args.ch_b;
+		const uint8_t* a = args.ch_a;
+
+		for (size_t i = 0; i < img_sz; ++i)
+		{
+			uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i] + a[i];
+			result[i] =  std::min(static_cast<uint16_t>(std::numeric_limits<uint8_t>::max()), sum);
 		}
 		return result;
 	}

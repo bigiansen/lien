@@ -17,21 +17,12 @@ namespace ien::img::_internal
         int bits_a;
     };
 
-    struct channel_average_args
-    {
-        size_t len;
-        const uint8_t* ch_r;
-        const uint8_t* ch_g;
-        const uint8_t* ch_b;
-        const uint8_t* ch_a;
-    };
-
-    struct channel_max_args
-    {
-        size_t len;
-        const uint8_t* ch_r;
-        const uint8_t* ch_g;
-        const uint8_t* ch_b;
-        const uint8_t* ch_a;
-    };
+	struct channel_info_extract_args
+	{
+		size_t len;
+		const uint8_t* ch_r;
+		const uint8_t* ch_g;
+		const uint8_t* ch_b;
+		const uint8_t* ch_a;
+	};
 }

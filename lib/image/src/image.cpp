@@ -11,7 +11,7 @@ namespace ien::img
 {
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
-// class image_unpacked_data
+// class: image_unpacked_data
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 
     image_unpacked_data::image_unpacked_data(size_t pixel_count)
@@ -77,7 +77,7 @@ namespace ien::img
     }
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
-// class image
+// class: image
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 
     image::image(int width, int height)

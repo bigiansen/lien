@@ -38,24 +38,24 @@ namespace ien::img
         func(args);
     }
 
-    std::vector<uint8_t> channel_average(const image* img)
+    std::vector<uint8_t> rgba_average(const image* img)
     {
-        typedef std::vector<uint8_t>(*func_ptr_t)(const _internal::channel_average_args&);
+        typedef std::vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args&);
 
         #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
         static func_ptr_t func = 
             platform::x86::get_feature(platform::x86::feature::AVX2)
-            ? &_internal::channel_average_avx2
+            ? &_internal::rgba_average_avx2
             : platform::x86::get_feature(platform::x86::feature::SSE2)
-            ? &_internal::channel_average_sse2
-            : &_internal::channel_average_std;
+            ? &_internal::rgba_average_sse2
+            : &_internal::rgba_average_std;
 
         #else
-        static func_ptr_t func = &_internal::chanchannel_average_std;
+        static func_ptr_t func = &_internal::rgba_average_std;
 
         #endif
 
-        _internal::channel_average_args args = {
+        _internal::channel_info_extract_args args = {
             img->pixel_count(),
             img->cdata()->cdata_r(), 
             img->cdata()->cdata_g(), 
@@ -66,22 +66,22 @@ namespace ien::img
         return func(args);
     }    
 
-    std::vector<uint8_t> channel_max(const image* img)
+    std::vector<uint8_t> rgba_max(const image* img)
     {
-        typedef std::vector<uint8_t>(*func_ptr_t)(const _internal::channel_max_args&);
+        typedef std::vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args&);
 
         #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
         static func_ptr_t func = 
             platform::x86::get_feature(platform::x86::feature::AVX2)
-            ? &_internal::channel_max_avx2
+            ? &_internal::rgba_max_avx2
             : platform::x86::get_feature(platform::x86::feature::SSE2)
-            ? &_internal::channel_max_sse2
-            : &_internal::channel_max_std;
+            ? &_internal::rgba_max_sse2
+            : &_internal::rgba_max_std;
         #else
-		static func_ptr_t func = &_internal::channel_max_std;
+		static func_ptr_t func = &_internal::rgba_max_std;
         #endif
 
-		_internal::channel_max_args args = {
+		_internal::channel_info_extract_args args = {
 			img->pixel_count(),
 			img->cdata()->cdata_r(),
 			img->cdata()->cdata_g(),
@@ -91,4 +91,30 @@ namespace ien::img
 
 		return func(args);
     }
+
+	std::vector<uint8_t> rgba_sum_saturated(const image* img)
+	{
+		typedef std::vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args&);
+
+		#if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+		static func_ptr_t func =
+			platform::x86::get_feature(platform::x86::feature::AVX2)
+			? &_internal::rgba_sum_saturated_avx2
+			: platform::x86::get_feature(platform::x86::feature::SSE2)
+			? &_internal::rgba_sum_saturated_sse2
+			: &_internal::rgba_sum_saturated_std;
+		#else
+		static func_ptr_t func = &_internal::rgba_sum_saturated_std;
+		#endif
+
+		_internal::channel_info_extract_args args = {
+			img->pixel_count(),
+			img->cdata()->cdata_r(),
+			img->cdata()->cdata_g(),
+			img->cdata()->cdata_b(),
+			img->cdata()->cdata_a()
+		};
+
+		return func(args);
+	}
 }
