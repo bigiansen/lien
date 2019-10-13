@@ -96,7 +96,7 @@ namespace ien::img::_internal
 		for (size_t i = 0; i < img_sz; ++i)
 		{
 			uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i] + a[i];
-			result[i] =  std::min(static_cast<uint16_t>(std::numeric_limits<uint8_t>::max()), sum);
+			result[i] = static_cast<uint8_t>(std::min(0x00FFui16, sum));
 		}
 		return result;
 	}

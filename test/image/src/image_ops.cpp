@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
 
 #include <ien/image.hpp>
@@ -26,16 +25,7 @@ TEST_CASE("Truncate channel bits")
 			img.data()->data_a()[i] = 0xFF;
 		}
 
-		_internal::truncate_channel_args args;
-		args.bits_r = 1;
-		args.bits_g = 2;
-		args.bits_b = 3;
-		args.bits_a = 4;
-		args.ch_r = img.data()->data_r();
-		args.ch_g = img.data()->data_g();
-		args.ch_b = img.data()->data_b();
-		args.ch_a = img.data()->data_a();
-		args.len = px_count;
+		_internal::truncate_channel_args args(&img, 1, 2, 3, 4);
 
 		_internal::truncate_channel_data_std(args);
 		for (size_t i = 0; i < px_count; ++i)
@@ -62,16 +52,7 @@ TEST_CASE("Truncate channel bits")
 			img.data()->data_a()[i] = 0xFF;
 		}
 
-		_internal::truncate_channel_args args;
-		args.bits_r = 1;
-		args.bits_g = 2;
-		args.bits_b = 3;
-		args.bits_a = 4;
-		args.ch_r = img.data()->data_r();
-		args.ch_g = img.data()->data_g();
-		args.ch_b = img.data()->data_b();
-		args.ch_a = img.data()->data_a();
-		args.len = px_count;
+		_internal::truncate_channel_args args(&img, 1, 2, 3, 4);
 
 		_internal::truncate_channel_data_sse2(args);
 		for (size_t i = 0; i < px_count; ++i)
@@ -96,16 +77,7 @@ TEST_CASE("Truncate channel bits")
 			img.data()->data_a()[i] = 0xFF;
 		}
 
-		_internal::truncate_channel_args args;
-		args.bits_r = 1;
-		args.bits_g = 2;
-		args.bits_b = 3;
-		args.bits_a = 4;
-		args.ch_r = img.data()->data_r();
-		args.ch_g = img.data()->data_g();
-		args.ch_b = img.data()->data_b();
-		args.ch_a = img.data()->data_a();
-		args.len = px_count;
+		_internal::truncate_channel_args args(&img, 1, 2, 3, 4);
 
 		_internal::truncate_channel_data_avx2(args);
 		for (size_t i = 0; i < px_count; ++i)

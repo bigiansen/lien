@@ -1,28 +1,65 @@
 #pragma once
 
+#include <ien/image.hpp>
 #include <cinttypes>
 
 namespace ien::img::_internal
 {
     struct truncate_channel_args
     {
-        size_t len;
-        uint8_t* ch_r;
-        uint8_t* ch_g;
-        uint8_t* ch_b;
-        uint8_t* ch_a;
-        int bits_r;
-        int bits_g; 
-        int bits_b;
-        int bits_a;
+        size_t len = 0;
+        uint8_t* ch_r = nullptr;
+        uint8_t* ch_g = nullptr;
+        uint8_t* ch_b = nullptr;
+        uint8_t* ch_a = nullptr;
+        int bits_r = 0;
+        int bits_g = 0;
+        int bits_b = 0;
+        int bits_a = 0;
+
+		constexpr truncate_channel_args() { }
+
+		truncate_channel_args(image* img, int r, int g, int b, int a)
+			: len(img->pixel_count())
+			, ch_r(img->data()->data_r())
+			, ch_g(img->data()->data_g())
+			, ch_b(img->data()->data_b())
+			, ch_a(img->data()->data_a())
+			, bits_r(r)
+			, bits_g(g)
+			, bits_b(b)
+			, bits_a(a)
+		{ }
+
+		truncate_channel_args(image_unpacked_data* img, int r, int g, int b, int a)
+			: len(img->size())
+			, ch_r(img->data_r())
+			, ch_g(img->data_g())
+			, ch_b(img->data_b())
+			, ch_a(img->data_a())
+			, bits_r(r)
+			, bits_g(g)
+			, bits_b(b)
+			, bits_a(a)
+		{ }
     };
 
 	struct channel_info_extract_args
 	{
-		size_t len;
-		const uint8_t* ch_r;
-		const uint8_t* ch_g;
-		const uint8_t* ch_b;
-		const uint8_t* ch_a;
+		size_t len = 0;
+		const uint8_t* ch_r = nullptr;
+		const uint8_t* ch_g = nullptr;
+		const uint8_t* ch_b = nullptr;
+		const uint8_t* ch_a = nullptr;
+
+		constexpr channel_info_extract_args() { }
+
+		channel_info_extract_args(const image* img)
+			: len(img->pixel_count())
+			, ch_r(img->cdata()->cdata_r())
+			, ch_g(img->cdata()->cdata_g())
+			, ch_b(img->cdata()->cdata_b())
+			, ch_a(img->cdata()->cdata_a())
+		{ }
 	};
 }

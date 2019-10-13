@@ -29,11 +29,7 @@ namespace ien::img
         static func_ptr_t func = &_internal::truncate_channel_data_std;
         #endif
 
-        _internal::truncate_channel_args args = { 
-            img->size(),
-            img->data_r(), img->data_g(), img->data_b(), img->data_a(),
-            bits_r, bits_g, bits_b, bits_a
-        };
+        _internal::truncate_channel_args args(img, bits_r, bits_g, bits_b, bits_a);
 
         func(args);
     }
@@ -55,13 +51,7 @@ namespace ien::img
 
         #endif
 
-        _internal::channel_info_extract_args args = {
-            img->pixel_count(),
-            img->cdata()->cdata_r(), 
-            img->cdata()->cdata_g(), 
-            img->cdata()->cdata_b(), 
-            img->cdata()->cdata_a()
-        };
+		_internal::channel_info_extract_args args(img);
 
         return func(args);
     }    
@@ -81,13 +71,7 @@ namespace ien::img
 		static func_ptr_t func = &_internal::rgba_max_std;
         #endif
 
-		_internal::channel_info_extract_args args = {
-			img->pixel_count(),
-			img->cdata()->cdata_r(),
-			img->cdata()->cdata_g(),
-			img->cdata()->cdata_b(),
-			img->cdata()->cdata_a()
-		};
+		_internal::channel_info_extract_args args(img);
 
 		return func(args);
     }
@@ -107,13 +91,7 @@ namespace ien::img
 		static func_ptr_t func = &_internal::rgba_sum_saturated_std;
 		#endif
 
-		_internal::channel_info_extract_args args = {
-			img->pixel_count(),
-			img->cdata()->cdata_r(),
-			img->cdata()->cdata_g(),
-			img->cdata()->cdata_b(),
-			img->cdata()->cdata_a()
-		};
+		_internal::channel_info_extract_args args(img);
 
 		return func(args);
 	}

@@ -16,12 +16,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE 	${PROJECT_BINARY_DIR}/output/lib/sha
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE 	${PROJECT_BINARY_DIR}/output/lib/static)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE 	${PROJECT_BINARY_DIR}/output/bin/lien)
 
-if(MSVC)
-	add_definitions(/std:c++17 /arch:AVX2)
-else()
-    add_definitions(-mavx2)
-endif()
-
 option(LIEN_BUILD_TESTS "Build Tests" On)
 
 option(LIEN_PARALLEL "Build Parallel utilities library" On)
