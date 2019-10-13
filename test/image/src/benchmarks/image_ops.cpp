@@ -154,3 +154,33 @@ TEST_CASE("Benchmark rgba sum saturated")
 		});
 	};
 };
+
+TEST_CASE("Benchmark rgba saturation")
+{
+	BENCHMARK_ADVANCED("STD")(Catch::Benchmark::Chronometer meter)
+	{
+		EXTRACT_CHANNEL_DATA_SETUP(args);
+		meter.measure([&]
+		{
+			return _internal::rgba_sum_saturated_std(args);
+		});
+	};
+
+	BENCHMARK_ADVANCED("SSE2")(Catch::Benchmark::Chronometer meter)
+	{
+		EXTRACT_CHANNEL_DATA_SETUP(args);
+		meter.measure([&]
+		{
+			return _internal::rgba_sum_saturated_sse2(args);
+		});
+	};
+
+	BENCHMARK_ADVANCED("AVX2")(Catch::Benchmark::Chronometer meter)
+	{
+		EXTRACT_CHANNEL_DATA_SETUP(args);
+		meter.measure([&]
+		{
+			return _internal::rgba_sum_saturated_avx2(args);
+		});
+	};
+};

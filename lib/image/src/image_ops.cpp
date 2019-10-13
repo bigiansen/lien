@@ -76,6 +76,26 @@ namespace ien::img
 		return func(args);
     }
 
+	std::vector<uint8_t> rgba_min(const image* img)
+	{
+		typedef std::vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args&);
+
+		#if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+		static func_ptr_t func =
+			platform::x86::get_feature(platform::x86::feature::AVX2)
+			? &_internal::rgba_min_avx2
+			: platform::x86::get_feature(platform::x86::feature::SSE2)
+			? &_internal::rgba_min_sse2
+			: &_internal::rgba_min_std;
+		#else
+		static func_ptr_t func = &_internal::rgba_min_std;
+		#endif
+
+		_internal::channel_info_extract_args args(img);
+
+		return func(args);
+	}
+
 	std::vector<uint8_t> rgba_sum_saturated(const image* img)
 	{
 		typedef std::vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args&);
@@ -93,6 +113,26 @@ namespace ien::img
 
 		_internal::channel_info_extract_args args(img);
 
+		return func(args);
+	}
+
+	std::vector<float> rgba_saturation(const image* img)
+	{
+		typedef std::vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args&);
+
+		#if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+		static func_ptr_t func = 
+			platform::x86::get_feature(platform::x86::feature::AVX2)
+			? &_internal::rgba_saturation_avx2
+			: platform::x86::get_feature(platform::x86::feature::SSE2)
+			? &_internal::rgba_saturation_sse2
+			: &_internal::rgba_saturation_std;
+
+		#else
+		static func_ptr_t func = &_internal::rgba_saturation_std;
+		#endif
+
+		_internal::channel_info_extract_args args(img);
 		return func(args);
 	}
 }

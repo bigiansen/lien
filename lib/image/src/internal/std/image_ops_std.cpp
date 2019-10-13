@@ -4,6 +4,18 @@
 #include <algorithm>
 #include <cinttypes>
 
+#define BIND_CHANNELS(args, r, g, b, a) \
+	uint8_t* r = args.ch_r; \
+	uint8_t* g = args.ch_g; \
+	uint8_t* b = args.ch_b; \
+	uint8_t* a = args.ch_a
+
+#define BIND_CHANNELS_CONST(args, r, g, b, a) \
+	const uint8_t* r = args.ch_r; \
+	const uint8_t* g = args.ch_g; \
+	const uint8_t* b = args.ch_b; \
+	const uint8_t* a = args.ch_a
+
 namespace ien::img::_internal
 {
     const uint32_t trunc_and_table[8] = {
@@ -14,10 +26,7 @@ namespace ien::img::_internal
     void truncate_channel_data_std(const truncate_channel_args& args)
     {
         size_t img_sz = args.len;
-        uint8_t* r = args.ch_r;
-        uint8_t* g = args.ch_g;
-        uint8_t* b = args.ch_b;
-        uint8_t* a = args.ch_a;
+		BIND_CHANNELS(args, r, g, b, a);
 
         uint32_t mask_r = trunc_and_table[args.bits_r];
         uint32_t mask_g = trunc_and_table[args.bits_g];
@@ -49,10 +58,7 @@ namespace ien::img::_internal
         std::vector<uint8_t> result;
         result.resize(args.len);
 
-        const uint8_t* r = args.ch_r;
-        const uint8_t* g = args.ch_g;
-        const uint8_t* b = args.ch_b;
-        const uint8_t* a = args.ch_a;
+		BIND_CHANNELS_CONST(args, r, g, b, a);
 
         for(size_t i = 0; i < img_sz; ++i)
         {
@@ -69,14 +75,27 @@ namespace ien::img::_internal
 		std::vector<uint8_t> result;
 		result.resize(args.len);
 
-		const uint8_t* r = args.ch_r;
-		const uint8_t* g = args.ch_g;
-		const uint8_t* b = args.ch_b;
-		const uint8_t* a = args.ch_a;
+		BIND_CHANNELS_CONST(args, r, g, b, a);
 
 		for (size_t i = 0; i < img_sz; ++i)
 		{
 			result[i] = std::max({ r[i], g[i], b[i], a[i] });
+		}
+		return result;
+	}
+
+	std::vector<uint8_t> rgba_min_std(const channel_info_extract_args& args)
+	{
+		const size_t img_sz = args.len;
+
+		std::vector<uint8_t> result;
+		result.resize(args.len);
+
+		BIND_CHANNELS_CONST(args, r, g, b, a);
+
+		for (size_t i = 0; i < img_sz; ++i)
+		{
+			result[i] = std::min({ r[i], g[i], b[i], a[i] });
 		}
 		return result;
 	}
@@ -88,16 +107,34 @@ namespace ien::img::_internal
 		std::vector<uint8_t> result;
 		result.resize(args.len);
 
-		const uint8_t* r = args.ch_r;
-		const uint8_t* g = args.ch_g;
-		const uint8_t* b = args.ch_b;
-		const uint8_t* a = args.ch_a;
+		BIND_CHANNELS_CONST(args, r, g, b, a);
 
 		for (size_t i = 0; i < img_sz; ++i)
 		{
 			uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i] + a[i];
 			result[i] = static_cast<uint8_t>(std::min(0x00FFui16, sum));
 		}
+		return result;
+	}
+
+	std::vector<float> rgba_saturation_std(const channel_info_extract_args& args)
+	{
+		const size_t img_sz = args.len;
+
+		std::vector<float> result;
+		result.resize(args.len);
+
+		BIND_CHANNELS_CONST(args, r, g, b, a);
+
+		// SATURATION(r, g, b) = (MAX(r, g, b) - MIN(r, g, b)) / MAX(r, g, b)
+
+		for (size_t i = 0; i < img_sz; ++i)
+		{
+			float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] })) / 255.0F;
+			float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] })) / 255.0F;
+			result[i] = (vmax - vmin) / vmax;
+		}
+
 		return result;
 	}
 }

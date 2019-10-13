@@ -18,8 +18,14 @@ namespace ien::img::_internal
     std::vector<uint8_t> rgba_max_sse2(const channel_info_extract_args& args);
     std::vector<uint8_t> rgba_max_avx2(const channel_info_extract_args& args);
 
+	std::vector<uint8_t> rgba_min_sse2(const channel_info_extract_args& args);
+	std::vector<uint8_t> rgba_min_avx2(const channel_info_extract_args& args);
+
 	std::vector<uint8_t> rgba_sum_saturated_sse2(const channel_info_extract_args& args);
 	std::vector<uint8_t> rgba_sum_saturated_avx2(const channel_info_extract_args& args);
+
+	std::vector<float> rgba_saturation_sse2(const channel_info_extract_args& args);
+	std::vector<float> rgba_saturation_avx2(const channel_info_extract_args& args);
 }
 
 #endif
