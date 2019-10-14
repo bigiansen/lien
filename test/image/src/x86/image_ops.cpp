@@ -71,6 +71,11 @@ TEST_CASE("[x86] Channel byte truncation")
 	};
 };
 
+TEST_CASE("[x86] Max channel RGBA")
+{
+
+}
+
 TEST_CASE("[x86] Saturation")
 {
     SECTION("STD == SSE2")
@@ -87,9 +92,9 @@ TEST_CASE("[x86] Saturation")
 			img.data()->data_a()[i] = static_cast<uint8_t>(i + 4);
 		}
 
-		_internal::channel_info_extract_args args(&img);
-		std::vector<float> result0 = _internal::rgba_saturation_std(args);
-		std::vector<float> result1 = _internal::rgba_saturation_sse2(args);
+		_internal::channel_info_extract_args_rgb args(&img);
+		std::vector<float> result0 = _internal::rgb_saturation_std(args);
+		std::vector<float> result1 = _internal::rgb_saturation_sse2(args);
 
         REQUIRE(result0.size() == img.pixel_count());
         REQUIRE(result1.size() == img.pixel_count());
@@ -113,9 +118,9 @@ TEST_CASE("[x86] Saturation")
 			img.data()->data_a()[i] = static_cast<uint8_t>(i + 4);
 		}
 
-		_internal::channel_info_extract_args args(&img);
-		std::vector<float> result0 = _internal::rgba_saturation_std(args);
-		std::vector<float> result1 = _internal::rgba_saturation_avx2(args);
+		_internal::channel_info_extract_args_rgb args(&img);
+		std::vector<float> result0 = _internal::rgb_saturation_std(args);
+		std::vector<float> result1 = _internal::rgb_saturation_avx2(args);
 
         REQUIRE(result0.size() == img.pixel_count());
         REQUIRE(result1.size() == img.pixel_count());
@@ -139,8 +144,8 @@ TEST_CASE("[x86] Saturation")
 			img.data()->data_a()[i] = static_cast<uint8_t>(4);
 		}
 
-		_internal::channel_info_extract_args args(&img);
-		std::vector<float> result = _internal::rgba_saturation_sse2(args);
+		_internal::channel_info_extract_args_rgb args(&img);
+		std::vector<float> result = _internal::rgb_saturation_sse2(args);
 
         REQUIRE(result.size() == img.pixel_count());
 		for(float& f : result)
@@ -163,8 +168,8 @@ TEST_CASE("[x86] Saturation")
 			img.data()->data_a()[i] = static_cast<uint8_t>(4);
 		}
 
-		_internal::channel_info_extract_args args(&img);
-		std::vector<float> result = _internal::rgba_saturation_avx2(args);
+		_internal::channel_info_extract_args_rgb args(&img);
+		std::vector<float> result = _internal::rgb_saturation_avx2(args);
 
         REQUIRE(result.size() == img.pixel_count());
 		for(float& f : result)
@@ -189,8 +194,8 @@ TEST_CASE("[x86] Luminance")
 			img.data()->data_a()[i] = static_cast<uint8_t>(4);
 		}
 
-		_internal::channel_info_extract_args args(&img);
-		std::vector<float> result = _internal::rgba_luminance_sse2(args);
+		_internal::channel_info_extract_args_rgb args(&img);
+		std::vector<float> result = _internal::rgb_luminance_sse2(args);
 
 		REQUIRE(result.size() == img.pixel_count());
 		for(size_t i = 0; i < result.size(); ++i)
@@ -212,8 +217,8 @@ TEST_CASE("[x86] Luminance")
 			img.data()->data_a()[i] = static_cast<uint8_t>(4);
 		}
 
-		_internal::channel_info_extract_args args(&img);
-		std::vector<float> result = _internal::rgba_luminance_avx2(args);
+		_internal::channel_info_extract_args_rgb args(&img);
+		std::vector<float> result = _internal::rgb_luminance_avx2(args);
 
 		REQUIRE(result.size() == img.pixel_count());
 		for(size_t i = 0; i < result.size(); ++i)

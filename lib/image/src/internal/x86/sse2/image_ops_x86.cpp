@@ -15,11 +15,16 @@
 	uint8_t* b = args.ch_b; \
 	uint8_t* a = args.ch_a
 
-#define BIND_CHANNELS_CONST(args, r, g, b, a) \
+#define BIND_CHANNELS_RGBA_CONST(args, r, g, b, a) \
 	const uint8_t* r = args.ch_r; \
 	const uint8_t* g = args.ch_g; \
 	const uint8_t* b = args.ch_b; \
 	const uint8_t* a = args.ch_a
+
+#define BIND_CHANNELS_RGB_CONST(args, r, g, b) \
+	const uint8_t* r = args.ch_r; \
+	const uint8_t* g = args.ch_g; \
+	const uint8_t* b = args.ch_b;
 
 #define LOAD_SI128(addr) \
 	_mm_load_si128(reinterpret_cast<__m128i*>(addr));
@@ -83,7 +88,7 @@ namespace ien::img::_internal
 		}
 	}
 
-	std::vector<uint8_t> rgba_average_sse2(const channel_info_extract_args& args)
+	std::vector<uint8_t> rgba_average_sse2(const channel_info_extract_args_rgba& args)
 	{
 		const size_t img_sz = args.len;
 
@@ -95,7 +100,7 @@ namespace ien::img::_internal
 		std::vector<uint8_t> result;
 		result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
 		size_t last_v_idx = img_sz - (img_sz % SSE2_STRIDE);
 		for (size_t i = 0; i < last_v_idx; i += SSE2_STRIDE)
@@ -121,7 +126,7 @@ namespace ien::img::_internal
 		return result;
 	}
 
-	std::vector<uint8_t> rgba_max_sse2(const channel_info_extract_args& args)
+	std::vector<uint8_t> rgba_max_sse2(const channel_info_extract_args_rgba& args)
 	{
 		const size_t img_sz = args.len;
 
@@ -133,7 +138,7 @@ namespace ien::img::_internal
 		std::vector<uint8_t> result;
 		result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
 		size_t last_v_idx = img_sz - (img_sz % SSE2_STRIDE);
 		for (size_t i = 0; i < last_v_idx; i += SSE2_STRIDE)
@@ -157,7 +162,7 @@ namespace ien::img::_internal
 		return result;
 	}
 
-	std::vector<uint8_t> rgba_min_sse2(const channel_info_extract_args& args)
+	std::vector<uint8_t> rgba_min_sse2(const channel_info_extract_args_rgba& args)
 	{
 		const size_t img_sz = args.len;
 
@@ -169,7 +174,7 @@ namespace ien::img::_internal
 		std::vector<uint8_t> result;
 		result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
 		size_t last_v_idx = img_sz - (img_sz % SSE2_STRIDE);
 		for (size_t i = 0; i < last_v_idx; i += SSE2_STRIDE)
@@ -193,7 +198,7 @@ namespace ien::img::_internal
 		return result;
 	}
 
-	std::vector<uint8_t> rgba_sum_saturated_sse2(const channel_info_extract_args& args)
+	std::vector<uint8_t> rgba_sum_saturated_sse2(const channel_info_extract_args_rgba& args)
 	{
 		const size_t img_sz = args.len;
 
@@ -205,7 +210,7 @@ namespace ien::img::_internal
 		std::vector<uint8_t> result;
 		result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
 		size_t last_v_idx = img_sz - (img_sz % SSE2_STRIDE);
 		for (size_t i = 0; i < last_v_idx; i += SSE2_STRIDE)
@@ -230,19 +235,19 @@ namespace ien::img::_internal
 		return result;
 	}
 
-	std::vector<float> rgba_saturation_sse2(const channel_info_extract_args& args)
+	std::vector<float> rgb_saturation_sse2(const channel_info_extract_args_rgb& args)
 	{
 		const size_t img_sz = args.len;
 
 		if (img_sz < SSE2_STRIDE)
 		{
-			return rgba_saturation_std(args);
+			return rgb_saturation_std(args);
 		}
 
 		std::vector<float> result;
 		result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
 		__m128i fpcast_mask = _mm_set1_epi32(0x000000FF);
 
@@ -311,19 +316,19 @@ namespace ien::img::_internal
 		return result;
 	}
 
-	std::vector<float> rgba_luminance_sse2(const channel_info_extract_args& args)
+	std::vector<float> rgb_luminance_sse2(const channel_info_extract_args_rgb& args)
 	{
 		const size_t img_sz = args.len;
 
 		if (img_sz < SSE2_STRIDE)
 		{
-			return rgba_luminance_std(args);
+			return rgb_luminance_std(args);
 		}
 
 		std::vector<float> result;
 		result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
 		__m128i fpcast_mask = _mm_set1_epi32(0x000000FF);
 		__m128 vhalfmul = _mm_set_ps1(0.5F);

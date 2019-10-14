@@ -48,9 +48,9 @@ TEST_CASE("[STD] Saturation")
 			img.data()->data_b()[i] = static_cast<uint8_t>(3);
 			img.data()->data_a()[i] = static_cast<uint8_t>(4);
 		}
-
-		_internal::channel_info_extract_args args(&img);
-		std::vector<float> result = _internal::rgba_saturation_std(args);
+ 
+		_internal::channel_info_extract_args_rgb args(&img);
+		std::vector<float> result = _internal::rgb_saturation_std(args);
 
 		REQUIRE(result.size() == img.pixel_count());
 		for(size_t i = 0; i < result.size(); ++i)
@@ -75,8 +75,8 @@ TEST_CASE("[STD] Luminance")
 			img.data()->data_a()[i] = static_cast<uint8_t>(4);
 		}
 
-		_internal::channel_info_extract_args args(&img);
-		std::vector<float> result = _internal::rgba_luminance_std(args);
+		_internal::channel_info_extract_args_rgb args(&img);
+		std::vector<float> result = _internal::rgb_luminance_std(args);
 
 		REQUIRE(result.size() == img.pixel_count());
 		for(size_t i = 0; i < result.size(); ++i)

@@ -10,11 +10,16 @@
 	uint8_t* b = args.ch_b; \
 	uint8_t* a = args.ch_a
 
-#define BIND_CHANNELS_CONST(args, r, g, b, a) \
+#define BIND_CHANNELS_RGBA_CONST(args, r, g, b, a) \
 	const uint8_t* r = args.ch_r; \
 	const uint8_t* g = args.ch_g; \
 	const uint8_t* b = args.ch_b; \
 	const uint8_t* a = args.ch_a
+
+#define BIND_CHANNELS_RGB_CONST(args, r, g, b) \
+	const uint8_t* r = args.ch_r; \
+	const uint8_t* g = args.ch_g; \
+	const uint8_t* b = args.ch_b; 
 
 namespace ien::img::_internal
 {
@@ -53,14 +58,14 @@ namespace ien::img::_internal
         }
     }
 
-    std::vector<uint8_t> rgba_average_std(const channel_info_extract_args& args)
+    std::vector<uint8_t> rgba_average_std(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;
         
         std::vector<uint8_t> result;
         result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
         for(size_t i = 0; i < img_sz; ++i)
         {
@@ -70,14 +75,14 @@ namespace ien::img::_internal
         return result;
     }
 
-	std::vector<uint8_t> rgba_max_std(const channel_info_extract_args& args)
+	std::vector<uint8_t> rgba_max_std(const channel_info_extract_args_rgba& args)
 	{
 		const size_t img_sz = args.len;
 
 		std::vector<uint8_t> result;
 		result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
 		for (size_t i = 0; i < img_sz; ++i)
 		{
@@ -86,14 +91,14 @@ namespace ien::img::_internal
 		return result;
 	}
 
-	std::vector<uint8_t> rgba_min_std(const channel_info_extract_args& args)
+	std::vector<uint8_t> rgba_min_std(const channel_info_extract_args_rgba& args)
 	{
 		const size_t img_sz = args.len;
 
 		std::vector<uint8_t> result;
 		result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
 		for (size_t i = 0; i < img_sz; ++i)
 		{
@@ -102,14 +107,14 @@ namespace ien::img::_internal
 		return result;
 	}
 
-	std::vector<uint8_t> rgba_sum_saturated_std(const channel_info_extract_args& args)
+	std::vector<uint8_t> rgba_sum_saturated_std(const channel_info_extract_args_rgba& args)
 	{
 		const size_t img_sz = args.len;
 
 		std::vector<uint8_t> result;
 		result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
 		for (size_t i = 0; i < img_sz; ++i)
 		{
@@ -119,14 +124,14 @@ namespace ien::img::_internal
 		return result;
 	}
 
-	std::vector<float> rgba_saturation_std(const channel_info_extract_args& args)
+	std::vector<float> rgb_saturation_std(const channel_info_extract_args_rgb& args)
 	{
 		const size_t img_sz = args.len;
 
 		std::vector<float> result;
 		result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
 		// SATURATION(r, g, b) = (MAX(r, g, b) - MIN(r, g, b)) / MAX(r, g, b)
 
@@ -140,14 +145,14 @@ namespace ien::img::_internal
 		return result;
 	}
 
-	std::vector<float> rgba_luminance_std(const channel_info_extract_args& args)
+	std::vector<float> rgb_luminance_std(const channel_info_extract_args_rgb& args)
 	{
 		const size_t img_sz = args.len;
 
 		std::vector<float> result;
 		result.resize(args.len);
 
-		BIND_CHANNELS_CONST(args, r, g, b, a);
+		BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
 		// LUMINANCE(r, g, b) = (((MAX(r, b, g) + MIN(r, g, b)) * 0.5) / 255.0F
 
