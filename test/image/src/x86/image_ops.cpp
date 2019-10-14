@@ -71,10 +71,52 @@ TEST_CASE("[x86] Channel byte truncation")
 	};
 };
 
-TEST_CASE("[x86] Max channel RGBA")
+TEST_CASE("[x86] Channel average RGBA")
 {
+	SECTION("SSE2")
+	{
+		CHECK_SSE2("[x86] Channel average RGBA");
+		image img(41, 41);
+		size_t px_count = 41 * 41;
 
-}
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 1;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 10;
+			img.data()->data_a()[i] = 15;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_average_sse2(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE((result[i] == 8 || result[i] == 7));
+		}
+	};
+
+	SECTION("AVX2")
+	{
+		CHECK_AVX2("[x86] Channel average RGBA");
+		image img(71, 71);
+		size_t px_count = 71 * 71;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 1;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 10;
+			img.data()->data_a()[i] = 15;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_average_avx2(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE((result[i] == 8 || result[i] == 7));
+		}
+	};
+};
 
 TEST_CASE("[x86] Saturation")
 {

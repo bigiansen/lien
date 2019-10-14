@@ -34,6 +34,30 @@ TEST_CASE("[STD] Channel byte truncation")
 	};
 }
 
+TEST_CASE("[STD] Channel average RGBA")
+{
+	SECTION("STD")
+	{
+		image img(128, 128);
+		size_t px_count = 128 * 128;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 1;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 10;
+			img.data()->data_a()[i] = 15;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_average_std(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 7);
+		}
+	};
+}
+
 TEST_CASE("[STD] Saturation")
 {
 	SECTION("STD")
