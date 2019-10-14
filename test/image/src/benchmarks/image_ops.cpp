@@ -30,6 +30,8 @@ void fill_image_random(image* img)
 	fill_image_random(&img);\
 	_internal::truncate_channel_args args(&img, 1, 2, 3, 4)
 
+#ifdef NDEBUG
+
 TEST_CASE("Benchmark truncate channel bits")
 {
 	BENCHMARK_ADVANCED("STD")(Catch::Benchmark::Chronometer meter)
@@ -184,3 +186,5 @@ TEST_CASE("Benchmark rgba saturation")
 		});
 	};
 };
+
+#endif

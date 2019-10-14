@@ -55,7 +55,8 @@ namespace ien::img::_internal
 		const __m256i vmask_b = _mm256_set1_epi8(trunc_and_table[args.bits_b]);
 		const __m256i vmask_a = _mm256_set1_epi8(trunc_and_table[args.bits_a]);
 
-		for (size_t i = 0; i < img_sz; i += AVX2_STRIDE)
+		size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
+		for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
 		{
 			__m256i seg_r = LOAD_SI256(r + i);
 			__m256i seg_g = LOAD_SI256(g + i);
@@ -73,8 +74,7 @@ namespace ien::img::_internal
 			STORE_SI256((a + i), seg_a);
 		}
 
-		size_t remainder_idx = img_sz - (img_sz % AVX2_STRIDE);
-		for (size_t i = remainder_idx; i < img_sz; ++i)
+		for (size_t i = last_v_idx; i < img_sz; ++i)
 		{
 			r[i] &= trunc_and_table[args.bits_r];
 			g[i] &= trunc_and_table[args.bits_g];
@@ -97,7 +97,8 @@ namespace ien::img::_internal
 
 		BIND_CHANNELS_CONST(args, r, g, b, a);
 
-		for (size_t i = 0; i < img_sz; i += AVX2_STRIDE)
+		size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
+		for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
 		{
 			__m256i vseg_r = LOAD_SI256_CONST(r + i);
 			__m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -112,8 +113,7 @@ namespace ien::img::_internal
 			STORE_SI256((result.data() + i), vagv_rgba);
 		}
 
-		size_t remainder_idx = img_sz - (img_sz % AVX2_STRIDE);
-		for (size_t i = remainder_idx; i < img_sz; ++i)
+		for (size_t i = last_v_idx; i < img_sz; ++i)
 		{
 			uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i] + a[i];
 			result[i] = static_cast<uint8_t>(sum / 4);
@@ -135,7 +135,8 @@ namespace ien::img::_internal
 
 		BIND_CHANNELS_CONST(args, r, g, b, a);
 
-		for (size_t i = 0; i < img_sz; i += AVX2_STRIDE)
+		size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
+		for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
 		{
 			__m256i vseg_r = LOAD_SI256_CONST(r + i);
 			__m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -149,8 +150,7 @@ namespace ien::img::_internal
 			STORE_SI256((result.data() + i), vmax_rgba);
 		}
 
-		size_t remainder_idx = img_sz - (img_sz % AVX2_STRIDE);
-		for (size_t i = remainder_idx; i < img_sz; ++i)
+		for (size_t i = last_v_idx; i < img_sz; ++i)
 		{
 			result[i] = std::max({ r[i], g[i], b[i], a[i] });
 		}
@@ -171,7 +171,8 @@ namespace ien::img::_internal
 
 		BIND_CHANNELS_CONST(args, r, g, b, a);
 
-		for (size_t i = 0; i < img_sz; i += AVX2_STRIDE)
+		size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
+		for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
 		{
 			__m256i vseg_r = LOAD_SI256_CONST(r + i);
 			__m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -185,8 +186,7 @@ namespace ien::img::_internal
 			STORE_SI256((result.data() + i), vmax_rgba);
 		}
 
-		size_t remainder_idx = img_sz - (img_sz % AVX2_STRIDE);
-		for (size_t i = remainder_idx; i < img_sz; ++i)
+		for (size_t i = last_v_idx; i < img_sz; ++i)
 		{
 			result[i] = std::min({ r[i], g[i], b[i], a[i] });
 		}
@@ -207,7 +207,8 @@ namespace ien::img::_internal
 
 		BIND_CHANNELS_CONST(args, r, g, b, a);
 
-		for (size_t i = 0; i < img_sz; i += AVX2_STRIDE)
+		size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
+		for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
 		{
 			__m256i vseg_r = LOAD_SI256_CONST(r + i);
 			__m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -221,11 +222,11 @@ namespace ien::img::_internal
 			STORE_SI256((result.data() + i), vsum_rgba);
 		}
 
-		size_t remainder_idx = img_sz - (img_sz % AVX2_STRIDE);
-		for (size_t i = remainder_idx; i < img_sz; ++i)
+		for (size_t i = last_v_idx; i < img_sz; ++i)
 		{
-			uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i] + a[i];
-			result[i] = std::min(static_cast<uint16_t>(0x00FFu), sum);
+			uint16_t aux = static_cast<uint16_t>(r[i]) + g[i] + b[i] + a[i];
+			aux = std::min(static_cast<uint16_t>(0x00FFu), aux);
+			result[i] = static_cast<uint8_t>(aux);
 		}
 		return result;
 	}
@@ -246,7 +247,8 @@ namespace ien::img::_internal
 
 		__m256i fpcast_mask = _mm256_set1_epi32(0x000000FF);
 
-		for (size_t i = 0; i < img_sz; i += AVX2_STRIDE)
+		size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
+		for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
 		{
 			__m256i vseg_r = LOAD_SI256_CONST(r + i);
 			__m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -299,8 +301,7 @@ namespace ien::img::_internal
 			}
 		}
 
-		size_t remainder_idx = img_sz - (img_sz % AVX2_STRIDE);
-		for (size_t i = remainder_idx; i < img_sz; ++i)
+		for (size_t i = last_v_idx; i < img_sz; ++i)
 		{
 			float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] })) / 255.0F;
 			float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] })) / 255.0F;

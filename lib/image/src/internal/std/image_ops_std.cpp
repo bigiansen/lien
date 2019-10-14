@@ -23,6 +23,8 @@ namespace ien::img::_internal
         0xF0F0F0F0, 0xE0E0E0E0, 0xC0C0C0C0, 0x80808080
     };
 
+	const int STD_STRIDE = 4;
+
     void truncate_channel_data_std(const truncate_channel_args& args)
     {
         size_t img_sz = args.len;
@@ -33,7 +35,8 @@ namespace ien::img::_internal
         uint32_t mask_b = trunc_and_table[args.bits_b];
         uint32_t mask_a = trunc_and_table[args.bits_a];
 
-        for(size_t i = 0; i < img_sz; i += 4)
+		size_t last_v_idx = img_sz - (img_sz % STD_STRIDE);
+        for(size_t i = 0; i < img_sz; i += STD_STRIDE)
         {
             *(reinterpret_cast<uint32_t*>(r + i)) &= mask_r;
             *(reinterpret_cast<uint32_t*>(g + i)) &= mask_g;
@@ -41,8 +44,7 @@ namespace ien::img::_internal
             *(reinterpret_cast<uint32_t*>(a + i)) &= mask_a;
         }
 
-        size_t remainder_idx = img_sz - (img_sz % 16);
-        for(size_t i = remainder_idx; i < img_sz; ++i)
+        for(size_t i = last_v_idx; i < img_sz; ++i)
         {
             r[i] &= trunc_and_table[args.bits_r];
             g[i] &= trunc_and_table[args.bits_g];
