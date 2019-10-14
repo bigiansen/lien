@@ -14,4 +14,5 @@ namespace ien::img::_internal
 	std::vector<uint8_t> rgba_min_std(const channel_info_extract_args& args);
 	std::vector<uint8_t> rgba_sum_saturated_std(const channel_info_extract_args& args);
 	std::vector<float> rgba_saturation_std(const channel_info_extract_args& args);
+    std::vector<float> rgba_luminance_std(const channel_info_extract_args& args);
 }

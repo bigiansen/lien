@@ -139,4 +139,26 @@ namespace ien::img::_internal
 
 		return result;
 	}
+
+	std::vector<float> rgba_luminance_std(const channel_info_extract_args& args)
+	{
+		const size_t img_sz = args.len;
+
+		std::vector<float> result;
+		result.resize(args.len);
+
+		BIND_CHANNELS_CONST(args, r, g, b, a);
+
+		// LUMINANCE(r, g, b) = (((MAX(r, b, g) + MIN(r, g, b)) * 0.5) / 255.0F
+
+		for (size_t i = 0; i < img_sz; ++i)
+		{
+			float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] }));
+			float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] }));
+			float vsum = (vmax + vmin) * 0.5F;
+			result[i] = (vsum / 255.0F);
+		}
+
+		return result;
+	}
 }

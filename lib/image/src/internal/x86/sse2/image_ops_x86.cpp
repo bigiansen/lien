@@ -98,7 +98,7 @@ namespace ien::img::_internal
 		BIND_CHANNELS_CONST(args, r, g, b, a);
 
 		size_t last_v_idx = img_sz - (img_sz % SSE2_STRIDE);
-		for (size_t i = 0; i < img_sz; i += SSE2_STRIDE)
+		for (size_t i = 0; i < last_v_idx; i += SSE2_STRIDE)
 		{
 			__m128i vseg_r = LOAD_SI128_CONST(r + i);
 			__m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -136,7 +136,7 @@ namespace ien::img::_internal
 		BIND_CHANNELS_CONST(args, r, g, b, a);
 
 		size_t last_v_idx = img_sz - (img_sz % SSE2_STRIDE);
-		for (size_t i = 0; i < img_sz; i += SSE2_STRIDE)
+		for (size_t i = 0; i < last_v_idx; i += SSE2_STRIDE)
 		{
 			__m128i vseg_r = LOAD_SI128_CONST(r + i);
 			__m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -172,7 +172,7 @@ namespace ien::img::_internal
 		BIND_CHANNELS_CONST(args, r, g, b, a);
 
 		size_t last_v_idx = img_sz - (img_sz % SSE2_STRIDE);
-		for (size_t i = 0; i < img_sz; i += SSE2_STRIDE)
+		for (size_t i = 0; i < last_v_idx; i += SSE2_STRIDE)
 		{
 			__m128i vseg_r = LOAD_SI128_CONST(r + i);
 			__m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -208,7 +208,7 @@ namespace ien::img::_internal
 		BIND_CHANNELS_CONST(args, r, g, b, a);
 
 		size_t last_v_idx = img_sz - (img_sz % SSE2_STRIDE);
-		for (size_t i = 0; i < img_sz; i += SSE2_STRIDE)
+		for (size_t i = 0; i < last_v_idx; i += SSE2_STRIDE)
 		{
 			__m128i vseg_r = LOAD_SI128_CONST(r + i);
 			__m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -247,7 +247,7 @@ namespace ien::img::_internal
 		__m128i fpcast_mask = _mm_set1_epi32(0x000000FF);
 
 		size_t last_v_idx = img_sz - (img_sz % SSE2_STRIDE);
-		for (size_t i = 0; i < img_sz; i += SSE2_STRIDE)
+		for (size_t i = 0; i < last_v_idx; i += SSE2_STRIDE)
 		{
 			__m128i vseg_r = LOAD_SI128_CONST(r + i);
 			__m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -284,7 +284,7 @@ namespace ien::img::_internal
 			__m128 vsat2 = _mm_div_ps(_mm_sub_ps(vfmax2, vfmin2), vfmax2);
 			__m128 vsat3 = _mm_div_ps(_mm_sub_ps(vfmax3, vfmin3), vfmax3);
 
-			float aux_result[16];
+			float aux_result[SSE2_STRIDE];
 
 			_mm_store_ps(aux_result + 0, vsat0);
 			_mm_store_ps(aux_result + 4, vsat1);
@@ -306,6 +306,95 @@ namespace ien::img::_internal
 			float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] })) / 255.0F;
 			float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] })) / 255.0F;
 			result[i] = (vmax - vmin) / vmax;
+		}
+
+		return result;
+	}
+
+	std::vector<float> rgba_luminance_sse2(const channel_info_extract_args& args)
+	{
+		const size_t img_sz = args.len;
+
+		if (img_sz < SSE2_STRIDE)
+		{
+			return rgba_luminance_std(args);
+		}
+
+		std::vector<float> result;
+		result.resize(args.len);
+
+		BIND_CHANNELS_CONST(args, r, g, b, a);
+
+		__m128i fpcast_mask = _mm_set1_epi32(0x000000FF);
+		__m128 vhalfmul = _mm_set_ps1(0.5F);
+		__m128 vzeroonediv = _mm_set_ps1(255.F);
+
+		size_t last_v_idx = img_sz - (img_sz % SSE2_STRIDE);
+		for (size_t i = 0; i < last_v_idx; i += SSE2_STRIDE)
+		{
+			__m128i vseg_r = LOAD_SI128_CONST(r + i);
+			__m128i vseg_g = LOAD_SI128_CONST(g + i);
+			__m128i vseg_b = LOAD_SI128_CONST(b + i);
+
+			__m128i vmax_rg = _mm_max_epu8(vseg_r, vseg_g);
+			__m128i vmax_rgb = _mm_max_epu8(vseg_b, vmax_rg);
+
+			__m128i vmin_rg = _mm_min_epu8(vseg_r, vseg_g);
+			__m128i vmin_rgb = _mm_min_epu8(vseg_b, vmin_rg);
+
+			__m128i vmax_aux0 = _mm_and_si128(vmax_rgb, fpcast_mask);
+			__m128i vmax_aux1 = _mm_and_si128(_mm_srli_epi32(vmax_rgb, 8), fpcast_mask);
+			__m128i vmax_aux2 = _mm_and_si128(_mm_srli_epi32(vmax_rgb, 16), fpcast_mask);
+			__m128i vmax_aux3 = _mm_and_si128(_mm_srli_epi32(vmax_rgb, 24), fpcast_mask);
+
+			__m128i vmin_aux0 = _mm_and_si128(vmin_rgb, fpcast_mask);
+			__m128i vmin_aux1 = _mm_and_si128(_mm_srli_epi32(vmin_rgb, 8), fpcast_mask);
+			__m128i vmin_aux2 = _mm_and_si128(_mm_srli_epi32(vmin_rgb, 16), fpcast_mask);
+			__m128i vmin_aux3 = _mm_and_si128(_mm_srli_epi32(vmin_rgb, 24), fpcast_mask);
+
+			__m128 vfmax0 = _mm_cvtepi32_ps(vmax_aux0);
+			__m128 vfmax1 = _mm_cvtepi32_ps(vmax_aux1);
+			__m128 vfmax2 = _mm_cvtepi32_ps(vmax_aux2);
+			__m128 vfmax3 = _mm_cvtepi32_ps(vmax_aux3);
+
+			__m128 vfmin0 = _mm_cvtepi32_ps(vmin_aux0);
+			__m128 vfmin1 = _mm_cvtepi32_ps(vmin_aux1);
+			__m128 vfmin2 = _mm_cvtepi32_ps(vmin_aux2);
+			__m128 vfmin3 = _mm_cvtepi32_ps(vmin_aux3);
+
+			__m128 vlum0 = _mm_mul_ps(_mm_add_ps(vfmax0, vfmin0), vhalfmul);
+			__m128 vlum1 = _mm_mul_ps(_mm_add_ps(vfmax1, vfmin1), vhalfmul);
+			__m128 vlum2 = _mm_mul_ps(_mm_add_ps(vfmax2, vfmin2), vhalfmul);
+			__m128 vlum3 = _mm_mul_ps(_mm_add_ps(vfmax3, vfmin3), vhalfmul);
+
+			vlum0 = _mm_div_ps(vlum0, vzeroonediv);
+			vlum1 = _mm_div_ps(vlum1, vzeroonediv);
+			vlum2 = _mm_div_ps(vlum2, vzeroonediv);
+			vlum3 = _mm_div_ps(vlum3, vzeroonediv);
+
+			float aux_result[SSE2_STRIDE];
+
+			_mm_store_ps(aux_result + 0, vlum0);
+			_mm_store_ps(aux_result + 4, vlum1);
+			_mm_store_ps(aux_result + 8, vlum2);
+			_mm_store_ps(aux_result + 12, vlum3);
+
+			for (size_t k = 0; k < 4u; ++k)
+			{
+				size_t offset = i + (k * 4u);
+				result[offset + 0] = aux_result[0 + k];
+				result[offset + 1] = aux_result[4 + k];
+				result[offset + 2] = aux_result[8 + k];
+				result[offset + 3] = aux_result[12 + k];
+			}
+		}
+
+		for (size_t i = last_v_idx; i < img_sz; ++i)
+		{
+			float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] }));
+			float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] }));
+			float vsum = (vmax + vmin) * 0.5F;
+			result[i] = (vsum / 255.0F);
 		}
 
 		return result;

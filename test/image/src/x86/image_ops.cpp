@@ -174,4 +174,53 @@ TEST_CASE("[x86] Saturation")
 	};
 };
 
+TEST_CASE("[x86] Luminance")
+{
+	SECTION("SSE2")
+	{
+		image img(39, 39);
+		size_t px_count = 39 * 39;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = static_cast<uint8_t>(1);
+			img.data()->data_g()[i] = static_cast<uint8_t>(2);
+			img.data()->data_b()[i] = static_cast<uint8_t>(3);
+			img.data()->data_a()[i] = static_cast<uint8_t>(4);
+		}
+
+		_internal::channel_info_extract_args args(&img);
+		std::vector<float> result = _internal::rgba_luminance_sse2(args);
+
+		REQUIRE(result.size() == img.pixel_count());
+		for(size_t i = 0; i < result.size(); ++i)
+        {
+			REQUIRE(result[i] == Approx(0.007843137254902F));
+        }
+	};
+
+	SECTION("AVX2")
+	{
+		image img(71, 71);
+		size_t px_count = 71 * 71;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = static_cast<uint8_t>(1);
+			img.data()->data_g()[i] = static_cast<uint8_t>(2);
+			img.data()->data_b()[i] = static_cast<uint8_t>(3);
+			img.data()->data_a()[i] = static_cast<uint8_t>(4);
+		}
+
+		_internal::channel_info_extract_args args(&img);
+		std::vector<float> result = _internal::rgba_luminance_avx2(args);
+
+		REQUIRE(result.size() == img.pixel_count());
+		for(size_t i = 0; i < result.size(); ++i)
+        {
+			REQUIRE(result[i] == Approx(0.00784313F).margin(0.00001F));
+        }
+	};
+};
+
 #endif

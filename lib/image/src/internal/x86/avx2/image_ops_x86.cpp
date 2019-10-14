@@ -285,7 +285,7 @@ namespace ien::img::_internal
 			__m256 vsat2 = _mm256_div_ps(_mm256_sub_ps(vfmax2, vfmin2), vfmax2);
 			__m256 vsat3 = _mm256_div_ps(_mm256_sub_ps(vfmax3, vfmin3), vfmax3);
 
-			float aux_result[32];
+			float aux_result[AVX2_STRIDE];
 
 			_mm256_store_ps(aux_result + 0, vsat0);
 			_mm256_store_ps(aux_result + 8, vsat1);
@@ -306,6 +306,95 @@ namespace ien::img::_internal
 			float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] })) / 255.0F;
 			float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] })) / 255.0F;
 			result[i] = (vmax - vmin) / vmax;
+		}
+
+		return result;
+	}
+
+	std::vector<float> rgba_luminance_avx2(const channel_info_extract_args& args)
+	{
+		const size_t img_sz = args.len;
+
+		if (img_sz < AVX2_STRIDE)
+		{
+			return rgba_luminance_std(args);
+		}
+
+		std::vector<float> result;
+		result.resize(args.len);
+
+		BIND_CHANNELS_CONST(args, r, g, b, a);
+
+		__m256i fpcast_mask = _mm256_set1_epi32(0x000000FF);
+		__m256 vhalfmul = _mm256_set1_ps(0.5F);
+		__m256 vzeroonediv = _mm256_set1_ps(255.F);
+
+		size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
+		for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+		{
+			__m256i vseg_r = LOAD_SI256_CONST(r + i);
+			__m256i vseg_g = LOAD_SI256_CONST(g + i);
+			__m256i vseg_b = LOAD_SI256_CONST(b + i);
+
+			__m256i vmax_rg = _mm256_max_epu8(vseg_r, vseg_g);
+			__m256i vmax_rgb = _mm256_max_epu8(vseg_b, vmax_rg);
+
+			__m256i vmin_rg = _mm256_min_epu8(vseg_r, vseg_g);
+			__m256i vmin_rgb = _mm256_min_epu8(vseg_b, vmin_rg);
+
+			__m256i vmax_aux0 = _mm256_and_si256(vmax_rgb, fpcast_mask);
+			__m256i vmax_aux1 = _mm256_and_si256(_mm256_srli_epi32(vmax_rgb, 8), fpcast_mask);
+			__m256i vmax_aux2 = _mm256_and_si256(_mm256_srli_epi32(vmax_rgb, 16), fpcast_mask);
+			__m256i vmax_aux3 = _mm256_and_si256(_mm256_srli_epi32(vmax_rgb, 24), fpcast_mask);
+
+			__m256i vmin_aux0 = _mm256_and_si256(vmin_rgb, fpcast_mask);
+			__m256i vmin_aux1 = _mm256_and_si256(_mm256_srli_epi32(vmin_rgb, 8), fpcast_mask);
+			__m256i vmin_aux2 = _mm256_and_si256(_mm256_srli_epi32(vmin_rgb, 16), fpcast_mask);
+			__m256i vmin_aux3 = _mm256_and_si256(_mm256_srli_epi32(vmin_rgb, 24), fpcast_mask);
+
+			__m256 vfmax0 = _mm256_cvtepi32_ps(vmax_aux0);
+			__m256 vfmax1 = _mm256_cvtepi32_ps(vmax_aux1);
+			__m256 vfmax2 = _mm256_cvtepi32_ps(vmax_aux2);
+			__m256 vfmax3 = _mm256_cvtepi32_ps(vmax_aux3);
+
+			__m256 vfmin0 = _mm256_cvtepi32_ps(vmin_aux0);
+			__m256 vfmin1 = _mm256_cvtepi32_ps(vmin_aux1);
+			__m256 vfmin2 = _mm256_cvtepi32_ps(vmin_aux2);
+			__m256 vfmin3 = _mm256_cvtepi32_ps(vmin_aux3);
+
+			__m256 vlum0 = _mm256_mul_ps(_mm256_add_ps(vfmax0, vfmin0), vhalfmul);
+			__m256 vlum1 = _mm256_mul_ps(_mm256_add_ps(vfmax1, vfmin1), vhalfmul);
+			__m256 vlum2 = _mm256_mul_ps(_mm256_add_ps(vfmax2, vfmin2), vhalfmul);
+			__m256 vlum3 = _mm256_mul_ps(_mm256_add_ps(vfmax3, vfmin3), vhalfmul);
+
+			vlum0 = _mm256_div_ps(vlum0, vzeroonediv);
+			vlum1 = _mm256_div_ps(vlum1, vzeroonediv);
+			vlum2 = _mm256_div_ps(vlum2, vzeroonediv);
+			vlum3 = _mm256_div_ps(vlum3, vzeroonediv);
+
+			float aux_result[AVX2_STRIDE];
+
+			_mm256_store_ps(aux_result + 0, vlum0);
+			_mm256_store_ps(aux_result + 8, vlum1);
+			_mm256_store_ps(aux_result + 16, vlum2);
+			_mm256_store_ps(aux_result + 24, vlum3);
+
+			for (size_t k = 0; k < 8u; ++k)
+			{
+				size_t offset = i + (k * 4u);
+				result[offset + 0] = aux_result[0 + k];
+				result[offset + 1] = aux_result[8 + k];
+				result[offset + 2] = aux_result[16 + k];
+				result[offset + 3] = aux_result[24 + k];
+			}
+		}
+
+		for (size_t i = last_v_idx; i < img_sz; ++i)
+		{
+			float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] }));
+			float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] }));
+			float vsum = (vmax + vmin) * 0.5F;
+			result[i] = (vsum / 255.0F);
 		}
 
 		return result;

@@ -26,6 +26,9 @@ namespace ien::img::_internal
 
 	std::vector<float> rgba_saturation_sse2(const channel_info_extract_args& args);
 	std::vector<float> rgba_saturation_avx2(const channel_info_extract_args& args);
+
+    std::vector<float> rgba_luminance_sse2(const channel_info_extract_args& args);
+	std::vector<float> rgba_luminance_avx2(const channel_info_extract_args& args);
 }
 
 #endif
