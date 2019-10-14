@@ -11,7 +11,7 @@
 
 using namespace ien::img;
 
-const size_t IMG_DIM = 600;
+const size_t IMG_DIM = 256;
 
 void fill_image_random(image* img)
 {
@@ -164,7 +164,7 @@ TEST_CASE("Benchmark rgba saturation")
 		EXTRACT_CHANNEL_DATA_SETUP(args);
 		meter.measure([&]
 		{
-			return _internal::rgba_sum_saturated_std(args);
+			return _internal::rgba_saturation_std(args);
 		});
 	};
 
@@ -173,7 +173,7 @@ TEST_CASE("Benchmark rgba saturation")
 		EXTRACT_CHANNEL_DATA_SETUP(args);
 		meter.measure([&]
 		{
-			return _internal::rgba_sum_saturated_sse2(args);
+			return _internal::rgba_saturation_sse2(args);
 		});
 	};
 
@@ -182,7 +182,37 @@ TEST_CASE("Benchmark rgba saturation")
 		EXTRACT_CHANNEL_DATA_SETUP(args);
 		meter.measure([&]
 		{
-			return _internal::rgba_sum_saturated_avx2(args);
+			return _internal::rgba_saturation_avx2(args);
+		});
+	};
+};
+
+TEST_CASE("Benchmark rgba luminance")
+{
+	BENCHMARK_ADVANCED("STD")(Catch::Benchmark::Chronometer meter)
+	{
+		EXTRACT_CHANNEL_DATA_SETUP(args);
+		meter.measure([&]
+		{
+			return _internal::rgba_luminance_std(args);
+		});
+	};
+
+	BENCHMARK_ADVANCED("SSE2")(Catch::Benchmark::Chronometer meter)
+	{
+		EXTRACT_CHANNEL_DATA_SETUP(args);
+		meter.measure([&]
+		{
+			return _internal::rgba_luminance_sse2(args);
+		});
+	};
+
+	BENCHMARK_ADVANCED("AVX2")(Catch::Benchmark::Chronometer meter)
+	{
+		EXTRACT_CHANNEL_DATA_SETUP(args);
+		meter.measure([&]
+		{
+			return _internal::rgba_luminance_avx2(args);
 		});
 	};
 };
