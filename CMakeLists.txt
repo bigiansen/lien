@@ -18,8 +18,25 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE 	${PROJECT_BINARY_DIR}/output/bin/lie
 
 option(LIEN_BUILD_TESTS "Build Tests" On)
 
+# Conditional library compilation options
 option(LIEN_PARALLEL "Build Parallel utilities library" On)
 option(LIEN_IMAGE "Build Image utilities library" On)
+
+# x86 FLAG
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
+    set (LIEN_ARCH_X86 TRUE)
+else ()
+    set (LIEN_ARCH_X86 FALSE)
+endif ()
+
+# Enable AVX2 code generation on x86 platforms
+if(LIEN_ARCH_X86)
+    if(MSVC)
+        add_definitions(/arch:AVX2)
+    else()
+        add_definitions(-mavx2)
+    endif()
+endif()
 
 add_subdirectory("lib")
 
