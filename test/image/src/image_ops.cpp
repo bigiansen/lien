@@ -10,8 +10,8 @@ TEST_CASE("[STD] Channel byte truncation")
 {
 	SECTION("STD")
 	{
-		image img(128, 128);
-		size_t px_count = 128 * 128;
+		image img(41, 41);
+		size_t px_count = 41 * 41;
 
 		for (size_t i = 0; i < px_count; ++i)
 		{
@@ -38,8 +38,8 @@ TEST_CASE("[STD] Channel average RGBA")
 {
 	SECTION("STD")
 	{
-		image img(128, 128);
-		size_t px_count = 128 * 128;
+		image img(41, 41);
+		size_t px_count = 41 * 41;
 
 		for (size_t i = 0; i < px_count; ++i)
 		{
@@ -56,14 +56,107 @@ TEST_CASE("[STD] Channel average RGBA")
 			REQUIRE(result[i] == 7);
 		}
 	};
-}
+};
+
+TEST_CASE("[STD] Channel max RGBA")
+{
+	SECTION("STD")
+	{
+		image img(41, 41);
+		size_t px_count = 41 * 41;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 1;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 10;
+			img.data()->data_a()[i] = 15;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_max_std(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 15);
+		}
+	};
+};
+
+TEST_CASE("[STD] Channel min RGBA")
+{
+	SECTION("STD")
+	{
+		image img(41, 41);
+		size_t px_count = 41 * 41;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 7;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 3;
+			img.data()->data_a()[i] = 4;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_min_std(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 3);
+		}
+	};
+};
+
+TEST_CASE("[STD] Channel sum saturated RGBA")
+{
+	SECTION("Below limit")
+	{
+		image img(41, 41);
+		size_t px_count = 41 * 41;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 7;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 3;
+			img.data()->data_a()[i] = 4;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_sum_saturated_std(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 19);
+		}
+	};
+
+	SECTION("Above limit")
+	{
+		image img(41, 41);
+		size_t px_count = 41 * 41;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 77;
+			img.data()->data_g()[i] = 55;
+			img.data()->data_b()[i] = 73;
+			img.data()->data_a()[i] = 184;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_sum_saturated_std(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 255u);
+		}
+	};
+};
 
 TEST_CASE("[STD] Saturation")
 {
 	SECTION("STD")
 	{
-		image img(34, 34);
-		size_t px_count = 34 * 34;
+		image img(41, 41);
+		size_t px_count = 41 * 41;
 
 		for (size_t i = 0; i < px_count; ++i)
 		{
@@ -88,8 +181,8 @@ TEST_CASE("[STD] Luminance")
 {
 	SECTION("STD")
 	{
-		image img(34, 34);
-		size_t px_count = 34 * 34;
+		image img(41, 41);
+		size_t px_count = 41 * 41;
 
 		for (size_t i = 0; i < px_count; ++i)
 		{

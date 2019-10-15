@@ -21,8 +21,8 @@ TEST_CASE("[x86] Channel byte truncation")
 	SECTION("SSE2")
 	{
         CHECK_SSE2("[x86] Channel byte truncation");
-		image img(128, 128);
-		size_t px_count = 128 * 128;
+		image img(41, 41);
+		size_t px_count = 41 * 41;
 
 		for (size_t i = 0; i < px_count; ++i)
 		{
@@ -47,8 +47,8 @@ TEST_CASE("[x86] Channel byte truncation")
 	SECTION("AVX2")
 	{
         CHECK_AVX2("[x86] Channel byte truncation");
-		image img(128, 128);
-		size_t px_count = 128 * 128;
+		image img(71, 71);
+		size_t px_count = 71 * 71;
 
 		for (size_t i = 0; i < px_count; ++i)
 		{
@@ -118,13 +118,198 @@ TEST_CASE("[x86] Channel average RGBA")
 	};
 };
 
+TEST_CASE("[x86] Channel max RGBA")
+{
+	SECTION("SSE2")
+	{
+		CHECK_SSE2("[x86] Channel max RGBA");
+		image img(41, 41);
+		size_t px_count = 41 * 41;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 1;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 10;
+			img.data()->data_a()[i] = 15;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_max_sse2(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 15);
+		}
+	};
+
+	SECTION("AVX2")
+	{
+		CHECK_AVX2("[x86] Channel max RGBA");
+		image img(71, 71);
+		size_t px_count = 71 * 71;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 1;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 10;
+			img.data()->data_a()[i] = 15;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_max_avx2(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 15);
+		}
+	};
+};
+
+TEST_CASE("[x86] Channel min RGBA")
+{
+	SECTION("SSE2")
+	{
+		CHECK_SSE2("[x86] Channel min RGBA");
+		image img(41, 41);
+		size_t px_count = 41 * 41;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 7;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 3;
+			img.data()->data_a()[i] = 4;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_min_sse2(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 3);
+		}
+	};
+
+	SECTION("AVX2")
+	{
+		CHECK_AVX2("[x86] Channel min RGBA");
+		image img(71, 71);
+		size_t px_count = 71 * 71;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 7;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 3;
+			img.data()->data_a()[i] = 4;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_min_avx2(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 3);
+		}
+	};
+};
+
+TEST_CASE("[x86] Channel sum saturated RGBA")
+{
+	SECTION("SSE2 - Below limit")
+	{
+		CHECK_SSE2("[x86] Channel sum saturated RGBA");
+		image img(41, 41);
+		size_t px_count = 41 * 41;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 7;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 3;
+			img.data()->data_a()[i] = 4;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_sum_saturated_sse2(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 19);
+		}
+	};
+
+	SECTION("SSE2 - Above limit")
+	{
+		CHECK_SSE2("[x86] Channel sum saturated RGBA");
+		image img(41, 41);
+		size_t px_count = 41 * 41;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 77;
+			img.data()->data_g()[i] = 55;
+			img.data()->data_b()[i] = 73;
+			img.data()->data_a()[i] = 184;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_sum_saturated_sse2(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 255u);
+		}
+	};
+
+	SECTION("AVX2 - Below limit")
+	{
+		CHECK_AVX2("[x86] Channel sum saturated RGBA");
+		image img(71, 71);
+		size_t px_count = 71 * 71;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 7;
+			img.data()->data_g()[i] = 5;
+			img.data()->data_b()[i] = 3;
+			img.data()->data_a()[i] = 4;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_sum_saturated_avx2(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 19);
+		}
+	};
+
+	SECTION("AVX - Above limit")
+	{
+		CHECK_SSE2("[x86] Channel sum saturated RGBA");
+		image img(71, 71);
+		size_t px_count = 71 * 71;
+
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			img.data()->data_r()[i] = 77;
+			img.data()->data_g()[i] = 55;
+			img.data()->data_b()[i] = 73;
+			img.data()->data_a()[i] = 184;
+		}
+
+		_internal::channel_info_extract_args_rgba args(&img);
+		auto result = _internal::rgba_sum_saturated_avx2(args);
+		for (size_t i = 0; i < px_count; ++i)
+		{
+			REQUIRE(result[i] == 255u);
+		}
+	};
+};
+
 TEST_CASE("[x86] Saturation")
 {
     SECTION("STD == SSE2")
 	{
         CHECK_SSE2("[x86] Saturation");
-		image img(40, 40);
-		size_t px_count = 40 * 40;
+		image img(41, 41);
+		size_t px_count = 41 * 41;
 
 		for (size_t i = 0; i < px_count; ++i)
 		{
@@ -149,8 +334,8 @@ TEST_CASE("[x86] Saturation")
     SECTION("STD == AVX2")
 	{
         CHECK_AVX2("[x86] Saturation");
-		image img(70, 70);
-		size_t px_count = 70 * 70;
+		image img(71, 71);
+		size_t px_count = 71 * 71;
 
 		for (size_t i = 0; i < px_count; ++i)
 		{
@@ -175,8 +360,8 @@ TEST_CASE("[x86] Saturation")
     SECTION("SSE2")
 	{
         CHECK_SSE2("[x86] Saturation");
-		image img(40, 40);
-		size_t px_count = 40 * 40;
+		image img(41, 41);
+		size_t px_count = 41 * 41;
 
 		for (size_t i = 0; i < px_count; ++i)
 		{
@@ -199,8 +384,8 @@ TEST_CASE("[x86] Saturation")
 	SECTION("AVX2")
 	{
         CHECK_AVX2("[x86] Saturation");
-		image img(70, 70);
-		size_t px_count = 70 * 70;
+		image img(71, 71);
+		size_t px_count = 71 * 71;
 
 		for (size_t i = 0; i < px_count; ++i)
 		{
