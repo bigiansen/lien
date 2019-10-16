@@ -40,6 +40,16 @@ namespace ien::img
 
     const uint8_t* packed_image::cdata() const noexcept { return _data; }
 
+    void packed_image::set_pixel(int idx, uint8_t* rgba)
+    {
+        std::memcpy(_data + (idx * 4), rgba, 4);
+    }
+    
+    void packed_image::set_pixel(int x, int y, uint8_t* rgba)
+    {
+        std::memcpy(_data + (x * (y * _width) * 4), rgba, 4);
+    }
+
     size_t packed_image::pixel_count() const noexcept { return _width * _height; }
 
     int packed_image::width() const noexcept { return _width; }
