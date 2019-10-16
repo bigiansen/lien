@@ -126,6 +126,26 @@ namespace ien::img
     
     int image::height() const noexcept { return _height; }
 
+    std::array<uint8_t, 4> image::get_packed_pixel(int index)
+    {
+        return { 
+            _data.cdata_r()[index], 
+            _data.cdata_g()[index], 
+            _data.cdata_b()[index],
+            _data.cdata_a()[index] 
+        };
+    }
+
+    std::array<uint8_t, 4> image::get_packed_pixel(int x, int y)
+    {
+        return {
+            _data.cdata_r()[(y * _height) + x],
+            _data.cdata_g()[(y * _height) + x],
+            _data.cdata_b()[(y * _height) + x],
+            _data.cdata_a()[(y * _height) + x],
+        };
+    }
+
     void image::save_to_file_jpeg(const std::string& path, int quality)
     {
         std::vector<uint8_t> packed_data = _data.pack_data();

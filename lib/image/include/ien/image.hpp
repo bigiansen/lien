@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cinttypes>
 #include <string>
 #include <vector>
@@ -70,8 +71,13 @@ namespace ien::img
         int width() const noexcept;
         int height() const noexcept;
 
+        std::array<uint8_t, 4> get_packed_pixel(int index);
+        std::array<uint8_t, 4> get_packed_pixel(int x, int y);
+
         void save_to_file_png(const std::string& path, int compression_level = 8);
         void save_to_file_jpeg(const std::string& path, int quality = 100);
         void save_to_file_tga(const std::string& path);
     };
+
+    
 }
