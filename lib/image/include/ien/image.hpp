@@ -78,6 +78,4 @@ namespace ien::img
         void save_to_file_jpeg(const std::string& path, int quality = 100);
         void save_to_file_tga(const std::string& path);
     };
-
-    
 }

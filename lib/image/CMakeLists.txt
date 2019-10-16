@@ -5,6 +5,7 @@ find_package(Threads REQUIRED)
 SET(LIEN_IMAGE_SOURCES
     src/image.cpp
     src/image_ops.cpp
+	src/packed_image.cpp
 	src/internal/std/image_ops_std.cpp
 	src/internal/x86/sse2/image_ops_x86.cpp
 	src/internal/x86/avx2/image_ops_x86.cpp
