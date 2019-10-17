@@ -1,8 +1,11 @@
 #include <ien/packed_image.hpp>
 
 #include <ien/platform.hpp>
+
 #include <stb_image.h>
 #include <stb_image_resize.h>
+
+#include <cstring>
 #include <stdexcept>
 
 namespace ien::img
