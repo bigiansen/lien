@@ -27,5 +27,8 @@ namespace ien::img
         size_t pixel_count() const noexcept;
         int width() const noexcept;
         int height() const noexcept;
+
+        void resize_absolute(int w, int h);
+        void resize_relative(float w, float h);
     };
 }

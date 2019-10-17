@@ -2,6 +2,7 @@
 
 #include <ien/platform.hpp>
 #include <stb_image.h>
+#include <stb_image_resize.h>
 #include <stdexcept>
 
 namespace ien::img
@@ -55,4 +56,29 @@ namespace ien::img
     int packed_image::width() const noexcept { return _width; }
     
     int packed_image::height() const noexcept  { return _height; }
+
+    void packed_image::resize_absolute(int w, int h)
+    {
+        uint8_t* resized_data = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(w * h * 4));
+        stbir_resize_uint8(_data, _width, _height, 4, resized_data, w, h, 4, 4);
+
+        if(_stb_free)
+        {
+            LIEN_ALIGNED_FREE(_data);
+        }
+        else
+        {
+            stbi_image_free(_data);
+        }
+
+        _data = resized_data;
+    }
+
+    void packed_image::resize_relative(float w, float h)
+    {
+        int real_w = static_cast<int>(static_cast<float>(_width) * w);
+        int real_h = static_cast<int>(static_cast<float>(_height) * h);
+
+        resize_absolute(real_w, real_h);
+    }
 }
