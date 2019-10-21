@@ -75,6 +75,25 @@ namespace ien::img
         };
     }
 
+    void image::set_pixel(int index, const uint8_t* rgba)
+    {
+        debug_assert(index < (_width * _height), "Pixel index out of range!");
+        _data.data_r()[index] = rgba[0];
+        _data.data_g()[index] = rgba[1];
+        _data.data_b()[index] = rgba[2];
+        _data.data_a()[index] = rgba[3];
+    }
+
+    void image::set_pixel(int x, int y, const uint8_t* rgba)
+    {
+        int index = (y * _width) + x;
+        debug_assert(index < (_width * _height), "Pixel index out of range!");
+        _data.data_r()[index] = rgba[0];
+        _data.data_g()[index] = rgba[1];
+        _data.data_b()[index] = rgba[2];
+        _data.data_a()[index] = rgba[3];
+    }
+
     void image::save_to_file_jpeg(const std::string& path, int quality)
     {
         std::vector<uint8_t> packed_data = _data.pack_data();
@@ -93,7 +112,7 @@ namespace ien::img
         _data.resize(static_cast<size_t>(w) * h); // realloc unpacked data buffers
         
         std::vector<uint8_t> resized_packed_data;
-        resized_packed_data.resize(w * h * 4);
+        resized_packed_data.resize(size_t(w) * h * 4);
 
         stbir_resize_uint8(
             packed_data.data(), _width, _height, 4, resized_packed_data.data(), w, h, 4, 4
@@ -104,7 +123,7 @@ namespace ien::img
         uint8_t* b = _data.data_b();
         uint8_t* a = _data.data_a();
 
-        for(size_t i = 0; i < (w * h); ++i)
+        for(size_t i = 0; i < (size_t(w) * h); ++i)
         {
             r[i] = resized_packed_data[(i * 4) + 0];
             g[i] = resized_packed_data[(i * 4) + 1];

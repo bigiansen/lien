@@ -35,10 +35,10 @@ namespace ien::img
 
     void image_unpacked_data::resize(size_t pixel_count)
     {
-        LIEN_ALIGNED_REALLOC(_r, pixel_count);
-        LIEN_ALIGNED_REALLOC(_g, pixel_count);
-        LIEN_ALIGNED_REALLOC(_b, pixel_count);
-        LIEN_ALIGNED_REALLOC(_a, pixel_count);
+        _r = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_r, pixel_count));
+        _g = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_g, pixel_count));
+        _b = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_b, pixel_count));
+        _a = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_a, pixel_count));
     }
 
     std::vector<uint8_t> image_unpacked_data::pack_data()

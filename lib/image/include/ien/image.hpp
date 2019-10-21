@@ -29,6 +29,9 @@ namespace ien::img
         std::array<uint8_t, 4> get_packed_pixel(int index);
         std::array<uint8_t, 4> get_packed_pixel(int x, int y);
 
+        void set_pixel(int index, const uint8_t* rgba);
+        void set_pixel(int x, int y, const uint8_t* rgba);
+
         void save_to_file_png(const std::string& path, int compression_level = 8);
         void save_to_file_jpeg(const std::string& path, int quality = 100);
         void save_to_file_tga(const std::string& path);

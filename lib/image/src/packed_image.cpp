@@ -14,7 +14,7 @@ namespace ien::img
         : _width(width)
         , _height(height)
     {
-        _data = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(width * height * 4));
+        _data = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(size_t(width) * height * 4));
     }
 
     packed_image::packed_image(const std::string& path)
@@ -46,15 +46,15 @@ namespace ien::img
 
     void packed_image::set_pixel(int idx, uint8_t* rgba)
     {
-        std::memcpy(_data + (idx * 4), rgba, 4);
+        std::memcpy(_data + (size_t(idx) * 4), rgba, 4);
     }
     
     void packed_image::set_pixel(int x, int y, uint8_t* rgba)
     {
-        std::memcpy(_data + (x * (y * _width) * 4), rgba, 4);
+        std::memcpy(_data + (size_t(x) * y * _width * 4), rgba, 4);
     }
 
-    size_t packed_image::pixel_count() const noexcept { return _width * _height; }
+    size_t packed_image::pixel_count() const noexcept { return size_t(_width) * _height; }
 
     int packed_image::width() const noexcept { return _width; }
     
@@ -62,7 +62,7 @@ namespace ien::img
 
     void packed_image::resize_absolute(int w, int h)
     {
-        uint8_t* resized_data = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(w * h * 4));
+        uint8_t* resized_data = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(size_t(w) * h * 4));
         stbir_resize_uint8(_data, _width, _height, 4, resized_data, w, h, 4, 4);
 
         if(_stb_free)
@@ -79,8 +79,8 @@ namespace ien::img
 
     void packed_image::resize_relative(float w, float h)
     {
-        int real_w = static_cast<int>(static_cast<float>(_width) * w);
-        int real_h = static_cast<int>(static_cast<float>(_height) * h);
+        int real_w = static_cast<int>(float(_width) * w);
+        int real_h = static_cast<int>(float(_height) * h);
 
         resize_absolute(real_w, real_h);
     }
