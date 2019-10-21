@@ -43,6 +43,8 @@ namespace ien::img
 
         void resize(size_t len);
 
+        void set_pixel(int index, const uint8_t* rgba);
+
         [[nodiscard]] std::vector<uint8_t> pack_data() const;
     };
 

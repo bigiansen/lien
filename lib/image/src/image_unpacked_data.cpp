@@ -41,6 +41,14 @@ namespace ien::img
         _a = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_a, pixel_count));
     }
 
+    void image_unpacked_data::set_pixel(int index, const uint8_t* rgba)
+    {
+        _r[index] = rgba[0];
+        _g[index] = rgba[1];
+        _b[index] = rgba[2];
+        _a[index] = rgba[3];
+    }
+
     std::vector<uint8_t> image_unpacked_data::pack_data() const
     {
         std::vector<uint8_t> result;

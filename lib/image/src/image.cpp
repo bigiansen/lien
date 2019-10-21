@@ -78,20 +78,12 @@ namespace ien::img
     void image::set_pixel(int index, const uint8_t* rgba)
     {
         debug_assert(index < (_width * _height), "Pixel index out of range!");
-        _data.data_r()[index] = rgba[0];
-        _data.data_g()[index] = rgba[1];
-        _data.data_b()[index] = rgba[2];
-        _data.data_a()[index] = rgba[3];
+        _data.set_pixel(index, rgba);
     }
 
     void image::set_pixel(int x, int y, const uint8_t* rgba)
     {
-        int index = (y * _width) + x;
-        debug_assert(index < (_width * _height), "Pixel index out of range!");
-        _data.data_r()[index] = rgba[0];
-        _data.data_g()[index] = rgba[1];
-        _data.data_b()[index] = rgba[2];
-        _data.data_a()[index] = rgba[3];
+        set_pixel((x * y), rgba);
     }
 
     void image::save_to_file_jpeg(const std::string& path, int quality) const
