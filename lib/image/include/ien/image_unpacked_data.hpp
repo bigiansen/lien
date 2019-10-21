@@ -43,8 +43,8 @@ namespace ien::img
 
         void resize(size_t len);
 
-        [[nodiscard]] std::vector<uint8_t> pack_data();
+        [[nodiscard]] std::vector<uint8_t> pack_data() const;
     };
 
-    extern image_unpacked_data unpack_image_data(uint8_t* data, size_t len);
+    extern image_unpacked_data unpack_image_data(const uint8_t* data, size_t len);
 }

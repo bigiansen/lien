@@ -32,7 +32,7 @@ namespace ien::img::_internal
 
     void truncate_channel_data_std(const truncate_channel_args& args)
     {
-        size_t img_sz = args.len;
+        const size_t img_sz = args.len;
 		BIND_CHANNELS(args, r, g, b, a);
 
         uint32_t mask_r = trunc_and_table[args.bits_r];
@@ -40,7 +40,7 @@ namespace ien::img::_internal
         uint32_t mask_b = trunc_and_table[args.bits_b];
         uint32_t mask_a = trunc_and_table[args.bits_a];
 
-		size_t last_v_idx = img_sz - (img_sz % STD_STRIDE);
+		const size_t last_v_idx = img_sz - (img_sz % STD_STRIDE);
         for(size_t i = 0; i < img_sz; i += STD_STRIDE)
         {
             *(reinterpret_cast<uint32_t*>(r + i)) &= mask_r;

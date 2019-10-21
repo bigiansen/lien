@@ -41,7 +41,7 @@ namespace ien::img
         _a = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_a, pixel_count));
     }
 
-    std::vector<uint8_t> image_unpacked_data::pack_data()
+    std::vector<uint8_t> image_unpacked_data::pack_data() const
     {
         std::vector<uint8_t> result;
         result.resize(_size * 4);
@@ -55,7 +55,7 @@ namespace ien::img
         return result;
     }
 
-    image_unpacked_data unpack_image_data(uint8_t* data, size_t len)
+    image_unpacked_data unpack_image_data(const uint8_t* data, size_t len)
     {
         runtime_assert(len % 4 == 0, "Packed image data len must be a multiple of 4!");
         image_unpacked_data result(len / 4);

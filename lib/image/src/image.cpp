@@ -39,7 +39,7 @@ namespace ien::img
 
     const image_unpacked_data* image::cdata() const noexcept { return &_data; }
 
-    void image::save_to_file_png(const std::string& path, int compression_level)
+    void image::save_to_file_png(const std::string& path, int compression_level) const
     {
         std::vector<uint8_t> packed_data = _data.pack_data();
         stbi_write_png_compression_level = compression_level;
@@ -55,7 +55,7 @@ namespace ien::img
     
     int image::height() const noexcept { return _height; }
 
-    std::array<uint8_t, 4> image::get_packed_pixel(int index)
+    std::array<uint8_t, 4> image::get_packed_pixel(int index) const
     {
         return { 
             _data.cdata_r()[index], 
@@ -65,7 +65,7 @@ namespace ien::img
         };
     }
 
-    std::array<uint8_t, 4> image::get_packed_pixel(int x, int y)
+    std::array<uint8_t, 4> image::get_packed_pixel(int x, int y) const
     {
         return {
             _data.cdata_r()[(y * _height) + x],
@@ -94,13 +94,13 @@ namespace ien::img
         _data.data_a()[index] = rgba[3];
     }
 
-    void image::save_to_file_jpeg(const std::string& path, int quality)
+    void image::save_to_file_jpeg(const std::string& path, int quality) const
     {
         std::vector<uint8_t> packed_data = _data.pack_data();
         stbi_write_jpg(path.c_str(), _width, _height, 4, packed_data.data(), quality);
     }
 
-    void image::save_to_file_tga(const std::string& path)
+    void image::save_to_file_tga(const std::string& path) const
     {
         std::vector<uint8_t> packed_data = _data.pack_data();
         stbi_write_tga(path.c_str(), _width, _height, 4, packed_data.data());

@@ -42,7 +42,7 @@ namespace ien::img::_internal
 		0xF0F0F0F0, 0xE0E0E0E0, 0xC0C0C0C0, 0x80808080
 	};
 
-	const size_t SSE2_STRIDE = 16;
+	constexpr size_t SSE2_STRIDE = 16;
 
 	void truncate_channel_data_sse2(const truncate_channel_args& args)
 	{

@@ -21,8 +21,8 @@ namespace ien::img
         uint8_t* data() noexcept;
         const uint8_t* cdata() const noexcept;
 
-        void set_pixel(int idx, uint8_t* rgba);
-        void set_pixel(int x, int y, uint8_t* rgba);
+        void set_pixel(int idx, const uint8_t* rgba);
+        void set_pixel(int x, int y, const uint8_t* rgba);
 
         size_t pixel_count() const noexcept;
         int width() const noexcept;

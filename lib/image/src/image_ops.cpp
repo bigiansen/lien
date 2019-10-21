@@ -8,8 +8,8 @@
 #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
 #include <ien/internal/x86/image_ops_x86.hpp>
 
-const size_t SSE2_STRIDE = 16;
-const size_t AVX2_STRIDE = 32;
+constexpr size_t SSE2_STRIDE = 16;
+constexpr size_t AVX2_STRIDE = 32;
 #endif
 
 namespace ien::img
