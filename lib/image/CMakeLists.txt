@@ -6,6 +6,7 @@ SET(LIEN_IMAGE_SOURCES
     src/image.cpp
     src/image_ops.cpp
 	src/image_unpacked_data.cpp
+	src/image_view.cpp
 	src/packed_image.cpp
 	src/internal/std/image_ops_std.cpp
 	src/internal/x86/sse2/image_ops_x86.cpp

@@ -14,11 +14,16 @@ namespace ien::img
 
         constexpr rect() { }
         
-        constexpr rect(T vx, T vy, T vw, T, vh) 
+        constexpr rect(T vx, T vy, T vw, T vh) 
             : x(vx)
             , y(vy)
             , w(vw)
             , h(vh)
         { }
+
+        constexpr T area()
+        {
+            return w * h;
+        }
     };
 }

@@ -3,6 +3,8 @@
 #include <ien/assert.hpp>
 #include <ien/platform.hpp>
 
+#include <array>
+
 namespace ien::img
 {
     image_unpacked_data::image_unpacked_data(size_t pixel_count)
@@ -39,6 +41,11 @@ namespace ien::img
         _g = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_g, pixel_count));
         _b = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_b, pixel_count));
         _a = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_a, pixel_count));
+    }
+
+    std::array<uint8_t, 4> image_unpacked_data::read_pixel(int index) const
+    {
+        return { _r[index], _g[index], _b[index], _a[index] };
     }
 
     void image_unpacked_data::set_pixel(int index, const uint8_t* rgba)

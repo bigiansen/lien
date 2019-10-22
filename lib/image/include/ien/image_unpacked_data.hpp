@@ -43,6 +43,7 @@ namespace ien::img
 
         void resize(size_t len);
 
+        std::array<uint8_t, 4> read_pixel(int index) const;
         void set_pixel(int index, const uint8_t* rgba);
 
         [[nodiscard]] std::vector<uint8_t> pack_data() const;
