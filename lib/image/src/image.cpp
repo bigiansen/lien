@@ -37,14 +37,7 @@ namespace ien::img
 
     image_unpacked_data* image::data() noexcept { return &_data; }
 
-    const image_unpacked_data* image::cdata() const noexcept { return &_data; }
-
-    void image::save_to_file_png(const std::string& path, int compression_level) const
-    {
-        std::vector<uint8_t> packed_data = _data.pack_data();
-        stbi_write_png_compression_level = compression_level;
-        stbi_write_png(path.c_str(), _width, _height, 4, packed_data.data(), _width * 4);
-    }
+    const image_unpacked_data* image::cdata() const noexcept { return &_data; }    
 
     size_t image::pixel_count() const noexcept
     {
@@ -86,16 +79,23 @@ namespace ien::img
         set_pixel((x * y), rgba);
     }
 
-    void image::save_to_file_jpeg(const std::string& path, int quality) const
+    bool image::save_to_file_png(const std::string& path, int compression_level) const
     {
         std::vector<uint8_t> packed_data = _data.pack_data();
-        stbi_write_jpg(path.c_str(), _width, _height, 4, packed_data.data(), quality);
+        stbi_write_png_compression_level = compression_level;
+        return stbi_write_png(path.c_str(), _width, _height, 4, packed_data.data(), _width * 4);
     }
 
-    void image::save_to_file_tga(const std::string& path) const
+    bool image::save_to_file_jpeg(const std::string& path, int quality) const
     {
         std::vector<uint8_t> packed_data = _data.pack_data();
-        stbi_write_tga(path.c_str(), _width, _height, 4, packed_data.data());
+        return stbi_write_jpg(path.c_str(), _width, _height, 4, packed_data.data(), quality);
+    }
+
+    bool image::save_to_file_tga(const std::string& path) const
+    {
+        std::vector<uint8_t> packed_data = _data.pack_data();
+        return stbi_write_tga(path.c_str(), _width, _height, 4, packed_data.data());
     }
 
     void image::resize_absolute(int w, int h)

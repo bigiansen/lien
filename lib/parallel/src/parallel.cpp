@@ -17,7 +17,7 @@ namespace ien
     void parallel_for(parallel_for_params params, parallel_for_pred_t pred)
     {
         if(params.count == 0) { return; }
-        if(params.max_threads <= 0)
+        if(params.max_threads == 0)
         {
             throw std::invalid_argument("Invalid max threads count!");
         }

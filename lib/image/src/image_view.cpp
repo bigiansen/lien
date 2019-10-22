@@ -31,7 +31,6 @@ namespace ien::img
     image image_view::build_image()
     {
         image result(_view_rect.w, _view_rect.h);
-        int sz = _view_rect.area();
 
         int start_idx = (_view_rect.y * _image_rect.w) + _view_rect.x;
         for(int i = 0; i < _view_rect.h; ++i)

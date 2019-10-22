@@ -4,6 +4,7 @@
 
 #include <stb_image.h>
 #include <stb_image_resize.h>
+#include <stb_image_write.h>
 
 #include <cstring>
 #include <stdexcept>
@@ -59,6 +60,22 @@ namespace ien::img
     int packed_image::width() const noexcept { return _width; }
     
     int packed_image::height() const noexcept  { return _height; }
+
+    bool packed_image::save_to_file_png(const std::string& path, int compression_level) const
+    {
+        stbi_write_png_compression_level = compression_level;
+        return stbi_write_png(path.c_str(), _width, _height, 4, _data, _width * 4);
+    }
+
+    bool packed_image::save_to_file_jpeg(const std::string& path, int quality) const
+    {
+        return stbi_write_jpg(path.c_str(), _width, _height, 4, _data, quality);
+    }
+
+    bool packed_image::save_to_file_tga(const std::string& path) const
+    {
+        return stbi_write_tga(path.c_str(), _width, _height, 4, _data);
+    }
 
     void packed_image::resize_absolute(int w, int h)
     {
