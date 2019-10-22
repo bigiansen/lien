@@ -43,4 +43,10 @@ namespace ien::tt
     using enable_if_is_iterable_of = std::enable_if_t<
         is_iterable<T>::value 
         && is_same_decay<iterable_value_type<T>, TElem>>;
+
+    template<typename T>
+    constexpr bool is_integral_or_float = std::is_integral_v<T> || std::is_floating_point_v<T>;
+
+    template<typename T>
+    using enable_if_is_integral_or_float = std::enable_if_t<is_integral_or_float<T>>;
 }
