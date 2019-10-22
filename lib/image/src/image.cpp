@@ -16,7 +16,7 @@ namespace ien::img
     { }
 
     image::image(const std::string& path)
-		: _width(0), _height(0)
+        : _width(0), _height(0)
     {
         int channels_dummy = 0;
         uint8_t* packed_data = stbi_load(

@@ -18,17 +18,17 @@ namespace ien::img::_internal
     std::vector<uint8_t> rgba_max_sse2(const channel_info_extract_args_rgba& args);
     std::vector<uint8_t> rgba_max_avx2(const channel_info_extract_args_rgba& args);
 
-	std::vector<uint8_t> rgba_min_sse2(const channel_info_extract_args_rgba& args);
-	std::vector<uint8_t> rgba_min_avx2(const channel_info_extract_args_rgba& args);
+    std::vector<uint8_t> rgba_min_sse2(const channel_info_extract_args_rgba& args);
+    std::vector<uint8_t> rgba_min_avx2(const channel_info_extract_args_rgba& args);
 
-	std::vector<uint8_t> rgba_sum_saturated_sse2(const channel_info_extract_args_rgba& args);
-	std::vector<uint8_t> rgba_sum_saturated_avx2(const channel_info_extract_args_rgba& args);
+    std::vector<uint8_t> rgba_sum_saturated_sse2(const channel_info_extract_args_rgba& args);
+    std::vector<uint8_t> rgba_sum_saturated_avx2(const channel_info_extract_args_rgba& args);
 
-	std::vector<float> rgb_saturation_sse2(const channel_info_extract_args_rgb& args);
-	std::vector<float> rgb_saturation_avx2(const channel_info_extract_args_rgb& args);
+    std::vector<float> rgb_saturation_sse2(const channel_info_extract_args_rgb& args);
+    std::vector<float> rgb_saturation_avx2(const channel_info_extract_args_rgb& args);
 
     std::vector<float> rgb_luminance_sse2(const channel_info_extract_args_rgb& args);
-	std::vector<float> rgb_luminance_avx2(const channel_info_extract_args_rgb& args);
+    std::vector<float> rgb_luminance_avx2(const channel_info_extract_args_rgb& args);
 }
 
 #endif

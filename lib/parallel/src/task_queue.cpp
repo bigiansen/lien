@@ -14,11 +14,11 @@ namespace ien
 
     void task_queue::run(bool detached)
     {
-		{ // lock guard
-			std::lock_guard lock(_run_mux);
-			if (_started) { return; }
-			_started = true;
-		}
+        { // lock guard
+            std::lock_guard lock(_run_mux);
+            if (_started) { return; }
+            _started = true;
+        }
 
         _detached = detached;
         for(size_t i = 0; i < _max_concurrent; ++i)

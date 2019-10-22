@@ -17,13 +17,13 @@ namespace ien::img
         uint8_t* _a;
         size_t _size;
 
-		constexpr image_unpacked_data() noexcept 
-			: _r(nullptr)
-			, _g(nullptr)
-			, _b(nullptr)
-			, _a(nullptr)
-			, _size(0)
-		{ }
+        constexpr image_unpacked_data() noexcept 
+            : _r(nullptr)
+            , _g(nullptr)
+            , _b(nullptr)
+            , _a(nullptr)
+            , _size(0)
+        { }
         
     public:
         image_unpacked_data(size_t pixel_count);

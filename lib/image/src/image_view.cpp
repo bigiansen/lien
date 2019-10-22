@@ -36,25 +36,29 @@ namespace ien::img
         for(int i = 0; i < _view_rect.h; ++i)
         {
             int line_idx = (start_idx) * (i * _image_rect.w);
+
+			ptrdiff_t dst_offset = static_cast<ptrdiff_t>(i) * (_view_rect.w);
+			size_t copylen = _view_rect.w;
+
             std::memcpy(
-                result.data()->data_r() + (i * (_view_rect.w)), 
+                result.data()->data_r() + dst_offset,
                 _ptr->cdata_r() + line_idx, 
-                _view_rect.w
+				copylen
             );
             std::memcpy(
-                result.data()->data_g() + (i * (_view_rect.w)), 
+                result.data()->data_g() + dst_offset,
                 _ptr->cdata_g() + line_idx, 
-                _view_rect.w
+				copylen
             );
             std::memcpy(
-                result.data()->data_b() + (i * (_view_rect.w)), 
+                result.data()->data_b() + dst_offset,
                 _ptr->cdata_b() + line_idx, 
-                _view_rect.w
+				copylen
             );
             std::memcpy(
-                result.data()->data_a() + (i * (_view_rect.w)), 
+                result.data()->data_a() + dst_offset,
                 _ptr->cdata_a() + line_idx, 
-                _view_rect.w
+				copylen
             );
         }
 

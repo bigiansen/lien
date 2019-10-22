@@ -39,11 +39,10 @@ namespace ien::img
         {
             int line_idx = ((_image_rect.w * 4) * (_view_rect.y + i)) + (_view_rect.x * 4);
 
-            std::memcpy(
-                result.data() + (i * 4 * _view_rect.w),
-                _ptr + (line_idx),
-                _view_rect.w * 4
-            );
+			ptrdiff_t dst_offset = static_cast<ptrdiff_t>(i) * 4 * _view_rect.w;
+			size_t copylen = static_cast<size_t>(_view_rect.w) * 4;
+
+            std::memcpy(result.data() + dst_offset, _ptr + (line_idx), copylen);
         }
 
         return result;
