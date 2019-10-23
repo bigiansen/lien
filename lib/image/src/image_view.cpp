@@ -1,6 +1,7 @@
 #include <ien/image_view.hpp>
 
 #include <ien/image.hpp>
+#include <cstring>
 
 namespace ien::img
 {

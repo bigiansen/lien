@@ -1,5 +1,7 @@
 #include <ien/packed_image_view.hpp>
 
+#include <cstring>
+
 namespace ien::img
 {
     packed_image_view::packed_image_view(const packed_image* img, const rect<int>& view_rect)
