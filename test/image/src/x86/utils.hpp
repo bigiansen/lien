@@ -6,12 +6,20 @@
 
 inline bool sse2_enabled()
 {
-    return ien::platform::x86::get_feature(ien::platform::x86::feature::SSE2);
+    #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        return ien::platform::x86::get_feature(ien::platform::x86::feature::SSE2);
+    #else
+        return false;
+    #endif
 }
 
 inline bool avx2_enabled()
 {
-    return ien::platform::x86::get_feature(ien::platform::x86::feature::SSE2);
+    #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        return ien::platform::x86::get_feature(ien::platform::x86::feature::AVX2);
+    #else
+        return false;
+    #endif
 }
 
 inline void skip_sse2_msg(const std::string& method_name)
