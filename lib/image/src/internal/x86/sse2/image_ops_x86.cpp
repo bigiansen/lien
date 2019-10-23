@@ -289,7 +289,7 @@ namespace ien::img::_internal
             __m128 vsat2 = _mm_div_ps(_mm_sub_ps(vfmax2, vfmin2), vfmax2);
             __m128 vsat3 = _mm_div_ps(_mm_sub_ps(vfmax3, vfmin3), vfmax3);
 
-            float aux_result[SSE2_STRIDE];
+            alignas(SSE2_STRIDE) float aux_result[SSE2_STRIDE];
 
             _mm_store_ps(aux_result + 0, vsat0);
             _mm_store_ps(aux_result + 4, vsat1);
@@ -377,7 +377,7 @@ namespace ien::img::_internal
             vlum2 = _mm_div_ps(vlum2, vzeroonediv);
             vlum3 = _mm_div_ps(vlum3, vzeroonediv);
 
-            float aux_result[SSE2_STRIDE];
+            alignas(SSE2_STRIDE) float aux_result[SSE2_STRIDE];
 
             _mm_store_ps(aux_result + 0, vlum0);
             _mm_store_ps(aux_result + 4, vlum1);

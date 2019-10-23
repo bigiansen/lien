@@ -18,7 +18,7 @@
         asm volatile ("cpuid"
                 : "=a" (cpuid[0]), "=b" (cpuid[1]), "=c" (cpuid[2]), "=d" (cpuid[3])
                 : "0" (func_id), "2" (subfunc_id));
-    #elif definedLIEN_ARCH_X86)
+    #elif defined(LIEN_ARCH_X86)
         asm volatile ("xchgl %%ebx, %1; cpuid; xchgl %%ebx, %1"
                 : "=a" (cpuid[0]), "=r" (cpuid[1]), "=c" (cpuid[2]), "=d" (cpuid[3])
                 : "0" (func_id), "2" (subfunc_id));

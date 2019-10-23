@@ -48,14 +48,14 @@
 // COMPILER
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(_MSC_VER)
+    #define LIEN_COMPILER_MSVC
+    
+#elif defined(__GNUC__) && !defined(__clang__)
     #define LIEN_COMPILER_GNU
 
 #elif defined(__clang__)
-    #define LIEN_COMPILER_CLANG
-
-#elif defined(_MSC_VER)
-    #define LIEN_COMPILER_MSVC
+    #define LIEN_COMPILER_CLANG   
 
 #elif defined(__INTEL_COMPILER)
     #define LIEN_COMPILER_INTEL
