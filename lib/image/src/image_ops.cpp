@@ -113,7 +113,7 @@ namespace ien::img
         return func(args);
     }
 
-    std::vector<float> rgba_saturation(const image* img)
+    std::vector<float> rgb_saturation(const image* img)
     {
         typedef std::vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
@@ -126,14 +126,14 @@ namespace ien::img
             : &_internal::rgb_saturation_std;
 
         #else
-        static func_ptr_t func = &_internal::rgba_saturation_std;
+        static func_ptr_t func = &_internal::rgb_saturation_std;
         #endif
 
         _internal::channel_info_extract_args_rgb args(img);
         return func(args);
     }
 
-    std::vector<float> rgba_luminance(const image* img)
+    std::vector<float> rgb_luminance(const image* img)
     {
         typedef std::vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
@@ -146,7 +146,7 @@ namespace ien::img
             : &_internal::rgb_luminance_std;
 
         #else
-        static func_ptr_t func = &_internal::rgba_luminance_std;
+        static func_ptr_t func = &_internal::rgb_luminance_std;
         #endif
 
         _internal::channel_info_extract_args_rgb args(img);
