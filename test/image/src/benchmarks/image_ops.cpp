@@ -5,7 +5,7 @@
 #include <ien/platform.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
 
-#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)    
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
 #include <ien/internal/x86/image_ops_x86.hpp>
 #endif
 
@@ -43,6 +43,7 @@ TEST_CASE("Benchmark truncate channel bits")
         });
     };
 
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
     BENCHMARK_ADVANCED("SSE2")(Catch::Benchmark::Chronometer meter)
     {
         TRUNCATE_CHANNEL_BITS_SETUP(args);
@@ -60,6 +61,7 @@ TEST_CASE("Benchmark truncate channel bits")
             _internal::truncate_channel_data_avx2(args);
         });
     };
+#endif
 }
 
 #define EXTRACT_CHANNEL_DATA_RGBA_SETUP(args) \
@@ -82,7 +84,7 @@ TEST_CASE("Benchmark rgba average")
             return _internal::rgba_average_std(args);
         });
     };
-
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
     BENCHMARK_ADVANCED("SSE2")(Catch::Benchmark::Chronometer meter)
     {
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
@@ -100,6 +102,7 @@ TEST_CASE("Benchmark rgba average")
             return _internal::rgba_average_avx2(args);
         });
     };
+#endif
 };
 
 TEST_CASE("Benchmark rgba max")
@@ -112,7 +115,7 @@ TEST_CASE("Benchmark rgba max")
             return _internal::rgba_max_std(args);
         });
     };
-
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
     BENCHMARK_ADVANCED("SSE2")(Catch::Benchmark::Chronometer meter)
     {
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
@@ -130,6 +133,7 @@ TEST_CASE("Benchmark rgba max")
             return _internal::rgba_max_avx2(args);
         });
     };
+#endif
 };
 
 TEST_CASE("Benchmark rgba min")
@@ -143,6 +147,7 @@ TEST_CASE("Benchmark rgba min")
         });
     };
 
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
     BENCHMARK_ADVANCED("SSE2")(Catch::Benchmark::Chronometer meter)
     {
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
@@ -160,6 +165,7 @@ TEST_CASE("Benchmark rgba min")
             return _internal::rgba_min_avx2(args);
         });
     };
+#endif
 };
 
 TEST_CASE("Benchmark rgba sum saturated")
@@ -173,6 +179,7 @@ TEST_CASE("Benchmark rgba sum saturated")
         });
     };
 
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
     BENCHMARK_ADVANCED("SSE2")(Catch::Benchmark::Chronometer meter)
     {
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
@@ -190,6 +197,7 @@ TEST_CASE("Benchmark rgba sum saturated")
             return _internal::rgba_sum_saturated_avx2(args);
         });
     };
+#endif
 };
 
 TEST_CASE("Benchmark rgb saturation")
@@ -203,6 +211,7 @@ TEST_CASE("Benchmark rgb saturation")
         });
     };
 
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
     BENCHMARK_ADVANCED("SSE2")(Catch::Benchmark::Chronometer meter)
     {
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
@@ -220,6 +229,7 @@ TEST_CASE("Benchmark rgb saturation")
             return _internal::rgb_saturation_avx2(args);
         });
     };
+#endif
 };
 
 TEST_CASE("Benchmark rgba luminance")
@@ -233,6 +243,7 @@ TEST_CASE("Benchmark rgba luminance")
         });
     };
 
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
     BENCHMARK_ADVANCED("SSE2")(Catch::Benchmark::Chronometer meter)
     {
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
@@ -250,6 +261,7 @@ TEST_CASE("Benchmark rgba luminance")
             return _internal::rgb_luminance_avx2(args);
         });
     };
+#endif
 };
 
 #endif

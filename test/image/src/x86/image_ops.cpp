@@ -4,7 +4,7 @@
 #include <ien/platform.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
 
-#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)    
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
 #include <ien/internal/x86/image_ops_x86.hpp>
 #endif
 
