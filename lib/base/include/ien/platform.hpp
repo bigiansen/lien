@@ -50,21 +50,19 @@
 
 #if defined(_MSC_VER)
     #define LIEN_COMPILER_MSVC
+    #define LIEN_COMPILER_MSVC_VER _MSC_VER
     
 #elif defined(__GNUC__) && !defined(__clang__)
     #define LIEN_COMPILER_GNU
+    #define LIEN_COMPILER_GNU_VER __GNUC__
 
 #elif defined(__clang__)
-    #define LIEN_COMPILER_CLANG   
+    #define LIEN_COMPILER_CLANG
+    #define LIEN_COMPILER_CLANG_VER __clang_major__
 
 #elif defined(__INTEL_COMPILER)
     #define LIEN_COMPILER_INTEL
-
-#elif defined(__EMSCRIPTEN__)
-    #define LIEN_COMPILER_EMSCRIPTEN
-
-#elif defined(__wasm__)
-    #define LIEN_COMPILER_WASM
+    #define LIEN_COMPILER_INTEL_VER __INTEL_COMPILER
 
 #endif
 
@@ -87,6 +85,37 @@
     #define LIEN_ALIGNED_REALLOC(ptr, sz) std::realloc(ptr, sz)
 #endif
 
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// UNSUPPORTED COMPILER GUARDS
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+#ifndef LIEN_COMPILER_IGNORE_VER
+    #if defined(LIEN_COMPILER_MSVC)
+        #if LIEN_COMPILER_MSVC_VER < 1900
+            #error "Unsupported Microsoft Visual C++ Compiler Version!"
+            #error "A compiler with at least C++17 support is required"
+            #error "If you believe this error to be a false positive, define LIEN_COMPILER_IGNORE_VER in your code"
+        #endif
+    #elif defined(LIEN_COMPILER_GNU)
+        #if LIEN_COMPILER_GNU_VER < 7
+            #error "Unsupported GNU C++ Compiler Version!"
+            #error "A compiler with at least C++17 support is required"
+            #error "If you believe this error to be a false positive, define LIEN_COMPILER_IGNORE_VER in your code"
+        #endif
+    #elif defined(LIEN_COMPILER_CLANG)
+        #if LIEN_COMPILER_CLANG_VER < 5
+            #error "Unsupported Clang C++ Compiler Version!"
+            #error "A compiler with at least C++17 support is required"
+            #error "If you believe this error to be a false positive, define LIEN_COMPILER_IGNORE_VER in your code"
+        #endif
+    #elif defined(LIEN_COMPILER_INTEL)
+        #if LIEN_COMPILER_INTEL_VER < 1900
+            #error "Unsupported Intel C++ Compiler Version!"
+            #error "A compiler with at least C++17 support is required"
+            #error "If you believe this error to be a false positive, define LIEN_COMPILER_IGNORE_VER in your code"
+        #endif
+    #endif
+#endif
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 // PLATFORM FEATURES (x86)
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
