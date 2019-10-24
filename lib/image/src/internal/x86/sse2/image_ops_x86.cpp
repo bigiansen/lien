@@ -32,6 +32,9 @@
 #define STORE_SI128(addr, v) \
     _mm_store_si128(reinterpret_cast<__m128i*>(addr), v);
 
+#define STOREU_SI128(addr, v) \
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(addr), v);
+
 #define LOAD_SI128_CONST(addr) \
     _mm_load_si128(reinterpret_cast<const __m128i*>(addr));
 
@@ -115,7 +118,7 @@ namespace ien::img::_internal
 
             __m128i vagv_rgba = _mm_avg_epu8(vavg_rg, vavg_ba);
 
-            STORE_SI128((result.data() + i), vagv_rgba);
+            STOREU_SI128((result.data() + i), vagv_rgba);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
@@ -132,7 +135,7 @@ namespace ien::img::_internal
 
         if (img_sz < SSE2_STRIDE)
         {
-            return rgba_max_std(args);            
+            return rgba_max_std(args);
         }
 
         std::vector<uint8_t> result;
@@ -152,7 +155,7 @@ namespace ien::img::_internal
             __m128i vmax_ba = _mm_max_epu8(vseg_b, vseg_a);
             __m128i vmax_rgba = _mm_max_epu8(vmax_rg, vmax_ba);
 
-            STORE_SI128((result.data() + i), vmax_rgba);
+            STOREU_SI128((result.data() + i), vmax_rgba);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
@@ -188,7 +191,7 @@ namespace ien::img::_internal
             __m128i vmax_ba = _mm_min_epu8(vseg_b, vseg_a);
             __m128i vmax_rgba = _mm_min_epu8(vmax_rg, vmax_ba);
 
-            STORE_SI128((result.data() + i), vmax_rgba);
+            STOREU_SI128((result.data() + i), vmax_rgba);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
@@ -224,7 +227,7 @@ namespace ien::img::_internal
             __m128i vsum_ba = _mm_adds_epu8(vseg_b, vseg_a);
             __m128i vsum_rgba = _mm_adds_epu8(vsum_rg, vsum_ba);
 
-            STORE_SI128((result.data() + i), vsum_rgba);
+            STOREU_SI128((result.data() + i), vsum_rgba);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)

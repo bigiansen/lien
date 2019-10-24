@@ -32,6 +32,9 @@
 #define STORE_SI256(addr, v) \
     _mm256_store_si256(reinterpret_cast<__m256i*>(addr), v);
 
+    #define STOREU_SI256(addr, v) \
+    _mm256_storeu_si256(reinterpret_cast<__m256i*>(addr), v);
+
 #define LOAD_SI256_CONST(addr) \
     _mm256_load_si256(reinterpret_cast<const __m256i*>(addr));
 
@@ -114,8 +117,7 @@ namespace ien::img::_internal
             __m256i vavg_ba = _mm256_avg_epu8(vseg_b, vseg_a);
 
             __m256i vagv_rgba = _mm256_avg_epu8(vavg_rg, vavg_ba);
-
-            STORE_SI256((result.data() + i), vagv_rgba);
+            STOREU_SI256((result.data() + i), vagv_rgba);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
@@ -152,7 +154,7 @@ namespace ien::img::_internal
             __m256i vmax_ba = _mm256_max_epu8(vseg_b, vseg_a);
             __m256i vmax_rgba = _mm256_max_epu8(vmax_rg, vmax_ba);
 
-            STORE_SI256((result.data() + i), vmax_rgba);
+            STOREU_SI256((result.data() + i), vmax_rgba);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
@@ -188,7 +190,7 @@ namespace ien::img::_internal
             __m256i vmax_ba = _mm256_min_epu8(vseg_b, vseg_a);
             __m256i vmax_rgba = _mm256_min_epu8(vmax_rg, vmax_ba);
 
-            STORE_SI256((result.data() + i), vmax_rgba);
+            STOREU_SI256((result.data() + i), vmax_rgba);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
@@ -224,7 +226,7 @@ namespace ien::img::_internal
             __m256i vsum_ba = _mm256_adds_epu8(vseg_b, vseg_a);
             __m256i vsum_rgba = _mm256_adds_epu8(vsum_rg, vsum_ba);
 
-            STORE_SI256((result.data() + i), vsum_rgba);
+            STOREU_SI256((result.data() + i), vsum_rgba);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
