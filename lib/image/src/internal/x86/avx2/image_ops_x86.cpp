@@ -332,9 +332,8 @@ namespace ien::img::_internal
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
-        __m256i fpcast_mask = _mm256_set1_epi32(0x000000FF);
-        __m256 vhalfmul = _mm256_set1_ps(0.5F);
-        __m256 vzeroonediv = _mm256_set1_ps(255.F);
+        __m256i vfpcast_mask = _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
+        __m256 vlum_mulv = _mm256_set1_ps(0.00392156862F / 2);
 
         size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
         for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
@@ -349,51 +348,86 @@ namespace ien::img::_internal
             __m256i vmin_rg = _mm256_min_epu8(vseg_r, vseg_g);
             __m256i vmin_rgb = _mm256_min_epu8(vseg_b, vmin_rg);
 
-            __m256i vmax_aux0 = _mm256_and_si256(vmax_rgb, fpcast_mask);
-            __m256i vmax_aux1 = _mm256_and_si256(_mm256_srli_epi32(vmax_rgb, 8), fpcast_mask);
-            __m256i vmax_aux2 = _mm256_and_si256(_mm256_srli_epi32(vmax_rgb, 16), fpcast_mask);
-            __m256i vmax_aux3 = _mm256_and_si256(_mm256_srli_epi32(vmax_rgb, 24), fpcast_mask);
+            __m256i vspread_shufmask = _mm256_set_epi8(
+                -1,-1,-1,7,-1,-1,-1,6,
+                -1,-1,-1,5,-1,-1,-1,4,
+                -1,-1,-1,3,-1,-1,-1,2,
+                -1,-1,-1,1,-1,-1,-1,0
+            );
 
-            __m256i vmin_aux0 = _mm256_and_si256(vmin_rgb, fpcast_mask);
-            __m256i vmin_aux1 = _mm256_and_si256(_mm256_srli_epi32(vmin_rgb, 8), fpcast_mask);
-            __m256i vmin_aux2 = _mm256_and_si256(_mm256_srli_epi32(vmin_rgb, 16), fpcast_mask);
-            __m256i vmin_aux3 = _mm256_and_si256(_mm256_srli_epi32(vmin_rgb, 24), fpcast_mask);
+            // Unpack max bytes into 4 float vectors
+            __m256i vmax_0 = _mm256_and_si256(vmax_rgb, vfpcast_mask);
+            __m256i vmax_1 = _mm256_and_si256(_mm256_srli_si256(vmax_rgb, 8), vfpcast_mask);
 
-            __m256 vfmax0 = _mm256_cvtepi32_ps(vmax_aux0);
-            __m256 vfmax1 = _mm256_cvtepi32_ps(vmax_aux1);
-            __m256 vfmax2 = _mm256_cvtepi32_ps(vmax_aux2);
-            __m256 vfmax3 = _mm256_cvtepi32_ps(vmax_aux3);
+            __m256i vmax_rgb_rev = _mm256_permute2x128_si256(vmax_rgb, vmax_rgb, 0x00000001);
 
-            __m256 vfmin0 = _mm256_cvtepi32_ps(vmin_aux0);
-            __m256 vfmin1 = _mm256_cvtepi32_ps(vmin_aux1);
-            __m256 vfmin2 = _mm256_cvtepi32_ps(vmin_aux2);
-            __m256 vfmin3 = _mm256_cvtepi32_ps(vmin_aux3);
+            __m256i vmax_2 = _mm256_and_si256(vmax_rgb_rev, vfpcast_mask);
+            __m256i vmax_3 = _mm256_and_si256(_mm256_srli_si256(vmax_rgb_rev, 8), vfpcast_mask);
 
-            __m256 vlum0 = _mm256_mul_ps(_mm256_add_ps(vfmax0, vfmin0), vhalfmul);
-            __m256 vlum1 = _mm256_mul_ps(_mm256_add_ps(vfmax1, vfmin1), vhalfmul);
-            __m256 vlum2 = _mm256_mul_ps(_mm256_add_ps(vfmax2, vfmin2), vhalfmul);
-            __m256 vlum3 = _mm256_mul_ps(_mm256_add_ps(vfmax3, vfmin3), vhalfmul);
+            __m256i vmax_a0 = _mm256_shuffle_epi8(vmax_0, vspread_shufmask);
+            __m256i vmax_a1 = _mm256_shuffle_epi8(vmax_1, vspread_shufmask);
+            __m256i vmax_a2 = _mm256_shuffle_epi8(vmax_2, vspread_shufmask);
+            __m256i vmax_a3 = _mm256_shuffle_epi8(vmax_3, vspread_shufmask);
 
-            vlum0 = _mm256_div_ps(vlum0, vzeroonediv);
-            vlum1 = _mm256_div_ps(vlum1, vzeroonediv);
-            vlum2 = _mm256_div_ps(vlum2, vzeroonediv);
-            vlum3 = _mm256_div_ps(vlum3, vzeroonediv);
+            __m256i vmax_a4 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmax_0, vmax_0, 0x00000001), vspread_shufmask);
+            __m256i vmax_a5 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmax_1, vmax_1, 0x00000001), vspread_shufmask);
+            __m256i vmax_a6 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmax_2, vmax_2, 0x00000001), vspread_shufmask);
+            __m256i vmax_a7 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmax_3, vmax_3, 0x00000001), vspread_shufmask);
 
-            alignas(AVX2_STRIDE) float aux_result[AVX2_STRIDE];
+            vmax_0 = _mm256_or_si256(vmax_a0, vmax_a4);
+            vmax_1 = _mm256_or_si256(vmax_a1, vmax_a5);
+            vmax_2 = _mm256_or_si256(vmax_a2, vmax_a6);
+            vmax_3 = _mm256_or_si256(vmax_a3, vmax_a7);
 
-            _mm256_store_ps(aux_result + 0, vlum0);
-            _mm256_store_ps(aux_result + 8, vlum1);
-            _mm256_store_ps(aux_result + 16, vlum2);
-            _mm256_store_ps(aux_result + 24, vlum3);
+            __m256 vfmax0 = _mm256_cvtepi32_ps(vmax_0);
+            __m256 vfmax1 = _mm256_cvtepi32_ps(vmax_1);
+            __m256 vfmax2 = _mm256_cvtepi32_ps(vmax_2);
+            __m256 vfmax3 = _mm256_cvtepi32_ps(vmax_3);
 
-            for (size_t k = 0; k < 8u; ++k)
-            {
-                size_t offset = i + (k * 4u);
-                result[offset + 0] = aux_result[0 + k];
-                result[offset + 1] = aux_result[8 + k];
-                result[offset + 2] = aux_result[16 + k];
-                result[offset + 3] = aux_result[24 + k];
-            }
+            // Unpack min bytes into 4 float vectors
+            __m256i vmin_0 = _mm256_and_si256(vmin_rgb, vfpcast_mask);
+            __m256i vmin_1 = _mm256_and_si256(_mm256_srli_si256(vmin_rgb, 8), vfpcast_mask);
+
+            __m256i vmin_rgb_rev = _mm256_permute2x128_si256(vmin_rgb, vmin_rgb, 0x00000001);
+
+            __m256i vmin_2 = _mm256_and_si256(vmin_rgb_rev, vfpcast_mask);
+            __m256i vmin_3 = _mm256_and_si256(_mm256_srli_si256(vmin_rgb_rev, 8), vfpcast_mask);            
+
+            __m256i vmin_a0 = _mm256_shuffle_epi8(vmin_0, vspread_shufmask);
+            __m256i vmin_a1 = _mm256_shuffle_epi8(vmin_1, vspread_shufmask);
+            __m256i vmin_a2 = _mm256_shuffle_epi8(vmin_2, vspread_shufmask);
+            __m256i vmin_a3 = _mm256_shuffle_epi8(vmin_3, vspread_shufmask);
+
+            __m256i vmin_a4 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmin_0, vmin_0, 0x00000001), vspread_shufmask);
+            __m256i vmin_a5 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmin_1, vmin_1, 0x00000001), vspread_shufmask);
+            __m256i vmin_a6 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmin_2, vmin_2, 0x00000001), vspread_shufmask);
+            __m256i vmin_a7 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmin_3, vmin_3, 0x00000001), vspread_shufmask);
+
+            vmin_0 = _mm256_or_si256(vmin_a0, vmin_a4);
+            vmin_1 = _mm256_or_si256(vmin_a1, vmin_a5);
+            vmin_2 = _mm256_or_si256(vmin_a2, vmin_a6);
+            vmin_3 = _mm256_or_si256(vmin_a3, vmin_a7);
+
+            __m256 vfmin0 = _mm256_cvtepi32_ps(vmin_0);
+            __m256 vfmin1 = _mm256_cvtepi32_ps(vmin_1);
+            __m256 vfmin2 = _mm256_cvtepi32_ps(vmin_2);
+            __m256 vfmin3 = _mm256_cvtepi32_ps(vmin_3);
+
+            // Calculate luminance = (max + min) / 2
+
+            __m256 vlum0 = _mm256_mul_ps(_mm256_add_ps(vfmin0, vfmax0), vlum_mulv);
+            __m256 vlum1 = _mm256_mul_ps(_mm256_add_ps(vfmin1, vfmax1), vlum_mulv);
+            __m256 vlum2 = _mm256_mul_ps(_mm256_add_ps(vfmin2, vfmax2), vlum_mulv);
+            __m256 vlum3 = _mm256_mul_ps(_mm256_add_ps(vfmin3, vfmax3), vlum_mulv);
+
+            // Store results
+
+            _mm256_storeu_ps(result.data() + i + 0, vlum0);
+            _mm256_storeu_ps(result.data() + i + 8, vlum1);
+            _mm256_storeu_ps(result.data() + i + 16, vlum2);
+            _mm256_storeu_ps(result.data() + i + 24, vlum3);
+
+            continue;
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)

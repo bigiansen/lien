@@ -6,6 +6,7 @@
     #include <intrin.h>
 #endif
 
+#include <array>
 #include <iostream>
 #include <memory>
 #include <unordered_map>
@@ -28,51 +29,30 @@
     }
 #endif
 
+namespace ien
+{
+    template<typename TEnumType, size_t MAX_VALUE> 
+    class feature_map
+    {
+    private:
+        std::array<bool, MAX_VALUE + 1> _map;
+
+    public:
+        bool& operator[](TEnumType idx)
+        { return _map[static_cast<size_t>(idx)]; }
+
+        bool& operator[](size_t idx) 
+        { return _map[idx]; }
+    };
+}
+
 namespace ien::platform::x86
 {
     void init();
     void print_enabled_features(std::ostream& ostr);
     bool get_feature(feature f);
 
-    typedef std::unordered_map<int, bool> feature_map_t;
     typedef std::unordered_map<int, std::string> feature_names_map_t;
-
-    feature_map_t gen_feature_map()
-    {
-        feature_map_t result;
-        result.emplace((int)feature::ABM,         false);
-        result.emplace((int)feature::ADX,         false);
-        result.emplace((int)feature::AES,         false);
-        result.emplace((int)feature::AVX2,        false);
-        result.emplace((int)feature::AVX512BW,    false);
-        result.emplace((int)feature::AVX512CD,    false);
-        result.emplace((int)feature::AVX512DQ,    false);
-        result.emplace((int)feature::AVX512ER,    false);
-        result.emplace((int)feature::AVX512F,     false);
-        result.emplace((int)feature::AVX512IFMA,  false);
-        result.emplace((int)feature::AVX512PF,    false);
-        result.emplace((int)feature::AVX512VBMI,  false);
-        result.emplace((int)feature::AVX512VL,    false);
-        result.emplace((int)feature::AVX,         false);
-        result.emplace((int)feature::BMI1,        false);
-        result.emplace((int)feature::BMI2,        false);
-        result.emplace((int)feature::FMA3,        false);
-        result.emplace((int)feature::FMA4,        false);
-        result.emplace((int)feature::MMX,         false);
-        result.emplace((int)feature::PREFETCHWT1, false);
-        result.emplace((int)feature::RDRAND,      false);
-        result.emplace((int)feature::SHA,         false);
-        result.emplace((int)feature::SSE2,        false);
-        result.emplace((int)feature::SSE3,        false);
-        result.emplace((int)feature::SSE41,       false);
-        result.emplace((int)feature::SSE42,       false);
-        result.emplace((int)feature::SSE4a,       false);
-        result.emplace((int)feature::SSE,         false);
-        result.emplace((int)feature::SSSE3,       false);
-        result.emplace((int)feature::x64,         false);
-        result.emplace((int)feature::XOP,         false);
-        return result;
-    }
 
     feature_names_map_t gen_names_map()
     {
@@ -111,8 +91,8 @@ namespace ien::platform::x86
         return result; 
     }
 
-    std::unique_ptr<feature_map_t> feature_map;
-    std::unique_ptr<feature_names_map_t> feature_names;
+    feature_map<feature, 30> map;
+    std::unique_ptr<feature_names_map_t> names;
 
     void W32_CPUID(int* info, int x)
     { 
@@ -122,8 +102,7 @@ namespace ien::platform::x86
     bool initialized = false;
     void init()
     {
-        feature_map = std::make_unique<feature_map_t>(gen_feature_map());
-        feature_names = std::make_unique<feature_names_map_t>(gen_names_map());
+        names = std::make_unique<feature_names_map_t>(gen_names_map());
 
         int info[4];
         W32_CPUID(info, 0);
@@ -136,63 +115,46 @@ namespace ien::platform::x86
         if (nIds >= 0x00000001)
         {
             W32_CPUID(info, 0x00000001);
-            (*feature_map)[(int)feature::MMX]    = (info[3] & (1 << 23)) != 0;
-            (*feature_map)[(int)feature::SSE]    = (info[3] & (1 << 25)) != 0;
-            (*feature_map)[(int)feature::SSE2]   = (info[3] & (1 << 26)) != 0;
-            (*feature_map)[(int)feature::SSE3]   = (info[2] & (1 <<  0)) != 0;
-            (*feature_map)[(int)feature::SSSE3]  = (info[2] & (1 <<  9)) != 0;
-            (*feature_map)[(int)feature::SSE41]  = (info[2] & (1 << 19)) != 0;
-            (*feature_map)[(int)feature::SSE42]  = (info[2] & (1 << 20)) != 0;
-            (*feature_map)[(int)feature::AES]    = (info[2] & (1 << 25)) != 0;
-            (*feature_map)[(int)feature::AVX]    = (info[2] & (1 << 28)) != 0;
-            (*feature_map)[(int)feature::FMA3]   = (info[2] & (1 << 12)) != 0;
-            (*feature_map)[(int)feature::RDRAND] = (info[2] & (1 << 30)) != 0;
+            map[feature::MMX]    = (info[3] & (1 << 23)) != 0;
+            map[feature::SSE]    = (info[3] & (1 << 25)) != 0;
+            map[feature::SSE2]   = (info[3] & (1 << 26)) != 0;
+            map[feature::SSE3]   = (info[2] & (1 <<  0)) != 0;
+            map[feature::SSSE3]  = (info[2] & (1 <<  9)) != 0;
+            map[feature::SSE41]  = (info[2] & (1 << 19)) != 0;
+            map[feature::SSE42]  = (info[2] & (1 << 20)) != 0;
+            map[feature::AES]    = (info[2] & (1 << 25)) != 0;
+            map[feature::AVX]    = (info[2] & (1 << 28)) != 0;
+            map[feature::FMA3]   = (info[2] & (1 << 12)) != 0;
+            map[feature::RDRAND] = (info[2] & (1 << 30)) != 0;
         }
         if (nIds >= 0x00000007)
         {
             W32_CPUID(info,0x00000007);
-            (*feature_map)[(int)feature::AVX2]        = (info[1] & (1 <<  5)) != 0;
-            (*feature_map)[(int)feature::BMI1]        = (info[1] & (1 <<  3)) != 0;
-            (*feature_map)[(int)feature::BMI2]        = (info[1] & (1 <<  8)) != 0;
-            (*feature_map)[(int)feature::ADX]         = (info[1] & (1 << 19)) != 0;
-            (*feature_map)[(int)feature::SHA]         = (info[1] & (1 << 29)) != 0;
-            (*feature_map)[(int)feature::PREFETCHWT1] = (info[2] & (1 <<  0)) != 0;
-            (*feature_map)[(int)feature::AVX512F]     = (info[1] & (1 << 16)) != 0;
-            (*feature_map)[(int)feature::AVX512CD]    = (info[1] & (1 << 28)) != 0;
-            (*feature_map)[(int)feature::AVX512PF]    = (info[1] & (1 << 26)) != 0;
-            (*feature_map)[(int)feature::AVX512ER]    = (info[1] & (1 << 27)) != 0;
-            (*feature_map)[(int)feature::AVX512VL]    = (info[1] & (1 << 31)) != 0;
-            (*feature_map)[(int)feature::AVX512BW]    = (info[1] & (1 << 30)) != 0;
-            (*feature_map)[(int)feature::AVX512DQ]    = (info[1] & (1 << 17)) != 0;
-            (*feature_map)[(int)feature::AVX512IFMA]  = (info[1] & (1 << 21)) != 0;
-            (*feature_map)[(int)feature::AVX512VBMI]  = (info[2] & (1 <<  1)) != 0;
+            map[feature::AVX2]        = (info[1] & (1 <<  5)) != 0;
+            map[feature::BMI1]        = (info[1] & (1 <<  3)) != 0;
+            map[feature::BMI2]        = (info[1] & (1 <<  8)) != 0;
+            map[feature::ADX]         = (info[1] & (1 << 19)) != 0;
+            map[feature::SHA]         = (info[1] & (1 << 29)) != 0;
+            map[feature::PREFETCHWT1] = (info[2] & (1 <<  0)) != 0;
+            map[feature::AVX512F]     = (info[1] & (1 << 16)) != 0;
+            map[feature::AVX512CD]    = (info[1] & (1 << 28)) != 0;
+            map[feature::AVX512PF]    = (info[1] & (1 << 26)) != 0;
+            map[feature::AVX512ER]    = (info[1] & (1 << 27)) != 0;
+            map[feature::AVX512VL]    = (info[1] & (1 << 31)) != 0;
+            map[feature::AVX512BW]    = (info[1] & (1 << 30)) != 0;
+            map[feature::AVX512DQ]    = (info[1] & (1 << 17)) != 0;
+            map[feature::AVX512IFMA]  = (info[1] & (1 << 21)) != 0;
+            map[feature::AVX512VBMI]  = (info[2] & (1 <<  1)) != 0;
         }
         if (nExIds >= 0x80000001)
         {
             W32_CPUID(info,0x80000001);
-            (*feature_map)[(int)feature::x64]   = (info[3] & (1 << 29)) != 0;
-            (*feature_map)[(int)feature::ABM]   = (info[2] & (1 <<  5)) != 0;
-            (*feature_map)[(int)feature::SSE4a] = (info[2] & (1 <<  6)) != 0;
-            (*feature_map)[(int)feature::FMA4]  = (info[2] & (1 << 16)) != 0;
-            (*feature_map)[(int)feature::XOP]   = (info[2] & (1 << 11)) != 0;
+            map[feature::x64]   = (info[3] & (1 << 29)) != 0;
+            map[feature::ABM]   = (info[2] & (1 <<  5)) != 0;
+            map[feature::SSE4a] = (info[2] & (1 <<  6)) != 0;
+            map[feature::FMA4]  = (info[2] & (1 << 16)) != 0;
+            map[feature::XOP]   = (info[2] & (1 << 11)) != 0;
         }
-    }
-    
-    void print_enabled_features(std::ostream& ostr)
-    {
-        if(!initialized)
-        {
-            init();
-            initialized = true;
-        }
-
-        ostr << "-- Enabled CPU features (x86) --" << std::endl;
-        for(auto& [ftype, enabled] : *feature_map)
-        {            
-            ostr << " >> [" << (*feature_names).at(ftype).c_str() << "] "
-                 << (enabled ? "YES" : "NO") << std::endl;
-        }
-        ostr << std::endl;
     }
 
     bool get_feature(feature f)
@@ -202,7 +164,7 @@ namespace ien::platform::x86
             init();
             initialized = true;
         }
-        return (*feature_map)[(int)f];
+        return map[f];
     }
 
     void force_feature(feature f, bool enabled)
@@ -212,7 +174,7 @@ namespace ien::platform::x86
             init();
             initialized = true;
         }
-        (*feature_map)[(int)f] = enabled;
+        map[f] = enabled;
     }
 }
 

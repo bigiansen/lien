@@ -438,10 +438,10 @@ TEST_CASE("[x86] Luminance")
 
         for (size_t i = 0; i < px_count; ++i)
         {
-            img.data()->data_r()[i] = static_cast<uint8_t>(1);
-            img.data()->data_g()[i] = static_cast<uint8_t>(2);
-            img.data()->data_b()[i] = static_cast<uint8_t>(3);
-            img.data()->data_a()[i] = static_cast<uint8_t>(4);
+            img.data()->data_r()[i] = static_cast<uint8_t>(i % 32);
+            img.data()->data_g()[i] = static_cast<uint8_t>(i % 32);
+            img.data()->data_b()[i] = static_cast<uint8_t>(i % 32);
+            img.data()->data_a()[i] = static_cast<uint8_t>(i % 32);
         }
 
         _internal::channel_info_extract_args_rgb args(&img);
@@ -450,7 +450,8 @@ TEST_CASE("[x86] Luminance")
         REQUIRE(result.size() == img.pixel_count());
         for(size_t i = 0; i < result.size(); ++i)
         {
-            REQUIRE(result[i] == Approx(0.00784313F).margin(0.00001F));
+            float v = std::fmod(i, 32) / 255.0F;
+            REQUIRE(result[i] == Approx(v).margin(0.001F));
         }
     };
 };
