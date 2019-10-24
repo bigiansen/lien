@@ -2,7 +2,7 @@
 
 #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
 
-#if __has_include(<intrin.h>)
+#if defined(LIEN_COMPILER_MSVC)
     #include <intrin.h>
 #endif
 
