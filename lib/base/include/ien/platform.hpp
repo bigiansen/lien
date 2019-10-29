@@ -77,10 +77,12 @@
 
 #if defined(LIEN_COMPILER_MSVC)
     #define LIEN_ALIGNED_ALLOC(sz) _aligned_malloc(sz, LIEN_ALIGNED_ALLOC_ALIGNMENT)
+    #define LIEN_ALIGNED_ALLOCV(sz, alig) _aligned_malloc(sz, alig)
     #define LIEN_ALIGNED_FREE(ptr) _aligned_free(ptr)
     #define LIEN_ALIGNED_REALLOC(ptr, sz) _aligned_realloc(ptr, sz, LIEN_ALIGNED_ALLOC_ALIGNMENT)
 #else
     #define LIEN_ALIGNED_ALLOC(sz) std::aligned_alloc(LIEN_ALIGNED_ALLOC_ALIGNMENT, sz)
+    #define LIEN_ALIGNED_ALLOCV(sz, alig) std::aligned_alloc(alig, sz)
     #define LIEN_ALIGNED_FREE(ptr) std::free(ptr)
     #define LIEN_ALIGNED_REALLOC(ptr, sz) std::realloc(ptr, sz)
 #endif

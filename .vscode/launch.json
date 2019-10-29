@@ -25,6 +25,17 @@
             "cwd": "${workspaceFolder}/build_debug_win64/output/bin/lien_tests/",
             "environment": [],
             "externalConsole": false
+        },
+        {
+            "name": "Debug Test-Base",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build_debug_win64/output/bin/lien_tests/lien_test_base.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build_debug_win64/output/bin/lien_tests/",
+            "environment": [],
+            "externalConsole": false
         }
     ]
 }
