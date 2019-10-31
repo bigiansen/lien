@@ -7,11 +7,8 @@
 namespace ien
 {
     template<typename T, bool Const>
-    class fixed_vector_iterator_base
-    {
-        friend class fixed_vector<T>;
-        using enable_if_const = std::enable_if_t<Const>;
-
+    class fixed_vector_iterator
+    {     
     private:
         T* _data = nullptr;
 
@@ -22,6 +19,7 @@ namespace ien
         using reference = std::conditional_t<Const, const T&, T&>;
         using iterator_category = std::random_access_iterator_tag;
         using offset_t = long long;
+        using iterator_type = fixed_vector_iterator<T, Const>;
 
         constexpr fixed_vector_iterator() noexcept { }
 
@@ -32,60 +30,61 @@ namespace ien
         // LegacyIterator
         reference operator*() { return *_data; }
         
-        template<typename = enable_if_const>
-        fixed_vector_iterator<T, Const>& operator++() noexcept 
+        iterator_type& operator++() noexcept
         { ++_data; return *this; }
 
         // LegacyForwardIterator
-        fixed_vector_iterator<T, Const> operator++(int) const noexcept 
-        { return fixed_vector_iterator<T>(_data + 1); }
+        iterator_type operator++(int) const noexcept
+        { return iterator_type(_data + 1); }
 
         // LegacyBidirectionalIterator
-        template<typename = enable_if_const>
-        fixed_vector_iterator<T, Const>& operator--() noexcept { --_data; return *this; }
+        iterator_type& operator--() noexcept { --_data; return *this; }
 
-        fixed_vector_iterator<T, Const> operator--(int) const noexcept 
-        { return fixed_vector_iterator<T>(_data - 1); }
+        iterator_type operator--(int) const noexcept
+        { return iterator_type(_data - 1); }
 
         // LegacyRandomAccessIterator
-        template<typename = enable_if_const>
-        fixed_vector_iterator<T, Const>& operator+=(offset_t offset) noexcept 
+        iterator_type& operator+=(offset_t offset) noexcept
         { _data += offset; return *this; }
 
-        fixed_vector_iterator<T, Const> operator+(offset_t offset) const noexcept 
-        { return fixed_vector_iterator<T>(_data + offset); }
+        iterator_type operator+(offset_t offset) const noexcept
+        { return iterator_type(_data + offset); }
 
-        friend operator+(offset_t, const fixed_vector_iterator<T, Const>&);
-
-        template<typename = enable_if_const>
-        fixed_vector_iterator<T, Const>& operator-=(offset_t offset) noexcept 
+        iterator_type& operator-=(offset_t offset) noexcept
         { _data -= offset; return *this; }
 
-        fixed_vector_iterator<T, Const> operator-(offset_t offset) const noexcept 
-        { return fixed_vector_iterator<T>(_data - offset); }
-
-        friend operator-(offset_t, const fixed_vector_iterator<T, Const>&);
+        iterator_type operator-(offset_t offset) const noexcept
+        { return iterator_type(_data - offset); }
 
         reference operator[](std::size_t index) noexcept { return _data[index]; }
 
-        bool operator>(const fixed_vector_iterator<T, Const>& other) { return _data > other._data; }
-        bool operator<(const fixed_vector_iterator<T, Const>& other) { return _data < other._data; }
-        bool operator>=(const fixed_vector_iterator<T, Const>& other) { return _data >= other._data; }
-        bool operator<=(const fixed_vector_iterator<T, Const>& other) { return _data <= other._data; }
+        bool operator>(const iterator_type& other) const noexcept { return _data > other._data; }
+        bool operator<(const iterator_type& other) const noexcept { return _data < other._data; }
+        bool operator>=(const iterator_type& other) const noexcept { return _data >= other._data; }
+        bool operator<=(const iterator_type& other) const noexcept { return _data <= other._data; }
+
+        bool operator==(const iterator_type& other) const noexcept { return _data == other._data; }
+        bool operator!=(const iterator_type& other) const noexcept { return _data != other._data; }
+
+        template<typename X, bool C>
+        friend fixed_vector_iterator<X, C> operator+(const fixed_vector_iterator<X, C>& it, offset_t offset) noexcept;
+
+        template<typename X, bool C>
+        friend fixed_vector_iterator<X, C> operator-(const fixed_vector_iterator<X, C>& it, offset_t offset) noexcept;
     };
 
     template<typename T, bool Const>
     fixed_vector_iterator<T, Const> operator+(
-        fixed_vector_iterator<T, Const>::offset_t offset, 
-        const fixed_vector_iterator<T, Const>& it) noexcept
+        const fixed_vector_iterator<T, Const>& it,
+        long long offset) noexcept
     {
         return fixed_vector_iterator<T, Const>(it._data + offset);
     }
 
     template<typename T, bool Const>
     fixed_vector_iterator<T, Const> operator-(
-        fixed_vector_iterator<T, Const>::offset_t offset, 
-        const fixed_vector_iterator<T, Const>& it) noexcept
+        const fixed_vector_iterator<T, Const>& it,
+        long long offset) noexcept
     {
         return fixed_vector_iterator<T, Const>(it._data - offset);
     }
@@ -99,30 +98,32 @@ namespace ien
         const std::size_t _alignment;
 
     public:
+        using iterator = fixed_vector_iterator<T, false>;
+        using const_iterator = fixed_vector_iterator<T, true>;
+
         fixed_vector(std::size_t len, std::size_t alignment = alignof(T))
             : _len(len)
             , _alignment(alignment)
         { 
-            if (alignment == alignof(T))
-            {
-                _data = new T[len];
-            }
-            else
-            {
-                _data = LIEN_ALIGNED_ALLOCV(len, alignment);
-            }
+            _data = reinterpret_cast<T*>(
+                LIEN_ALIGNED_ALLOCV(len * sizeof(T), alignment)
+            );
+        }
+
+        fixed_vector(fixed_vector&& mv_src) noexcept
+            : _data(mv_src._data)
+            , _len(mv_src._len)
+            , _alignment(mv_src._alignment)
+        { 
+            mv_src._data = nullptr;
         }
 
         virtual ~fixed_vector()
         {
-            if constexpr(_alignment == alignof(T))
-            {
-                delete[] _data;
-            }
-            else
-            {
-                LIEN_ALIGNED_FREE(_data);
-            }
+            if (_data == nullptr)
+                return;
+
+            LIEN_ALIGNED_FREE(_data);
         }
 
         std::size_t size() const noexcept { return _len; }
@@ -136,24 +137,24 @@ namespace ien
             return _data[index];
         }
 
-        fixed_vector_iterator<T> begin()
+        fixed_vector::iterator begin()
         {
-            return fixed_vector_iterator<T>(_data);
+            return fixed_vector_iterator<T, false>(_data);
         }
 
-        fixed_vector_iterator<T> end()
+        fixed_vector::iterator end()
         {
-            return fixed_vector_iterator<T>(_data + _len);
+            return fixed_vector_iterator<T, false>(_data + _len - 1);
         }
 
-        fixed_vector_iterator<T> cbegin()
+        fixed_vector::const_iterator cbegin() const
         {
-            return fixed_vector_iterator<T>(_data);
+            return fixed_vector_iterator<T, true>(_data);
         }
 
-        fixed_vector_iterator<T> cend()
+        fixed_vector::const_iterator cend() const
         {
-            return fixed_vector_iterator<T>(_data + _len);
+            return fixed_vector_iterator<T, true>(_data + _len - 1);
         }
     };
 }

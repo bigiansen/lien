@@ -91,7 +91,7 @@ namespace ien::img::_internal
         }
     }
 
-    std::vector<uint8_t> rgba_average_avx2(const channel_info_extract_args_rgba& args)
+    fixed_vector<uint8_t> rgba_average_avx2(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;
 
@@ -100,8 +100,7 @@ namespace ien::img::_internal
             return rgba_average_std(args);
         }
 
-        std::vector<uint8_t> result;
-        result.resize(args.len);
+        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
@@ -128,7 +127,7 @@ namespace ien::img::_internal
         return result;
     }
 
-    std::vector<uint8_t> rgba_max_avx2(const channel_info_extract_args_rgba& args)
+    fixed_vector<uint8_t> rgba_max_avx2(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;
 
@@ -137,8 +136,7 @@ namespace ien::img::_internal
             return rgba_max_std(args);
         }
 
-        std::vector<uint8_t> result;
-        result.resize(args.len);
+        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
@@ -164,7 +162,7 @@ namespace ien::img::_internal
         return result;
     }
 
-    std::vector<uint8_t> rgba_min_avx2(const channel_info_extract_args_rgba& args)
+    fixed_vector<uint8_t> rgba_min_avx2(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;
 
@@ -173,8 +171,7 @@ namespace ien::img::_internal
             return rgba_min_std(args);
         }
 
-        std::vector<uint8_t> result;
-        result.resize(args.len);
+        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
@@ -200,7 +197,7 @@ namespace ien::img::_internal
         return result;
     }
 
-    std::vector<uint8_t> rgba_sum_saturated_avx2(const channel_info_extract_args_rgba& args)
+    fixed_vector<uint8_t> rgba_sum_saturated_avx2(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;
 
@@ -209,8 +206,7 @@ namespace ien::img::_internal
             return rgba_sum_saturated_std(args);
         }
 
-        std::vector<uint8_t> result;
-        result.resize(args.len);
+        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
@@ -238,7 +234,7 @@ namespace ien::img::_internal
         return result;
     }
 
-    std::vector<float> rgb_saturation_avx2(const channel_info_extract_args_rgb& args)
+    fixed_vector<float> rgb_saturation_avx2(const channel_info_extract_args_rgb& args)
     {
         const size_t img_sz = args.len;
 
@@ -247,8 +243,7 @@ namespace ien::img::_internal
             return rgb_saturation_std(args);
         }
 
-        std::vector<float> result;
-        result.resize(args.len);
+        fixed_vector<float> result(args.len, AVX2_STRIDE);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
@@ -318,7 +313,7 @@ namespace ien::img::_internal
         return result;
     }
 
-    std::vector<float> rgb_luminance_avx2(const channel_info_extract_args_rgb& args)
+    fixed_vector<float> rgb_luminance_avx2(const channel_info_extract_args_rgb& args)
     {
         const size_t img_sz = args.len;
 
@@ -327,8 +322,7 @@ namespace ien::img::_internal
             return rgb_luminance_std(args);
         }
 
-        std::vector<float> result;
-        result.resize(args.len);
+        fixed_vector<float> result(args.len, AVX2_STRIDE);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
@@ -422,10 +416,10 @@ namespace ien::img::_internal
 
             // Store results
 
-            _mm256_storeu_ps(result.data() + i + 0, vlum0);
-            _mm256_storeu_ps(result.data() + i + 8, vlum1);
-            _mm256_storeu_ps(result.data() + i + 16, vlum2);
-            _mm256_storeu_ps(result.data() + i + 24, vlum3);
+            _mm256_store_ps(result.data() + i + 0, vlum0);
+            _mm256_store_ps(result.data() + i + 8, vlum1);
+            _mm256_store_ps(result.data() + i + 16, vlum2);
+            _mm256_store_ps(result.data() + i + 24, vlum3);
 
             continue;
         }

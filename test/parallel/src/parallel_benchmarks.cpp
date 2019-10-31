@@ -1,3 +1,5 @@
+#ifdef NDEBUG
+
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
 #include <ien/parallel.hpp>
@@ -6,8 +8,6 @@
 #include <limits>
 #include <cmath>
 #include <vector>
-
-static const size_t VEC_SIZE = 10000;
 
 double expensive_op(const double val)
 {
@@ -23,6 +23,8 @@ double expensive_op(const double val)
     }
     return res;
 }
+
+static const size_t VEC_SIZE = 10000;
 
 TEST_CASE("parallel_for benchmarks")
 {
@@ -74,3 +76,5 @@ TEST_CASE("parallel_for benchmarks")
         return vec;
     };
 }
+
+#endif

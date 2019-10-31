@@ -1,5 +1,6 @@
 SET(LIEN_TEST_BASE_SOURCES
 	src/aligned_allocator.cpp
+	src/fixed_vector.cpp
     src/main.cpp
 )
 

@@ -167,7 +167,7 @@ TEST_CASE("[STD] Saturation")
         }
  
         _internal::channel_info_extract_args_rgb args(&img);
-        std::vector<float> result = _internal::rgb_saturation_std(args);
+        ien::fixed_vector<float> result = _internal::rgb_saturation_std(args);
 
         REQUIRE(result.size() == img.pixel_count());
         for(size_t i = 0; i < result.size(); ++i)
@@ -193,7 +193,7 @@ TEST_CASE("[STD] Luminance")
         }
 
         _internal::channel_info_extract_args_rgb args(&img);
-        std::vector<float> result = _internal::rgb_luminance_std(args);
+        ien::fixed_vector<float> result = _internal::rgb_luminance_std(args);
 
         REQUIRE(result.size() == img.pixel_count());
         for(size_t i = 0; i < result.size(); ++i)

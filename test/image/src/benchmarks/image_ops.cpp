@@ -1,3 +1,5 @@
+#ifdef NDEBUG
+
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
 
@@ -10,8 +12,6 @@
 #endif
 
 using namespace ien::img;
-
-const size_t IMG_DIM = 256;
 
 void fill_image_random(image* img)
 {
@@ -30,7 +30,9 @@ void fill_image_random(image* img)
     fill_image_random(&img);\
     _internal::truncate_channel_args args(&img, 1, 2, 3, 4)
 
-#ifdef NDEBUG
+
+
+const size_t IMG_DIM = 256;
 
 TEST_CASE("Benchmark truncate channel bits")
 {

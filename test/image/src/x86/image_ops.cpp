@@ -320,8 +320,8 @@ TEST_CASE("[x86] Saturation")
         }
 
         _internal::channel_info_extract_args_rgb args(&img);
-        std::vector<float> result0 = _internal::rgb_saturation_std(args);
-        std::vector<float> result1 = _internal::rgb_saturation_sse2(args);
+        ien::fixed_vector<float> result0 = _internal::rgb_saturation_std(args);
+        ien::fixed_vector<float> result1 = _internal::rgb_saturation_sse2(args);
 
         REQUIRE(result0.size() == img.pixel_count());
         REQUIRE(result1.size() == img.pixel_count());
@@ -346,8 +346,8 @@ TEST_CASE("[x86] Saturation")
         }
 
         _internal::channel_info_extract_args_rgb args(&img);
-        std::vector<float> result0 = _internal::rgb_saturation_std(args);
-        std::vector<float> result1 = _internal::rgb_saturation_avx2(args);
+        ien::fixed_vector<float> result0 = _internal::rgb_saturation_std(args);
+        ien::fixed_vector<float> result1 = _internal::rgb_saturation_avx2(args);
 
         REQUIRE(result0.size() == img.pixel_count());
         REQUIRE(result1.size() == img.pixel_count());
@@ -372,10 +372,10 @@ TEST_CASE("[x86] Saturation")
         }
 
         _internal::channel_info_extract_args_rgb args(&img);
-        std::vector<float> result = _internal::rgb_saturation_sse2(args);
+        ien::fixed_vector<float> result = _internal::rgb_saturation_sse2(args);
 
         REQUIRE(result.size() == img.pixel_count());
-        for(float& f : result)
+        for(const float& f : result)
         {
             REQUIRE(f == Approx(0.6666666F));
         }
@@ -396,7 +396,7 @@ TEST_CASE("[x86] Saturation")
         }
 
         _internal::channel_info_extract_args_rgb args(&img);
-        std::vector<float> result = _internal::rgb_saturation_avx2(args);
+        ien::fixed_vector<float> result = _internal::rgb_saturation_avx2(args);
 
         REQUIRE(result.size() == img.pixel_count());
         for(float& f : result)
@@ -422,7 +422,7 @@ TEST_CASE("[x86] Luminance")
         }
 
         _internal::channel_info_extract_args_rgb args(&img);
-        std::vector<float> result = _internal::rgb_luminance_sse2(args);
+        ien::fixed_vector<float> result = _internal::rgb_luminance_sse2(args);
 
         REQUIRE(result.size() == img.pixel_count());
         for(size_t i = 0; i < result.size(); ++i)
@@ -445,12 +445,12 @@ TEST_CASE("[x86] Luminance")
         }
 
         _internal::channel_info_extract_args_rgb args(&img);
-        std::vector<float> result = _internal::rgb_luminance_avx2(args);
+        ien::fixed_vector<float> result = _internal::rgb_luminance_avx2(args);
 
         REQUIRE(result.size() == img.pixel_count());
         for(size_t i = 0; i < result.size(); ++i)
         {
-            float v = std::fmod(i, 32) / 255.0F;
+            float v = static_cast<float>(std::fmod(i, 32)) / 255.0F;
             REQUIRE(result[i] == Approx(v).margin(0.001F));
         }
     };

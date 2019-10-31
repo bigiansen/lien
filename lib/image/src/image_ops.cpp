@@ -1,5 +1,6 @@
 #include <ien/image_ops.hpp>
 
+#include <ien/fixed_vector.hpp>
 #include <ien/platform.hpp>
 #include <ien/internal/image_ops_args.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
@@ -31,9 +32,9 @@ namespace ien::img
         func(args);
     }
 
-    std::vector<uint8_t> rgba_average(const image* img)
+    fixed_vector<uint8_t> rgba_average(const image* img)
     {
-        typedef std::vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
+        typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
         #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
         static func_ptr_t func = 
@@ -53,9 +54,9 @@ namespace ien::img
         return func(args);
     }    
 
-    std::vector<uint8_t> rgba_max(const image* img)
+    fixed_vector<uint8_t> rgba_max(const image* img)
     {
-        typedef std::vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
+        typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
         #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
         static func_ptr_t func = 
@@ -73,9 +74,9 @@ namespace ien::img
         return func(args);
     }
 
-    std::vector<uint8_t> rgba_min(const image* img)
+    fixed_vector<uint8_t> rgba_min(const image* img)
     {
-        typedef std::vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
+        typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
         #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
         static func_ptr_t func =
@@ -93,9 +94,9 @@ namespace ien::img
         return func(args);
     }
 
-    std::vector<uint8_t> rgba_sum_saturated(const image* img)
+    fixed_vector<uint8_t> rgba_sum_saturated(const image* img)
     {
-        typedef std::vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
+        typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
         #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
         static func_ptr_t func =
@@ -113,9 +114,9 @@ namespace ien::img
         return func(args);
     }
 
-    std::vector<float> rgb_saturation(const image* img)
+    fixed_vector<float> rgb_saturation(const image* img)
     {
-        typedef std::vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
+        typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
         #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
         static func_ptr_t func = 
@@ -133,9 +134,9 @@ namespace ien::img
         return func(args);
     }
 
-    std::vector<float> rgb_luminance(const image* img)
+    fixed_vector<float> rgb_luminance(const image* img)
     {
-        typedef std::vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
+        typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
         #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
         static func_ptr_t func = 
