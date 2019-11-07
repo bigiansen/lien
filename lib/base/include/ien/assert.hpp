@@ -20,3 +20,5 @@ namespace ien
     extern void debug_assert(bool cond, const std::string& msg);
     extern void runtime_assert(bool cond, const std::string& msg);
 }
+
+#define LIEN_NOT_IMPLEMENTED() runtime_assert(false, "Method not implemented!")
