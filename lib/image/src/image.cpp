@@ -10,9 +10,9 @@
 namespace ien::img
 {
     image::image(int width, int height)
-        : _width(width)
+        : _data(static_cast<size_t>(width) * height)
+        , _width(width)
         , _height(height)
-        , _data(static_cast<size_t>(width) * height)
     { }
 
     image::image(const std::string& path)
