@@ -12,4 +12,6 @@ namespace ien::img
     fixed_vector<uint8_t> rgba_sum_saturated(const image* img);
     fixed_vector<float> rgb_saturation(const image* img);
     fixed_vector<float> rgb_luminance(const image* img);
+
+	image_unpacked_data unpack_image_data(const uint8_t* data, size_t len);
 }

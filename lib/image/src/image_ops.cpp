@@ -180,4 +180,23 @@ namespace ien::img
         _internal::channel_info_extract_args_rgb args(img);
         return func(args);
     }
+
+	image_unpacked_data unpack_image_data(const uint8_t* data, size_t len)
+	{
+		typedef image_unpacked_data(*func_ptr_t)(const uint8_t*, size_t len);
+
+		#if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+		static func_ptr_t func = platform::x86::get_feature(platform::x86::feature::SSSE3)
+				? &_internal::unpack_image_data_ssse3
+				: &_internal::unpack_image_data_std;
+		#elif defined(LIEN_ARCH_ARM64)
+			LIEN_NOT_IMPLEMENTED();
+		#elif defined(LIEN_ARCH_ARM)
+			LIEN_NOT_IMPLEMENTED();
+		#else
+			static func_ptr_t func = &_internal::rgb_luminance_std;
+		#endif
+
+		return func(data, len);
+	}
 }

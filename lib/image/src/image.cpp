@@ -2,6 +2,8 @@
 
 #include <ien/assert.hpp>
 #include <ien/platform.hpp>
+#include <ien/image_ops.hpp>
+
 #include <stb_image.h>
 #include <stb_image_resize.h>
 #include <stb_image_write.h>

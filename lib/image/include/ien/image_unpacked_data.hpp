@@ -49,6 +49,4 @@ namespace ien::img
 
         [[nodiscard]] std::vector<uint8_t> pack_data() const;
     };
-
-    extern image_unpacked_data unpack_image_data(const uint8_t* data, size_t len);
 }

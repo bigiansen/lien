@@ -29,6 +29,8 @@ namespace ien::img::_internal
 
     fixed_vector<float> rgb_luminance_sse2(const channel_info_extract_args_rgb& args);
     fixed_vector<float> rgb_luminance_avx2(const channel_info_extract_args_rgb& args);
+
+	image_unpacked_data unpack_image_data_ssse3(const uint8_t* data, size_t len);
 }
 
 #endif

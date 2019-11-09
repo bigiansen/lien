@@ -160,4 +160,23 @@ namespace ien::img::_internal
 
         return result;
     }
+
+	image_unpacked_data unpack_image_data_std(const uint8_t* data, size_t len)
+	{		
+		image_unpacked_data result(len / 4);
+
+		uint8_t* r = result.data_r();
+		uint8_t* g = result.data_g();
+		uint8_t* b = result.data_b();
+		uint8_t* a = result.data_a();
+
+		for (size_t i = 0; i < len; i += 4)
+		{
+			r[i / 4] = data[i + 0];
+			g[i / 4] = data[i + 1];
+			b[i / 4] = data[i + 2];
+			a[i / 4] = data[i + 3];
+		}
+		return result;
+	}
 }

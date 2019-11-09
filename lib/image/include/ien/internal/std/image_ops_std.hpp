@@ -16,4 +16,6 @@ namespace ien::img::_internal
     
     fixed_vector<float> rgb_saturation_std(const channel_info_extract_args_rgb& args);
     fixed_vector<float> rgb_luminance_std(const channel_info_extract_args_rgb& args);
+
+	image_unpacked_data unpack_image_data_std(const uint8_t* data, size_t len);
 }
