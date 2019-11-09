@@ -15,7 +15,7 @@
 namespace ien::img
 {
     template<typename TFuncPtr>
-    TFuncPtr ARCH_X86_OVERLOAD_SELECT(TFuncPtr default, TFuncPtr sse2, TFuncPtr avx2)
+    TFuncPtr ARCH_X86_OVERLOAD_SELECT(TFuncPtr def, TFuncPtr sse2, TFuncPtr avx2)
     {
         #if defined(LIEN_ARCH_X86_64) // on x86-64 SSE2 is guaranteed
             return platform::x86::get_feature(platform::x86::feature::AVX2) ? avx2 : sse2;

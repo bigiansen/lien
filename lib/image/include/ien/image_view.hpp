@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ien/image.hpp>
 #include <ien/image_unpacked_data.hpp>
 #include <ien/rect.hpp>
 #include <array>
