@@ -67,6 +67,15 @@
 #endif
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// ARM SPECIFIC
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+#if defined(LIEN_ARCH_ARM) || defined(LIEN_ARCH_ARM64)
+    #if defined(__ARM_NEON) || defined(__ARM_NEON__)
+        #define LIEN_ARM_NEON
+    #endif
+#endif
+
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 // ALIGNED ALLOCATION
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
@@ -118,6 +127,7 @@
         #endif
     #endif
 #endif
+
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 // PLATFORM FEATURES (x86)
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+

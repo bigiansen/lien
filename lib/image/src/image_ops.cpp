@@ -14,6 +14,8 @@
 
 namespace ien::img
 {
+
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
     template<typename TFuncPtr>
     TFuncPtr ARCH_X86_OVERLOAD_SELECT(TFuncPtr def, TFuncPtr sse2, TFuncPtr avx2)
     {
@@ -26,6 +28,7 @@ namespace ien::img
             #error "Unable to select x86 overload on non-x86 platform!"
         #endif
     }
+#endif
 
     void truncate_channel_data(image_unpacked_data* img, int bits_r, int bits_g, int bits_b, int bits_a)
     {

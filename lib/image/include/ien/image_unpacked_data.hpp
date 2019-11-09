@@ -17,6 +17,7 @@ namespace ien::img
         uint8_t* _b;
         uint8_t* _a;
         size_t _size;
+        bool _moved = false;
 
         constexpr image_unpacked_data() noexcept 
             : _r(nullptr)
@@ -29,6 +30,10 @@ namespace ien::img
     public:
         image_unpacked_data(size_t pixel_count);
         ~image_unpacked_data();
+
+        image_unpacked_data(image_unpacked_data&& mv_src);
+
+        void operator=(image_unpacked_data&& mv_src);
 
         uint8_t* data_r() noexcept;
         uint8_t* data_g() noexcept;

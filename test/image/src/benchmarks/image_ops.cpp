@@ -30,9 +30,7 @@ void fill_image_random(image* img)
     fill_image_random(&img);\
     _internal::truncate_channel_args args(&img, 1, 2, 3, 4)
 
-
-
-const size_t IMG_DIM = 256;
+const size_t IMG_DIM = 200;
 
 TEST_CASE("Benchmark truncate channel bits")
 {
@@ -61,6 +59,16 @@ TEST_CASE("Benchmark truncate channel bits")
         meter.measure([&]
         {
             _internal::truncate_channel_data_avx2(args);
+        });
+    };
+
+#elif defined(LIEN_ARM_NEON)
+    BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)
+    {
+        TRUNCATE_CHANNEL_BITS_SETUP(args);
+        meter.measure([&]
+        {
+            _internal::truncate_channel_data_neon(args);
         });
     };
 #endif
@@ -104,6 +112,16 @@ TEST_CASE("Benchmark rgba average")
             return _internal::rgba_average_avx2(args);
         });
     };
+
+#elif defined(LIEN_ARM_NEON)
+    BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)
+    {
+        EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
+        meter.measure([&]
+        {
+            return _internal::rgba_average_neon(args);
+        });
+    };
 #endif
 };
 
@@ -133,6 +151,16 @@ TEST_CASE("Benchmark rgba max")
         meter.measure([&]
         {
             return _internal::rgba_max_avx2(args);
+        });
+    };
+
+#elif defined(LIEN_ARM_NEON)
+    BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)
+    {
+        EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
+        meter.measure([&]
+        {
+            return _internal::rgba_max_neon(args);
         });
     };
 #endif
@@ -167,6 +195,16 @@ TEST_CASE("Benchmark rgba min")
             return _internal::rgba_min_avx2(args);
         });
     };
+
+#elif defined(LIEN_ARM_NEON)
+    BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)
+    {
+        EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
+        meter.measure([&]
+        {
+            return _internal::rgba_min_neon(args);
+        });
+    };
 #endif
 };
 
@@ -197,6 +235,16 @@ TEST_CASE("Benchmark rgba sum saturated")
         meter.measure([&]
         {
             return _internal::rgba_sum_saturated_avx2(args);
+        });
+    };
+
+#elif defined(LIEN_ARM_NEON)
+    BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)
+    {
+        EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
+        meter.measure([&]
+        {
+            return _internal::rgba_sum_saturated_neon(args);
         });
     };
 #endif
@@ -231,6 +279,16 @@ TEST_CASE("Benchmark rgb saturation")
             return _internal::rgb_saturation_avx2(args);
         });
     };
+
+#elif defined(LIEN_ARM_NEON)
+    BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)
+    {
+        EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
+        meter.measure([&]
+        {
+            return _internal::rgb_saturation_neon(args);
+        });
+    };
 #endif
 };
 
@@ -261,6 +319,73 @@ TEST_CASE("Benchmark rgba luminance")
         meter.measure([&]
         {
             return _internal::rgb_luminance_avx2(args);
+        });
+    };
+
+#elif defined(LIEN_ARM_NEON)
+    BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)
+    {
+        EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
+        meter.measure([&]
+        {
+            return _internal::rgb_luminance_neon(args);
+        });
+    };
+#endif
+};
+
+TEST_CASE("Benchmark unpack image data")
+{
+    BENCHMARK_ADVANCED("STD")(Catch::Benchmark::Chronometer meter)
+    {
+        std::vector<uint8_t> data(1024);
+        for (size_t i = 0; i < 256; ++i)
+        {
+            data[(i * 4) + 0] = 1;
+            data[(i * 4) + 1] = 2;
+            data[(i * 4) + 2] = 3;
+            data[(i * 4) + 3] = 4;
+        }
+
+        meter.measure([&]
+        {
+            return _internal::unpack_image_data_std(data.data(), data.size());
+        });
+    };
+
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
+    BENCHMARK_ADVANCED("SSSE3")(Catch::Benchmark::Chronometer meter)
+    {
+        std::vector<uint8_t> data(IMG_DIM * IMG_DIM);
+        for (size_t i = 0; i < ((IMG_DIM * IMG_DIM) / 4); ++i)
+        {
+            data[(i * 4) + 0] = 1;
+            data[(i * 4) + 1] = 2;
+            data[(i * 4) + 2] = 3;
+            data[(i * 4) + 3] = 4;
+        }
+
+        meter.measure([&]
+        {
+            return _internal::unpack_image_data_ssse3(data.data(), data.size());
+        });
+    };
+    
+#elif defined(LIEN_ARM_NEON)
+    BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)
+    {
+        std::vector<uint8_t> data(IMG_DIM * IMG_DIM);
+        for (size_t i = 0; i < ((IMG_DIM * IMG_DIM) / 4); ++i)
+        {
+            data[(i * 4) + 0] = 1;
+            data[(i * 4) + 1] = 2;
+            data[(i * 4) + 2] = 3;
+            data[(i * 4) + 3] = 4;
+        }
+
+        meter.measure([&]
+        {
+            return _internal::unpack_image_data_neon(data.data(), data.size());
         });
     };
 #endif

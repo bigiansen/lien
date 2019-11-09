@@ -456,4 +456,30 @@ TEST_CASE("[x86] Luminance")
     };
 };
 
+TEST_CASE("[x86] Unpack Image Data")
+{
+    SECTION("SSSE3")
+    {
+        std::vector<uint8_t> data(1024);
+
+        for (size_t i = 0; i < 256; ++i)
+        {
+            data[(i * 4) + 0] = 1;
+            data[(i * 4) + 1] = 2;
+            data[(i * 4) + 2] = 3;
+            data[(i * 4) + 3] = 4;
+        }
+
+        ien::img::image_unpacked_data result = _internal::unpack_image_data_ssse3(data.data(), data.size());
+
+        for(size_t i = 0; i < result.size(); ++i)
+        {
+            REQUIRE(result.cdata_r()[i] == 1);
+            REQUIRE(result.cdata_g()[i] == 2);
+            REQUIRE(result.cdata_b()[i] == 3);
+            REQUIRE(result.cdata_a()[i] == 4);
+        }
+    };
+};
+
 #endif

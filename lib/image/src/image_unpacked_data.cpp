@@ -17,10 +17,35 @@ namespace ien::img
 
     image_unpacked_data::~image_unpacked_data()
     {
-        LIEN_ALIGNED_FREE(_r);
-        LIEN_ALIGNED_FREE(_g);
-        LIEN_ALIGNED_FREE(_b);
-        LIEN_ALIGNED_FREE(_a);
+        if(!_moved)
+        {
+            LIEN_ALIGNED_FREE(_r);
+            LIEN_ALIGNED_FREE(_g);
+            LIEN_ALIGNED_FREE(_b);
+            LIEN_ALIGNED_FREE(_a);
+        }
+    }
+
+    image_unpacked_data::image_unpacked_data(image_unpacked_data&& mv_src)
+        : _r(mv_src._r)
+        , _g(mv_src._g)
+        , _b(mv_src._b)
+        , _a(mv_src._a)
+        , _size(mv_src._size)
+        , _moved(false)
+    {
+        mv_src._moved = true;
+    }
+
+    void image_unpacked_data::operator=(image_unpacked_data&& mv_src)
+    {
+        _r = mv_src._r;
+        _g = mv_src._g;
+        _b = mv_src._b;
+        _a = mv_src._a;
+        _size = mv_src._size;
+        _moved = false;
+        mv_src._moved = true;
     }
 
     uint8_t* image_unpacked_data::data_r() noexcept { return _r; }
