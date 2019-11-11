@@ -40,10 +40,8 @@ namespace ien::img
                 &_internal::truncate_channel_data_sse2,
                 &_internal::truncate_channel_data_avx2
             );
-        #elif defined(LIEN_ARCH_ARM64)
+        #elif defined(LIEN_ARM_NEON)
             static func_ptr_t func = &_internal::truncate_channel_data_neon;
-        #elif defined(LIEN_ARCH_ARM)
-            LIEN_NOT_IMPLEMENTED();
         #else
             static func_ptr_t func = &_internal::truncate_channel_data_std;
         #endif
@@ -62,10 +60,8 @@ namespace ien::img
                 &_internal::rgba_average_sse2,
                 &_internal::rgba_average_avx2
             );
-        #elif defined(LIEN_ARCH_ARM64)
+        #elif defined(LIEN_ARM_NEON)
             static func_ptr_t func = &_internal::rgba_average_neon;
-        #elif defined(LIEN_ARCH_ARM)
-            LIEN_NOT_IMPLEMENTED();
         #else
             static func_ptr_t func = &_internal::rgba_average_std;
         #endif
@@ -84,10 +80,8 @@ namespace ien::img
                 &_internal::rgba_max_sse2,
                 &_internal::rgba_max_avx2
             );
-        #elif defined(LIEN_ARCH_ARM64)
+        #elif defined(LIEN_ARM_NEON)
             static func_ptr_t func = &_internal::rgba_max_neon;
-        #elif defined(LIEN_ARCH_ARM)
-            LIEN_NOT_IMPLEMENTED();
         #else
             static func_ptr_t func = &_internal::rgba_max_std;
         #endif
@@ -106,10 +100,8 @@ namespace ien::img
                 &_internal::rgba_min_sse2,
                 &_internal::rgba_min_avx2
             );
-        #elif defined(LIEN_ARCH_ARM64)
+        #elif defined(LIEN_ARM_NEON)
             static func_ptr_t func = &_internal::rgba_min_neon;
-        #elif defined(LIEN_ARCH_ARM)
-            LIEN_NOT_IMPLEMENTED();
         #else
             static func_ptr_t func = &_internal::rgba_min_std;
         #endif
@@ -128,10 +120,8 @@ namespace ien::img
                 &_internal::rgba_sum_saturated_sse2,
                 &_internal::rgba_sum_saturated_avx2
             );
-        #elif defined(LIEN_ARCH_ARM64)
+        #elif defined(LIEN_ARM_NEON)
             static func_ptr_t func = &_internal::rgba_sum_saturated_neon;
-        #elif defined(LIEN_ARCH_ARM)
-            LIEN_NOT_IMPLEMENTED();
         #else
             static func_ptr_t func = &_internal::rgba_sum_saturated_std;
         #endif
@@ -150,10 +140,8 @@ namespace ien::img
                 &_internal::rgb_saturation_sse2,
                 &_internal::rgb_saturation_avx2
             );
-        #elif defined(LIEN_ARCH_ARM64)
+        #elif defined(LIEN_ARM_NEON)
             static func_ptr_t func = &_internal::rgb_saturation_neon;
-        #elif defined(LIEN_ARCH_ARM)
-            LIEN_NOT_IMPLEMENTED();
         #else
             static func_ptr_t func = &_internal::rgb_saturation_std;
         #endif
@@ -172,10 +160,8 @@ namespace ien::img
                 &_internal::rgb_luminance_sse2,
                 &_internal::rgb_luminance_avx2
             );
-        #elif defined(LIEN_ARCH_ARM64)
+        #elif defined(LIEN_ARM_NEON)
             static func_ptr_t func = &_internal::rgb_luminance_neon;
-        #elif defined(LIEN_ARCH_ARM)
-            LIEN_NOT_IMPLEMENTED();
         #else
             static func_ptr_t func = &_internal::rgb_luminance_std;
         #endif
@@ -192,12 +178,10 @@ namespace ien::img
 		static func_ptr_t func = platform::x86::get_feature(platform::x86::feature::SSSE3)
 				? &_internal::unpack_image_data_ssse3
 				: &_internal::unpack_image_data_std;
-		#elif defined(LIEN_ARCH_ARM64)
-			LIEN_NOT_IMPLEMENTED();
-		#elif defined(LIEN_ARCH_ARM)
-			LIEN_NOT_IMPLEMENTED();
+        #elif defined(LIEN_ARM_NEON)
+            static func_ptr_t func = &_internal::unpack_image_data_neon;
 		#else
-			static func_ptr_t func = &_internal::rgb_luminance_std;
+            static func_ptr_t func = &_internal::unpack_image_data_std;
 		#endif
 
 		return func(data, len);

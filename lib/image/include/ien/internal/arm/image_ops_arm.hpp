@@ -1,6 +1,9 @@
 #include <ien/platform.hpp>
 
-#if defined(LIEN_ARCH_ARM) || defined(LIEN_ARCH_ARM64)
+#if defined(LIEN_ARM_NEON)
+
+#include <ien/fixed_vector.hpp>
+#include <ien/internal/image_ops_args.hpp>
 
 namespace ien::img::_internal
 {

@@ -48,7 +48,8 @@ endif()
 
 # Enable NEON code generation on ARM platforms, if enabled by LIEN_ARM_ENABLE_NEON
 if(LIEN_ARCH_ARM AND LIEN_ARM_ENABLE_NEON)
-    add_definitions(-mfpu=neon -mfloat-abi=softfp)
+    message("########## ARM NEON ENABLED! ###########")
+    add_definitions(-mfpu=neon -mfloat-abi=hard -march=armv7-a)
 endif()
 
 add_subdirectory("lib")

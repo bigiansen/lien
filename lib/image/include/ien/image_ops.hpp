@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ien/fixed_vector.hpp>
 #include <ien/image.hpp>
 

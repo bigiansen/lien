@@ -8,7 +8,9 @@
 #include <ien/internal/std/image_ops_std.hpp>
 
 #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
-#include <ien/internal/x86/image_ops_x86.hpp>
+    #include <ien/internal/x86/image_ops_x86.hpp>
+#elif defined(LIEN_ARM_NEON)
+    #include <ien/internal/arm/image_ops_arm.hpp>
 #endif
 
 using namespace ien::img;

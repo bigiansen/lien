@@ -5,6 +5,7 @@
 #include <ien/rect.hpp>
 #include <array>
 #include <cinttypes>
+#include <cstring>
 #include <vector>
 
 namespace ien::img
@@ -40,7 +41,7 @@ namespace ien::img
             
     	public:
             image_view_base(imgptr_t img, const rect<int>& view_rect)
-                : _ptr(ptr)
+                : _ptr(img->cdata())
                 , _view_rect(view_rect)
                 , _image_rect(0, 0, img->width(), img->height())
             { }

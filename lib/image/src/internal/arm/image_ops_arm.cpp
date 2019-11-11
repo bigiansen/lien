@@ -1,7 +1,7 @@
 #include <ien/internal/arm/image_ops_arm.hpp>
 #include <ien/platform.hpp>
 
-#if defined(LIEN_ARCH_ARM) || defined(LIEN_ARCH_ARM64)
+#if defined(LIEN_ARM_NEON)
 
 #include <ien/internal/image_ops_args.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
@@ -44,28 +44,28 @@ namespace ien::img::_internal
 
         BIND_CHANNELS(args, r, g, b, a);
 
-        const uint32x4_t vmask_r = vld1q_u32(trunc_and_table[args.bits_r]);
-        const uint32x4_t vmask_g = vld1q_u32(trunc_and_table[args.bits_g]);
-        const uint32x4_t vmask_b = vld1q_u32(trunc_and_table[args.bits_b]);
-        const uint32x4_t vmask_a = vld1q_u32(trunc_and_table[args.bits_a]);
+        const uint8x16_t vmask_r = vdupq_n_u8(trunc_and_table[args.bits_r]);
+        const uint8x16_t vmask_g = vdupq_n_u8(trunc_and_table[args.bits_g]);
+        const uint8x16_t vmask_b = vdupq_n_u8(trunc_and_table[args.bits_b]);
+        const uint8x16_t vmask_a = vdupq_n_u8(trunc_and_table[args.bits_a]);
 
         size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
         for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
         {
-            uint32x4_t seg_r = vld1q_u32(r + i);
-            uint32x4_t seg_g = vld1q_u32(g + i);
-            uint32x4_t seg_b = vld1q_u32(b + i);
-            uint32x4_t seg_a = vld1q_u32(a + i);
+            uint8x16_t seg_r = vld1q_u8(r + i);
+            uint8x16_t seg_g = vld1q_u8(g + i);
+            uint8x16_t seg_b = vld1q_u8(b + i);
+            uint8x16_t seg_a = vld1q_u8(a + i);
 
-            seg_r = vandq_u32(seg_r, vmask_r);
-            seg_g = vandq_u32(seg_g, vmask_r);
-            seg_b = vandq_u32(seg_b, vmask_r);
-            seg_a = vandq_u32(seg_a, vmask_r);
+            seg_r = vandq_u8(seg_r, vmask_r);
+            seg_g = vandq_u8(seg_g, vmask_r);
+            seg_b = vandq_u8(seg_b, vmask_r);
+            seg_a = vandq_u8(seg_a, vmask_r);
 
-            vst1q_u32(r + i, seg_r);
-            vst1q_u32(g + i, seg_g);
-            vst1q_u32(b + i, seg_b);
-            vst1q_u32(a + i, seg_a);
+            vst1q_u8(r + i, seg_r);
+            vst1q_u8(g + i, seg_g);
+            vst1q_u8(b + i, seg_b);
+            vst1q_u8(a + i, seg_a);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
@@ -79,32 +79,37 @@ namespace ien::img::_internal
 
     fixed_vector<uint8_t> rgba_average_neon(const channel_info_extract_args_rgba& args)
     {
-        LIEN_NOT_IMPLEMENTED();
+        return fixed_vector<uint8_t>(0);
     }
 
     fixed_vector<uint8_t> rgba_max_neon(const channel_info_extract_args_rgba& args)
     {
-        LIEN_NOT_IMPLEMENTED();
+        return fixed_vector<uint8_t>(0);
     }
 
     fixed_vector<uint8_t> rgba_min_neon(const channel_info_extract_args_rgba& args)
     {
-        LIEN_NOT_IMPLEMENTED();
+        return fixed_vector<uint8_t>(0);
     }
 
     fixed_vector<uint8_t> rgba_sum_saturated_neon(const channel_info_extract_args_rgba& args)
     {
-        LIEN_NOT_IMPLEMENTED();
+        return fixed_vector<uint8_t>(0);
     }
 
     fixed_vector<float> rgb_saturation_neon(const channel_info_extract_args_rgb& args)
     {
-        LIEN_NOT_IMPLEMENTED();
+        return fixed_vector<float>(0);
     }
 
     fixed_vector<float> rgb_luminance_neon(const channel_info_extract_args_rgb& args)
     {
-        LIEN_NOT_IMPLEMENTED();
+        return fixed_vector<float>(0);
+    }
+
+    image_unpacked_data unpack_image_data_neon(const uint8_t* data, size_t len)
+    {
+        return image_unpacked_data(0);
     }
 }
 

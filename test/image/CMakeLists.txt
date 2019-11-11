@@ -1,10 +1,8 @@
 SET(LIEN_TEST_IMAGE_SOURCES
-	src/image_ops.cpp
-	src/x86/image_ops.cpp
+    src/image_ops.cpp
+    src/x86/image_ops.cpp
     src/arm/image_ops.cpp
-
-	src/benchmarks/image_ops.cpp	
-
+    src/benchmarks/image_ops.cpp
     src/main.cpp
 )
 
