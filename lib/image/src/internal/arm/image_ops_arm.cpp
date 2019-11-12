@@ -5,6 +5,7 @@
 
 #include <ien/internal/image_ops_args.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
+#include <algorithm>
 #include <arm_neon.h>
 
 #define BIND_CHANNELS(args, r, g, b, a) \
@@ -52,20 +53,20 @@ namespace ien::img::_internal
         size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
         for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
         {
-            uint8x16_t seg_r = vld1q_u8(r + i);
-            uint8x16_t seg_g = vld1q_u8(g + i);
-            uint8x16_t seg_b = vld1q_u8(b + i);
-            uint8x16_t seg_a = vld1q_u8(a + i);
+            uint8x16_t vseg_r = vld1q_u8(r + i);
+            uint8x16_t vseg_g = vld1q_u8(g + i);
+            uint8x16_t vseg_b = vld1q_u8(b + i);
+            uint8x16_t vseg_a = vld1q_u8(a + i);
 
-            seg_r = vandq_u8(seg_r, vmask_r);
-            seg_g = vandq_u8(seg_g, vmask_r);
-            seg_b = vandq_u8(seg_b, vmask_r);
-            seg_a = vandq_u8(seg_a, vmask_r);
+            vseg_r = vandq_u8(vseg_r, vmask_r);
+            vseg_g = vandq_u8(vseg_g, vmask_r);
+            vseg_b = vandq_u8(vseg_b, vmask_r);
+            vseg_a = vandq_u8(vseg_a, vmask_r);
 
-            vst1q_u8(r + i, seg_r);
-            vst1q_u8(g + i, seg_g);
-            vst1q_u8(b + i, seg_b);
-            vst1q_u8(a + i, seg_a);
+            vst1q_u8(r + i, vseg_r);
+            vst1q_u8(g + i, vseg_g);
+            vst1q_u8(b + i, vseg_b);
+            vst1q_u8(a + i, vseg_a);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
@@ -79,12 +80,67 @@ namespace ien::img::_internal
 
     fixed_vector<uint8_t> rgba_average_neon(const channel_info_extract_args_rgba& args)
     {
-        return fixed_vector<uint8_t>(0);
+        const size_t img_sz = args.len;
+        if(img_sz < NEON_STRIDE)
+        {
+            rgba_average_std(args);
+        }
+        BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+
+        fixed_vector<uint8_t> result(args.len, NEON_STRIDE);
+        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
+        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        {
+            uint8x16_t vseg_r = vld1q_u8(r + i);
+            uint8x16_t vseg_g = vld1q_u8(g + i);
+            uint8x16_t vseg_b = vld1q_u8(b + i);
+            uint8x16_t vseg_a = vld1q_u8(a + i);
+
+            uint8x16_t vavg_rg = vrhaddq_u8(vseg_r, vseg_g);
+            uint8x16_t vavg_ba = vrhaddq_u8(vseg_b, vseg_a);
+            uint8x16_t vavg_rgba = vrhaddq_u8(vavg_rg, vavg_ba);
+
+            vst1q_u8(result.data() + i, vavg_rgba);
+        }
+
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i] + a[i];
+            result[i] = static_cast<uint8_t>(sum / 4);
+        }
+        return result;
     }
 
     fixed_vector<uint8_t> rgba_max_neon(const channel_info_extract_args_rgba& args)
     {
-        return fixed_vector<uint8_t>(0);
+        const size_t img_sz = args.len;
+        if(img_sz < NEON_STRIDE)
+        {
+            rgba_average_std(args);
+        }
+        BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+
+        fixed_vector<uint8_t> result(args.len, NEON_STRIDE);
+        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
+        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        {
+            uint8x16_t vseg_r = vld1q_u8(r + i);
+            uint8x16_t vseg_g = vld1q_u8(g + i);
+            uint8x16_t vseg_b = vld1q_u8(b + i);
+            uint8x16_t vseg_a = vld1q_u8(a + i);
+
+            uint8x16_t vmax_rg = vmaxq_u8(vseg_r, vseg_g);
+            uint8x16_t vmax_ba = vmaxq_u8(vseg_b, vseg_a);
+            uint8x16_t vmax_rgba = vmaxq_u8(vmax_rg, vmax_ba);
+
+            vst1q_u8(result.data() + i, vmax_rgba);
+        }
+
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            result[i] = std::max({r[i], g[i], b[i], a[i]});
+        }
+        return result;
     }
 
     fixed_vector<uint8_t> rgba_min_neon(const channel_info_extract_args_rgba& args)

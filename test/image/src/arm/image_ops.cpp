@@ -62,7 +62,7 @@ TEST_CASE("[ARM] Channel average RGBA")
         {
             REQUIRE((result[i] == 8 || result[i] == 7));
         }
-    };    
+    };
 };
 
 TEST_CASE("[ARM] Channel max RGBA")
