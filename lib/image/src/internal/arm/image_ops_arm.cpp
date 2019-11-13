@@ -45,28 +45,28 @@ namespace ien::img::_internal
 
         BIND_CHANNELS(args, r, g, b, a);
 
-        const uint8x16_t vmask_r = vdupq_n_u8(trunc_and_table[args.bits_r]);
-        const uint8x16_t vmask_g = vdupq_n_u8(trunc_and_table[args.bits_g]);
-        const uint8x16_t vmask_b = vdupq_n_u8(trunc_and_table[args.bits_b]);
-        const uint8x16_t vmask_a = vdupq_n_u8(trunc_and_table[args.bits_a]);
+        const uint32x4_t vmask_r = vdupq_n_u32(trunc_and_table[args.bits_r]);
+        const uint32x4_t vmask_g = vdupq_n_u32(trunc_and_table[args.bits_g]);
+        const uint32x4_t vmask_b = vdupq_n_u32(trunc_and_table[args.bits_b]);
+        const uint32x4_t vmask_a = vdupq_n_u32(trunc_and_table[args.bits_a]);
 
         size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
         for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
         {
-            uint8x16_t vseg_r = vld1q_u8(r + i);
-            uint8x16_t vseg_g = vld1q_u8(g + i);
-            uint8x16_t vseg_b = vld1q_u8(b + i);
-            uint8x16_t vseg_a = vld1q_u8(a + i);
+            uint32x4_t vseg_r = vld1_u32(r + i);
+            uint32x4_t vseg_g = vld1_u32(g + i);
+            uint32x4_t vseg_b = vld1_u32(b + i);
+            uint32x4_t vseg_a = vld1_u32(a + i);
 
-            vseg_r = vandq_u8(vseg_r, vmask_r);
-            vseg_g = vandq_u8(vseg_g, vmask_r);
-            vseg_b = vandq_u8(vseg_b, vmask_r);
-            vseg_a = vandq_u8(vseg_a, vmask_r);
+            vseg_r = vandq_u32(vseg_r, vmask_r);
+            vseg_g = vandq_u32(vseg_g, vmask_r);
+            vseg_b = vandq_u32(vseg_b, vmask_r);
+            vseg_a = vandq_u32(vseg_a, vmask_r);
 
-            vst1q_u8(r + i, vseg_r);
-            vst1q_u8(g + i, vseg_g);
-            vst1q_u8(b + i, vseg_b);
-            vst1q_u8(a + i, vseg_a);
+            vst1q_u32(r + i, vseg_r);
+            vst1q_u32(g + i, vseg_g);
+            vst1q_u32(b + i, vseg_b);
+            vst1q_u32(a + i, vseg_a);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
