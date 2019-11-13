@@ -1,7 +1,7 @@
 #include <ien/internal/arm/image_ops_arm.hpp>
 #include <ien/platform.hpp>
 
-#if defined(LIEN_ARM_NEON) || 1
+#if defined(LIEN_ARM_NEON)
 
 #include <ien/internal/image_ops_args.hpp>
 #include <ien/internal/std/image_ops_std.hpp>

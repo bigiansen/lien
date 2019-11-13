@@ -1,6 +1,6 @@
 #include <catch2/catch.hpp>
 
-#if defined(LIEN_ARM_NEON) || 1
+#if defined(LIEN_ARM_NEON)
 
 #include <ien/image.hpp>
 #include <ien/platform.hpp>
