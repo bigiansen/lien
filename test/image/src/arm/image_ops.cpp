@@ -1,15 +1,13 @@
 #include <catch2/catch.hpp>
 
-#if defined(LIEN_ARM_NEON)
+#if defined(LIEN_ARM_NEON) || 1
 
 #include <ien/image.hpp>
 #include <ien/platform.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
-#include <ien/internal/x86/image_ops_x86.hpp>
+#include <ien/internal/arm/image_ops_arm.hpp>
 
 #include <iostream>
-
-#include "utils.hpp"
 
 using namespace ien::img;
 
@@ -239,7 +237,7 @@ TEST_CASE("[ARM] Unpack Image Data")
 {
     SECTION("NEON")
     {
-        std::vector<uint8_t> data(1024);
+        ien::fixed_vector<uint8_t> data(1024, 16);
 
         for (size_t i = 0; i < 256; ++i)
         {

@@ -1,7 +1,7 @@
 #include <ien/internal/arm/image_ops_arm.hpp>
 #include <ien/platform.hpp>
 
-#if defined(LIEN_ARM_NEON)
+#if defined(LIEN_ARM_NEON) || 1
 
 #include <ien/internal/image_ops_args.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
@@ -193,9 +193,9 @@ namespace ien::img::_internal
             uint8x16_t vseg_b = vld1q_u8(b + i);
             uint8x16_t vseg_a = vld1q_u8(a + i);
 
-            uint8x16_t vsum_rg = vqadd_u8(vseg_r, vseg_g);
-            uint8x16_t vsum_ba = vqadd_u8(vseg_b, vseg_a);
-            uint8x16_t vsum_rgba = vqadd_u8(vsum_rg, vsum_ba);
+            uint8x16_t vsum_rg = vqaddq_u8(vseg_r, vseg_g);
+            uint8x16_t vsum_ba = vqaddq_u8(vseg_b, vseg_a);
+            uint8x16_t vsum_rgba = vqaddq_u8(vsum_rg, vsum_ba);
 
             vst1q_u8(result.data() + i, vsum_rgba);
         }
@@ -230,16 +230,23 @@ namespace ien::img::_internal
         size_t last_v_idx = len - (len % NEON_STRIDE);
         for(size_t i = 0; i < len; i += NEON_STRIDE)
         {
-            uint8x16_t vr = vld4q_u8(data + i + 0);
-            uint8x16_t vg = vld4q_u8(data + i + 1);
-            uint8x16_t vb = vld4q_u8(data + i + 2);
-            uint8x16_t va = vld4q_u8(data + i + 3);
+            uint8x16x4_t vrgba = vld4q_u8(data + i + 0);
 
-            vst1q_u8(r + (i / 4), vr);
-            vst1q_u8(g + (i / 4), vg);
-            vst1q_u8(b + (i / 4), vb);
-            vst1q_u8(a + (i / 4), va);
+            vst1q_u8(r + (i / 4), vrgba.val[0]);
+            vst1q_u8(g + (i / 4), vrgba.val[1]);
+            vst1q_u8(b + (i / 4), vrgba.val[2]);
+            vst1q_u8(a + (i / 4), vrgba.val[3]);
         }
+
+        for (size_t i = last_v_idx; i < len; ++i)
+        {
+            r[i / 4] = data[i + 0];
+            g[i / 4] = data[i + 1];
+            b[i / 4] = data[i + 2];
+            a[i / 4] = data[i + 3];
+        }
+
+        return result;
     }
 }
 

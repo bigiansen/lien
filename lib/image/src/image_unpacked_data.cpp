@@ -44,7 +44,7 @@ namespace ien::img
         _b = mv_src._b;
         _a = mv_src._a;
         _size = mv_src._size;
-        _moved = false;
+        _moved = mv_src._moved;
         mv_src._moved = true;
     }
 
