@@ -29,17 +29,28 @@ namespace ien::img
         _stb_free = true;
     }
 
+    packed_image::packed_image(packed_image&& mv_src)
+        : _data(mv_src._data)
+        , _width(mv_src._height)
+        , _height(mv_src._height)
+        , _stb_free(mv_src._stb_free)
+    {
+        _width = 0;
+        _height = 0;
+        mv_src._data = nullptr;
+    }
+
     packed_image::~packed_image()
     {
+        if(_data == nullptr)
+            return;
+            
         if(_stb_free)
-        {
             stbi_image_free(_data);
-        }
         else
-        {
             LIEN_ALIGNED_FREE(_data);
-        }
-    }
+        
+    } 
 
     uint8_t* packed_image::data() noexcept { return _data; }
 

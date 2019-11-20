@@ -16,6 +16,7 @@ namespace ien::img
     public:
         packed_image(int width, int height);
         packed_image(const std::string& path);
+        packed_image(packed_image&& mv_src);
         ~packed_image();
 
         uint8_t* data() noexcept;

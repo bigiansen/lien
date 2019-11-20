@@ -114,7 +114,7 @@ namespace ien
             : _data(mv_src._data)
             , _len(mv_src._len)
             , _alignment(mv_src._alignment)
-        { 
+        {
             mv_src._data = nullptr;
         }
 

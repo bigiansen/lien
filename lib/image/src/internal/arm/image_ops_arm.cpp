@@ -3,6 +3,7 @@
 
 #if defined(LIEN_ARM_NEON)
 
+#include <ien/assert.hpp>
 #include <ien/internal/image_ops_args.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
 #include <algorithm>
@@ -28,6 +29,50 @@
 namespace ien::img::_internal
 {
     constexpr size_t NEON_STRIDE = 16;
+
+    float32x4x4_t extract_4x4f32_from_8x16u8(uint8x16_t v)
+    {                                                                           // v = v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15
+        uint8x8_t hv_lo = vget_low_u8(v);                                       // v0, v1, v2, v3, v4, v5, v6, v7
+        uint8x8_t hv_hi = vget_high_u8(v);                                      // v8, v9, v10, v11, v12, v13, v14, v15
+
+        uint8x16_t vtemp_lo = vreinterpretq_u8_u16(vmovl_u8(hv_lo));            // 0, v0, 0, v1, 0, v2, 0, v3, 0, v4, 0, v5, 0, v6, 0, v7
+        uint8x8_t hvtemp_lo0 = vget_low_u8(vtemp_lo);                           // 0, v0, 0, v1, 0, v2, 0, v3
+        uint8x8_t hvtemp_lo1 = vget_high_u8(vtemp_lo);                          // 0, v4, 0, v5, 0, v6, 0, v7
+
+        uint32x4_t vtemp32_lo0 = vmovl_u16(vreinterpret_u16_u8(hvtemp_lo0));    // 0, 0, 0, v0, 0, 0, 0, v1, 0, 0, 0, v2, 0, 0, 0, v3
+        uint32x4_t vtemp32_lo1 = vmovl_u16(vreinterpret_u16_u8(hvtemp_lo1));    // 0, 0, 0, v4, 0, 0, 0, v5, 0, 0, 0, v6, 0, 0, 0, v7
+
+        float32x4_t vfv0 = vcvtq_f32_u32(vtemp32_lo0);                          // (float) vf0, vf1, vf2, vf3
+        float32x4_t vfv1 = vcvtq_f32_u32(vtemp32_lo1);                          // (float) vf4, vf5, vf6, vf7
+
+        uint8x16_t vtemp_hi = vreinterpretq_u8_u16(vmovl_u8(hv_hi));            // same for high uint8x8
+        uint8x8_t hvtemp_hi0 = vget_low_u8(vtemp_hi);
+        uint8x8_t hvtemp_hi1 = vget_high_u8(vtemp_hi);
+
+        uint32x4_t vtemp32_hi0 = vmovl_u16(vreinterpret_u16_u8(hvtemp_hi0)); 
+        uint32x4_t vtemp32_hi1 = vmovl_u16(vreinterpret_u16_u8(hvtemp_hi1));
+
+        float32x4_t vfv2 = vcvtq_f32_u32(vtemp32_hi0);
+        float32x4_t vfv3 = vcvtq_f32_u32(vtemp32_hi1);
+
+        return {{ vfv0, vfv1, vfv2, vfv3 }};
+    }
+
+    float32x4_t neon_divide_f32_fast(float32x4_t dividend, float32x4_t divisor)
+    {
+        float32x4_t reciprocal = vrecpeq_f32(divisor);
+        return vmulq_f32(dividend, reciprocal);
+    }
+
+    float32x4_t neon_divide_f32(float32x4_t dividend, float32x4_t divisor, uint8_t newton_rhaphson_steps = 1)
+    {
+        float32x4_t reciprocal = vrecpeq_f32(divisor);
+        for(uint8_t i = 0; i < newton_rhaphson_steps; ++i)
+        {
+            reciprocal = vmulq_f32(vrecpsq_f32(divisor, reciprocal), reciprocal);
+        }
+        return vmulq_f32(dividend, reciprocal);
+    }
 
     void truncate_channel_data_neon(const truncate_channel_args& args)
     {
@@ -206,11 +251,53 @@ namespace ien::img::_internal
             result[i] = static_cast<uint8_t>(std::min(static_cast<uint16_t>(255), sum));
         }
         return result;
-    }
+    }    
 
     fixed_vector<float> rgb_saturation_neon(const channel_info_extract_args_rgb& args)
     {
-        return fixed_vector<float>(0);
+        const size_t img_sz = args.len;
+        if(img_sz < NEON_STRIDE)
+        {
+            rgb_saturation_std(args);
+        }
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);
+
+        fixed_vector<float> result(args.len, NEON_STRIDE);
+
+        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
+        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        {
+            uint8x16_t vseg_r = vld1q_u8(r + i);
+            uint8x16_t vseg_g = vld1q_u8(g + i);
+            uint8x16_t vseg_b = vld1q_u8(b + i);
+
+            uint8x16_t vmax_rg = vmaxq_u8(vseg_r, vseg_g);
+            uint8x16_t vmax_rgb = vmaxq_u8(vmax_rg, vseg_b);
+
+            uint8x16_t vmin_rg = vminq_u8(vseg_r, vseg_g);
+            uint8x16_t vmin_rgb = vminq_u8(vmin_rg, vseg_b);
+
+            uint8x16_t vdiff_rgb = vsubq_u8(vmax_rgb, vmin_rgb);
+
+            float32x4x4_t vfdiffq = extract_4x4f32_from_8x16u8(vdiff_rgb);
+            float32x4x4_t vfmaxq = extract_4x4f32_from_8x16u8(vmax_rgb);
+
+            for(int vidx = 0; vidx < 4; ++vidx)
+            {
+                float32x4_t vfsat = neon_divide_f32(vfdiffq.val[vidx], vfmaxq.val[vidx], 2);
+                float* dest_ptr = result.data() + i + (vidx * 4);
+                vst1q_f32(dest_ptr, vfsat);
+            }
+        }
+
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] })) / 255.0F;
+            float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] })) / 255.0F;
+            result[i] = (vmax - vmin) / vmax;
+        }
+
+        return result;
     }
 
     fixed_vector<float> rgb_luminance_neon(const channel_info_extract_args_rgb& args)

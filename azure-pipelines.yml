@@ -1,0 +1,27 @@
+# C/C++ with GCC
+
+# Build your C/C++ project with GCC using make.
+# Add steps that publish test results, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/c-cpp/gcc
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+variables:
+    CC: gcc-7
+    CXX: g++-7
+    
+steps:
+- task: CmdLine@2
+  inputs:
+    script: |
+      bash build_debug_linux.sh
+      cd build_debug_linux/output/bin/lien_tests
+      ./lien_test_image -r junit -o lien_test_image.xml
+      
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: 'build_debug_linux/output/bin/lien_tests/*.xml'
