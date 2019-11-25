@@ -302,7 +302,57 @@ namespace ien::img::_internal
 
     fixed_vector<float> rgb_luminance_neon(const channel_info_extract_args_rgb& args)
     {
-        return fixed_vector<float>(0);
+        const size_t img_sz = args.len;
+        if(img_sz < NEON_STRIDE)
+        {
+            rgb_luminance_std(args);
+        }
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);
+
+        fixed_vector<float> result(args.len, NEON_STRIDE);
+
+        const float lum_mul = 0.0019607843137254F;
+        float32x4_t vlum_mul = vld1q_dup_f32(&lum_mul);
+
+        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
+        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        {
+            uint8x16_t vseg_r = vld1q_u8(r + i);
+            uint8x16_t vseg_g = vld1q_u8(g + i);
+            uint8x16_t vseg_b = vld1q_u8(b + i);
+
+            uint8x16_t vmax_rg = vmaxq_u8(vseg_r, vseg_g);
+            uint8x16_t vmax_rgb = vmaxq_u8(vmax_rg, vseg_b);
+
+            uint8x16_t vmin_rg = vminq_u8(vseg_r, vseg_g);
+            uint8x16_t vmin_rgb = vminq_u8(vmin_rg, vseg_b);
+
+            float32x4x4_t vmaxq = extract_4x4f32_from_8x16u8(vmax_rgb);
+            float32x4x4_t vminq = extract_4x4f32_from_8x16u8(vmin_rgb);
+
+            float32x4x4_t vsumq = {
+                vaddq_f32(vmaxq.val[0], vminq.val[0]),
+                vaddq_f32(vmaxq.val[1], vminq.val[1]),
+                vaddq_f32(vmaxq.val[2], vminq.val[2]),
+                vaddq_f32(vmaxq.val[3], vminq.val[3])
+            };
+
+            for(int vidx = 0; vidx < 4; ++vidx)
+            {
+                float32x4_t vflum = vmulq_f32(vsumq.val[vidx], vlum_mul);
+                float* dest_ptr = result.data() + i + (vidx * 4);
+                vst1q_f32(dest_ptr, vflum);
+            }
+        }
+
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] })) / 255.0F;
+            float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] })) / 255.0F;
+            result[i] = (vmax - vmin) / vmax;
+        }
+
+        return result;
     }
 
     image_unpacked_data unpack_image_data_neon(const uint8_t* data, size_t len)

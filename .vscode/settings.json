@@ -74,7 +74,8 @@
         "xloctime": "cpp",
         "xtree": "cpp",
         "cinttypes": "cpp",
-        "stb_image.h": "c"
+        "stb_image.h": "c",
+        "string_view": "cpp"
     },
     "C_Cpp.dimInactiveRegions": true
 }
