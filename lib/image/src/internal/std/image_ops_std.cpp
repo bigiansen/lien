@@ -104,6 +104,32 @@ namespace ien::img::_internal
         return result;
     }
 
+    fixed_vector<uint8_t> rgb_max_std(const channel_info_extract_args_rgb& args)
+    {
+        const size_t img_sz = args.len;
+        fixed_vector<uint8_t> result(args.len);
+
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        for (size_t i = 0; i < img_sz; ++i)
+        {
+            result[i] = std::max({ r[i], g[i], b[i] });
+        }
+        return result;
+    }
+
+    fixed_vector<uint8_t> rgb_min_std(const channel_info_extract_args_rgb& args)
+    {
+        const size_t img_sz = args.len;
+        fixed_vector<uint8_t> result(args.len);
+
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        for (size_t i = 0; i < img_sz; ++i)
+        {
+            result[i] = std::min({ r[i], g[i], b[i] });
+        }
+        return result;
+    }
+
     fixed_vector<uint8_t> rgba_sum_saturated_std(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;

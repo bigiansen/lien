@@ -198,6 +198,72 @@ namespace ien::img::_internal
 		return result;
 	}
 
+	fixed_vector<uint8_t> rgb_max_sse2(const channel_info_extract_args_rgb& args)
+	{
+		const size_t img_sz = args.len;
+
+		if (img_sz < SSE_STRIDE)
+		{
+			return rgb_max_std(args);
+		}
+
+		fixed_vector<uint8_t> result(args.len, SSE_STRIDE);
+
+		BIND_CHANNELS_RGB_CONST(args, r, g, b);
+
+		size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
+		for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
+		{
+			__m128i vseg_r = LOAD_SI128_CONST(r + i);
+			__m128i vseg_g = LOAD_SI128_CONST(g + i);
+			__m128i vseg_b = LOAD_SI128_CONST(b + i);
+
+			__m128i vmax_rg = _mm_max_epu8(vseg_r, vseg_g);
+			__m128i vmax_rgb = _mm_max_epu8(vmax_rg, vseg_b);
+
+			STOREU_SI128((result.data() + i), vmax_rgb);
+		}
+
+		for (size_t i = last_v_idx; i < img_sz; ++i)
+		{
+			result[i] = std::max({ r[i], g[i], b[i] });
+		}
+		return result;
+	}
+
+	fixed_vector<uint8_t> rgb_min_sse2(const channel_info_extract_args_rgb& args)
+	{
+		const size_t img_sz = args.len;
+
+		if (img_sz < SSE_STRIDE)
+		{
+			return rgb_min_std(args);
+		}
+
+		fixed_vector<uint8_t> result(args.len, SSE_STRIDE);
+
+		BIND_CHANNELS_RGB_CONST(args, r, g, b);
+
+		size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
+		for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
+		{
+			__m128i vseg_r = LOAD_SI128_CONST(r + i);
+			__m128i vseg_g = LOAD_SI128_CONST(g + i);
+			__m128i vseg_b = LOAD_SI128_CONST(b + i);
+
+			__m128i vmax_rg = _mm_min_epu8(vseg_r, vseg_g);
+			__m128i vmax_rgb = _mm_min_epu8(vmax_rg, vseg_b);
+
+			STOREU_SI128((result.data() + i), vmax_rgb);
+		}
+
+		for (size_t i = last_v_idx; i < img_sz; ++i)
+		{
+			result[i] = std::min({ r[i], g[i], b[i] });
+		}
+		return result;
+	}
+
 	fixed_vector<uint8_t> rgba_sum_saturated_sse2(const channel_info_extract_args_rgba& args)
 	{
 		const size_t img_sz = args.len;

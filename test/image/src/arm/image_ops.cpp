@@ -54,7 +54,7 @@ TEST_CASE("[ARM] Channel average RGBA")
             img.data()->data_a()[i] = 15;
         }
 
-        _internal::channel_info_extract_args_rgba args(&img);
+        _internal::channel_info_extract_args_rgba args(img);
         auto result = _internal::rgba_average_neon(args);
         for (size_t i = 0; i < px_count; ++i)
         {
@@ -78,7 +78,7 @@ TEST_CASE("[ARM] Channel max RGBA")
             img.data()->data_a()[i] = 15;
         }
 
-        _internal::channel_info_extract_args_rgba args(&img);
+        _internal::channel_info_extract_args_rgba args(img);
         auto result = _internal::rgba_max_neon(args);
         for (size_t i = 0; i < px_count; ++i)
         {
@@ -102,7 +102,7 @@ TEST_CASE("[ARM] Channel min RGBA")
             img.data()->data_a()[i] = 4;
         }
 
-        _internal::channel_info_extract_args_rgba args(&img);
+        _internal::channel_info_extract_args_rgba args(img);
         auto result = _internal::rgba_min_neon(args);
         for (size_t i = 0; i < px_count; ++i)
         {
@@ -126,7 +126,7 @@ TEST_CASE("[ARM] Channel sum saturated RGBA")
             img.data()->data_a()[i] = 4;
         }
 
-        _internal::channel_info_extract_args_rgba args(&img);
+        _internal::channel_info_extract_args_rgba args(img);
         auto result = _internal::rgba_sum_saturated_neon(args);
         for (size_t i = 0; i < px_count; ++i)
         {
@@ -147,7 +147,7 @@ TEST_CASE("[ARM] Channel sum saturated RGBA")
             img.data()->data_a()[i] = 184;
         }
 
-        _internal::channel_info_extract_args_rgba args(&img);
+        _internal::channel_info_extract_args_rgba args(img);
         auto result = _internal::rgba_sum_saturated_neon(args);
         for (size_t i = 0; i < px_count; ++i)
         {
@@ -171,7 +171,7 @@ TEST_CASE("[ARM] Saturation")
             img.data()->data_a()[i] = static_cast<uint8_t>(i + 4);
         }
 
-        _internal::channel_info_extract_args_rgb args(&img);
+        _internal::channel_info_extract_args_rgb args(img);
         ien::fixed_vector<float> result0 = _internal::rgb_saturation_std(args);
         ien::fixed_vector<float> result1 = _internal::rgb_saturation_neon(args);
 
@@ -196,7 +196,7 @@ TEST_CASE("[ARM] Saturation")
             img.data()->data_a()[i] = static_cast<uint8_t>(4);
         }
 
-        _internal::channel_info_extract_args_rgb args(&img);
+        _internal::channel_info_extract_args_rgb args(img);
         ien::fixed_vector<float> result = _internal::rgb_saturation_neon(args);
 
         REQUIRE(result.size() == img.pixel_count());
@@ -222,7 +222,7 @@ TEST_CASE("[ARM] Luminance")
             img.data()->data_a()[i] = static_cast<uint8_t>(4);
         }
 
-        _internal::channel_info_extract_args_rgb args(&img);
+        _internal::channel_info_extract_args_rgb args(img);
         ien::fixed_vector<float> result = _internal::rgb_luminance_neon(args);
 
         REQUIRE(result.size() == img.pixel_count());

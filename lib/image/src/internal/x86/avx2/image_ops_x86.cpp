@@ -197,6 +197,72 @@ namespace ien::img::_internal
         return result;
     }
 
+    fixed_vector<uint8_t> rgb_max_avx2(const channel_info_extract_args_rgb& args)
+    {
+        const size_t img_sz = args.len;
+
+        if (img_sz < AVX2_STRIDE)
+        {
+            return rgb_max_std(args);
+        }
+
+        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
+
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);
+
+        size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
+        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        {
+            __m256i vseg_r = LOAD_SI256_CONST(r + i);
+            __m256i vseg_g = LOAD_SI256_CONST(g + i);
+            __m256i vseg_b = LOAD_SI256_CONST(b + i);
+
+            __m256i vmax_rg = _mm256_max_epu8(vseg_r, vseg_g);
+            __m256i vmax_rgb = _mm256_max_epu8(vmax_rg, vseg_b);
+
+            STOREU_SI256((result.data() + i), vmax_rgb);
+        }
+
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            result[i] = std::max({ r[i], g[i], b[i] });
+        }
+        return result;
+    }
+
+    fixed_vector<uint8_t> rgb_min_avx2(const channel_info_extract_args_rgb& args)
+    {
+        const size_t img_sz = args.len;
+
+        if (img_sz < AVX2_STRIDE)
+        {
+            return rgb_min_std(args);
+        }
+
+        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
+
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);
+
+        size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
+        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        {
+            __m256i vseg_r = LOAD_SI256_CONST(r + i);
+            __m256i vseg_g = LOAD_SI256_CONST(g + i);
+            __m256i vseg_b = LOAD_SI256_CONST(b + i);
+
+            __m256i vmax_rg = _mm256_min_epu8(vseg_r, vseg_g);
+            __m256i vmax_rgb = _mm256_min_epu8(vmax_rg, vseg_b);
+
+            STOREU_SI256((result.data() + i), vmax_rgb);
+        }
+
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            result[i] = std::min({ r[i], g[i], b[i] });
+        }
+        return result;
+    }
+
     fixed_vector<uint8_t> rgba_sum_saturated_avx2(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;

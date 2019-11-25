@@ -46,11 +46,11 @@ namespace ien::img
             static func_ptr_t func = &_internal::truncate_channel_data_std;
         #endif
 
-        _internal::truncate_channel_args args(img, bits_r, bits_g, bits_b, bits_a);
+        _internal::truncate_channel_args args(*img, bits_r, bits_g, bits_b, bits_a);
         func(args);
     }
 
-    fixed_vector<uint8_t> rgba_average(const image* img)
+    fixed_vector<uint8_t> rgba_average(const image& img)
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
@@ -70,7 +70,7 @@ namespace ien::img
         return func(args);
     }    
 
-    fixed_vector<uint8_t> rgba_max(const image* img)
+    fixed_vector<uint8_t> rgba_max(const image& img)
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
@@ -90,7 +90,7 @@ namespace ien::img
         return func(args);
     }
 
-    fixed_vector<uint8_t> rgba_min(const image* img)
+    fixed_vector<uint8_t> rgba_min(const image& img)
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
@@ -110,7 +110,47 @@ namespace ien::img
         return func(args);
     }
 
-    fixed_vector<uint8_t> rgba_sum_saturated(const image* img)
+    fixed_vector<uint8_t> rgb_max(const image& img)
+    {
+        typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
+
+        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+            static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
+                &_internal::rgb_max_std,
+                &_internal::rgb_max_sse2,
+                &_internal::rgb_max_avx2
+            );
+        #elif defined(LIEN_ARM_NEON)
+            static func_ptr_t func = &_internal::rgb_max_neon;
+        #else
+            static func_ptr_t func = &_internal::rgb_max_std;
+        #endif
+
+        _internal::channel_info_extract_args_rgb args(img);
+        return func(args);
+    }
+
+    fixed_vector<uint8_t> rgb_min(const image& img)
+    {
+        typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
+
+        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+            static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
+                &_internal::rgb_min_std,
+                &_internal::rgb_min_sse2,
+                &_internal::rgb_min_avx2
+            );
+        #elif defined(LIEN_ARM_NEON)
+            static func_ptr_t func = &_internal::rgb_min_neon;
+        #else
+            static func_ptr_t func = &_internal::rgb_min_std;
+        #endif
+
+        _internal::channel_info_extract_args_rgb args(img);
+        return func(args);
+    }
+
+    fixed_vector<uint8_t> rgba_sum_saturated(const image& img)
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
@@ -130,7 +170,7 @@ namespace ien::img
         return func(args);
     }
 
-    fixed_vector<float> rgb_saturation(const image* img)
+    fixed_vector<float> rgb_saturation(const image& img)
     {
         typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
@@ -150,7 +190,7 @@ namespace ien::img
         return func(args);
     }
 
-    fixed_vector<float> rgb_luminance(const image* img)
+    fixed_vector<float> rgb_luminance(const image img)
     {
         typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 

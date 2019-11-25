@@ -193,7 +193,7 @@ namespace ien::img::_internal
         const size_t img_sz = args.len;
         if(img_sz < NEON_STRIDE)
         {
-            rgba_average_std(args);
+            rgba_min_std(args);
         }
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
@@ -220,12 +220,72 @@ namespace ien::img::_internal
         return result;
     }
 
+    fixed_vector<uint8_t> rgb_max_neon(const channel_info_extract_args_rgb& args)
+    {
+        const size_t img_sz = args.len;
+        if(img_sz < NEON_STRIDE)
+        {
+            rgb_max_std(args);
+        }
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);
+
+        fixed_vector<uint8_t> result(args.len, NEON_STRIDE);
+        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
+        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        {
+            uint8x16_t vseg_r = vld1q_u8(r + i);
+            uint8x16_t vseg_g = vld1q_u8(g + i);
+            uint8x16_t vseg_b = vld1q_u8(b + i);
+
+            uint8x16_t vmax_rg = vmaxq_u8(vseg_r, vseg_g);
+            uint8x16_t vmax_rgb = vmaxq_u8(vseg_b, vseg_b);
+
+            vst1q_u8(result.data() + i, vmax_rgb);
+        }
+
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            result[i] = std::max({ r[i], g[i], b[i] });
+        }
+        return result;
+    }
+
+    fixed_vector<uint8_t> rgb_min_neon(const channel_info_extract_args_rgb& args)
+    {
+        const size_t img_sz = args.len;
+        if(img_sz < NEON_STRIDE)
+        {
+            rgba_min_std(args);
+        }
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);
+
+        fixed_vector<uint8_t> result(args.len, NEON_STRIDE);
+        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
+        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        {
+            uint8x16_t vseg_r = vld1q_u8(r + i);
+            uint8x16_t vseg_g = vld1q_u8(g + i);
+            uint8x16_t vseg_b = vld1q_u8(b + i);
+
+            uint8x16_t vmin_rg = vminq_u8(vseg_r, vseg_g);
+            uint8x16_t vmin_rgb = vminq_u8(vmin_rg, vmin_b);
+
+            vst1q_u8(result.data() + i, vmin_rgb);
+        }
+
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            result[i] = std::min({r[i], g[i], b[i] });
+        }
+        return result;
+    }
+
     fixed_vector<uint8_t> rgba_sum_saturated_neon(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;
         if(img_sz < NEON_STRIDE)
         {
-            rgba_average_std(args);
+            rgba_sum_saturated_std(args);
         }
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
@@ -357,6 +417,11 @@ namespace ien::img::_internal
 
     image_unpacked_data unpack_image_data_neon(const uint8_t* data, size_t len)
     {
+        if(len < NEON_STRIDE)
+        {
+            return unpack_image_data_std(data, len);
+        }
+
         image_unpacked_data result(len / 4);
 
         uint8_t* r = result.data_r();
