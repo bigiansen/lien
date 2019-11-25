@@ -1,4 +1,4 @@
-SET(LIEN_TEST_IMAGE_SOURCES
+SET(LIEN_IMAGE_TESTS_SOURCES
     src/image_ops.cpp
     src/x86/image_ops.cpp
     src/arm/image_ops.cpp
@@ -6,5 +6,5 @@ SET(LIEN_TEST_IMAGE_SOURCES
     src/main.cpp
 )
 
-add_executable(lien_test_image ${LIEN_TEST_IMAGE_SOURCES})
-target_link_libraries(lien_test_image lien_image Catch2::Catch2)
+add_executable(lien_image_tests ${LIEN_IMAGE_TESTS_SOURCES})
+target_link_libraries(lien_image_tests lien_image Catch2::Catch2)

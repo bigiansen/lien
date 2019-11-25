@@ -132,6 +132,14 @@ namespace ien
         T* data() noexcept { return _data; }
         const T* cdata() const noexcept { return _data; }
 
+        void resize(size_t sz)
+        {
+            _len = sz;
+            _data = reinterpret_cast<T*>(
+                LIEN_ALIGNED_REALLOC(_data, sz, _alignment)
+            );
+        }
+
         T& operator[](std::size_t index)
         {
             return _data[index];

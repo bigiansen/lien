@@ -18,8 +18,15 @@ steps:
   inputs:
     script: |
       bash build_debug_linux.sh
+
+- task: CmdLine@2
+  inputs:
+    script: |
       cd build_debug_linux/output/bin/lien_tests
-      ./lien_test_image -r junit -o lien_test_image.xml
+      ./lien_base_tests -r junit -o lien_base_tests.xml
+      ./lien_image_tests -r junit -o lien_image_tests.xml
+      ./lien_parallel_tests -r junit -o lien_parallel_tests.xml
+      ./lien_strutils_tests -r junit -o lien_strutils_tests.xml
       
 - task: PublishTestResults@2
   inputs:
