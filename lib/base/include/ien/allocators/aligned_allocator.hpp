@@ -29,7 +29,7 @@ namespace ien::allocators
 
         [[nodiscard]] T* allocate(size_t n, const void* hint = 0)
         {
-            void* ptr = LIEN_ALIGNED_ALLOCV(sizeof(T) * n, Alignment);
+            void* ptr = LIEN_ALIGNED_ALLOC(sizeof(T) * n, Alignment);
             if(ptr != nullptr) 
             {
                 return reinterpret_cast<T*>(ptr);

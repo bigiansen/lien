@@ -106,7 +106,7 @@ namespace ien
             , _alignment(alignment)
         { 
             _data = reinterpret_cast<T*>(
-                LIEN_ALIGNED_ALLOCV(len * sizeof(T), alignment)
+                LIEN_ALIGNED_ALLOC(len * sizeof(T), alignment)
             );
         }
 

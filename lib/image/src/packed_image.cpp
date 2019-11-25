@@ -15,7 +15,7 @@ namespace ien::img
         : _width(width)
         , _height(height)
     {
-        _data = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(size_t(width) * height * 4));
+        _data = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(size_t(width) * height * 4, LIEN_DEFAULT_ALIGNMENT));
     }
 
     packed_image::packed_image(const std::string& path)
@@ -90,7 +90,9 @@ namespace ien::img
 
     void packed_image::resize_absolute(int w, int h)
     {
-        uint8_t* resized_data = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(size_t(w) * h * 4));
+        uint8_t* resized_data = reinterpret_cast<uint8_t*>(
+            LIEN_ALIGNED_ALLOC(size_t(w) * h * 4, LIEN_DEFAULT_ALIGNMENT)
+        );
         stbir_resize_uint8(_data, _width, _height, 4, resized_data, w, h, 4, 4);
 
         if(_stb_free)

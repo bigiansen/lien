@@ -81,21 +81,24 @@
 // ALIGNED ALLOCATION
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-// Set default alignment of aligned (m)alloc to 32 bits (AVX)
-#ifndef LIEN_ALIGNED_ALLOC_ALIGNMENT
-    #define LIEN_ALIGNED_ALLOC_ALIGNMENT 32
+#define LIEN_ALIGNED_SZ(sz, alig) (sz - (sz % alig) + alig)
+
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
+    #define LIEN_DEFAULT_ALIGNMENT 32
+#elif defined(LIEN_ARCH_ARM) || defined(LIEN_ARCH_ARM64)
+    #define LIEN_DEFAULT_ALIGNMENT 16
+#else
+    #define LIEN_DEFAULT_ALIGNMENT 32
 #endif
 
 #if defined(LIEN_COMPILER_MSVC)
-    #define LIEN_ALIGNED_ALLOC(sz) _aligned_malloc(sz, LIEN_ALIGNED_ALLOC_ALIGNMENT)
-    #define LIEN_ALIGNED_ALLOCV(sz, alig) _aligned_malloc(sz, alig)
+    #define LIEN_ALIGNED_ALLOC(sz, alig) _aligned_malloc(LIEN_ALIGNED_SZ(sz, alig), alig)
     #define LIEN_ALIGNED_FREE(ptr) _aligned_free(ptr)
-    #define LIEN_ALIGNED_REALLOC(ptr, sz) _aligned_realloc(ptr, sz, LIEN_ALIGNED_ALLOC_ALIGNMENT)
+    #define LIEN_ALIGNED_REALLOC(ptr, sz, alig) _aligned_realloc(ptr, LIEN_ALIGNED_SZ(sz, alig), alig)
 #else
-    #define LIEN_ALIGNED_ALLOC(sz) std::aligned_alloc(LIEN_ALIGNED_ALLOC_ALIGNMENT, sz)
-    #define LIEN_ALIGNED_ALLOCV(sz, alig) std::aligned_alloc(alig, sz)
+    #define LIEN_ALIGNED_ALLOC(sz, alig) std::aligned_alloc(alig, LIEN_ALIGNED_SZ(sz, alig))
     #define LIEN_ALIGNED_FREE(ptr) std::free(ptr)
-    #define LIEN_ALIGNED_REALLOC(ptr, sz) std::realloc(ptr, sz)
+    #define LIEN_ALIGNED_REALLOC(ptr, sz, alig) std::realloc(ptr, LIEN_ALIGNED_SZ(sz, alig))
 #endif
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+

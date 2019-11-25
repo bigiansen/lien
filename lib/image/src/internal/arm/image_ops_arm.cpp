@@ -315,22 +315,24 @@ namespace ien::img::_internal
         uint8_t* a = result.data_a();
 
         size_t last_v_idx = len - (len % NEON_STRIDE);
-        for(size_t i = 0; i < len; i += NEON_STRIDE)
+        for(size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
         {
-            uint8x16x4_t vrgba = vld4q_u8(data + i + 0);
+            uint8x16x4_t vrgba = vld4q_u8(data + i);
 
-            vst1q_u8(r + (i / 4), vrgba.val[0]);
-            vst1q_u8(g + (i / 4), vrgba.val[1]);
-            vst1q_u8(b + (i / 4), vrgba.val[2]);
-            vst1q_u8(a + (i / 4), vrgba.val[3]);
+            size_t vidx = i / 4;
+            vst1q_u8(r + (vidx), vrgba.val[0]);
+            vst1q_u8(g + (vidx), vrgba.val[1]);
+            vst1q_u8(b + (vidx), vrgba.val[2]);
+            vst1q_u8(a + (vidx), vrgba.val[3]);
         }
 
         for (size_t i = last_v_idx; i < len; ++i)
         {
-            r[i / 4] = data[i + 0];
-            g[i / 4] = data[i + 1];
-            b[i / 4] = data[i + 2];
-            a[i / 4] = data[i + 3];
+            size_t vidx = i / 4;
+            r[vidx] = data[i + 0];
+            g[vidx] = data[i + 1];
+            b[vidx] = data[i + 2];
+            a[vidx] = data[i + 3];
         }
 
         return result;
