@@ -336,12 +336,14 @@ TEST_CASE("Benchmark rgba luminance")
 #endif
 };
 
+#define IMG_DIM_UNPACK 128
+
 TEST_CASE("Benchmark unpack image data")
 {
     BENCHMARK_ADVANCED("STD")(Catch::Benchmark::Chronometer meter)
     {
-        std::vector<uint8_t> data(IMG_DIM * IMG_DIM);
-        for (size_t i = 0; i < i < ((IMG_DIM * IMG_DIM) / 4); ++i)
+        std::vector<uint8_t> data(IMG_DIM_UNPACK * IMG_DIM_UNPACK);
+        for (size_t i = 0; i < i < ((IMG_DIM_UNPACK * IMG_DIM_UNPACK) / 4); ++i)
         {
             data[(i * 4) + 0] = 1;
             data[(i * 4) + 1] = 2;
@@ -358,8 +360,8 @@ TEST_CASE("Benchmark unpack image data")
 #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
     BENCHMARK_ADVANCED("SSSE3")(Catch::Benchmark::Chronometer meter)
     {
-        std::vector<uint8_t> data(IMG_DIM * IMG_DIM);
-        for (size_t i = 0; i < ((IMG_DIM * IMG_DIM) / 4); ++i)
+        std::vector<uint8_t> data(IMG_DIM_UNPACK * IMG_DIM_UNPACK);
+        for (size_t i = 0; i < ((IMG_DIM_UNPACK * IMG_DIM_UNPACK) / 4); ++i)
         {
             data[(i * 4) + 0] = 1;
             data[(i * 4) + 1] = 2;
@@ -376,8 +378,8 @@ TEST_CASE("Benchmark unpack image data")
 #elif defined(LIEN_ARM_NEON)
     BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)
     {
-        std::vector<uint8_t> data(IMG_DIM * IMG_DIM);
-        for (size_t i = 0; i < ((IMG_DIM * IMG_DIM) / 4); ++i)
+        std::vector<uint8_t> data(IMG_DIM_UNPACK * IMG_DIM_UNPACK);
+        for (size_t i = 0; i < ((IMG_DIM_UNPACK * IMG_DIM_UNPACK) / 4); ++i)
         {
             data[(i * 4) + 0] = 1;
             data[(i * 4) + 1] = 2;
