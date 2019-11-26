@@ -1,4 +1,4 @@
-#ifdef NDEBUG
+#if defined(NDEBUG)
 
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>
@@ -473,6 +473,53 @@ TEST_CASE("Benchmark unpack image data")
         meter.measure([&]
         {
             return _internal::unpack_image_data_neon(data.data(), data.size());
+        });
+    };
+#endif
+};
+
+#define COMPARE_CHANNEL_SETUP(args) \
+    image img(IMG_DIM, IMG_DIM); \
+    fill_image_random(img);\
+    _internal::channel_compare_args args(img, rgba_channel::R, 123)
+
+TEST_CASE("Benchmark channel compare")
+{
+    BENCHMARK_ADVANCED("STD")(Catch::Benchmark::Chronometer meter)
+    {
+        COMPARE_CHANNEL_SETUP(args);
+        meter.measure([&]
+        {
+            return _internal::channel_compare_std(args);
+        });
+    };
+
+#if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
+    BENCHMARK_ADVANCED("SSE2")(Catch::Benchmark::Chronometer meter)
+    {
+        COMPARE_CHANNEL_SETUP(args);
+        meter.measure([&]
+        {
+            return _internal::channel_compare_sse2(args);
+        });
+    };
+
+    BENCHMARK_ADVANCED("AVX2")(Catch::Benchmark::Chronometer meter)
+    {
+        COMPARE_CHANNEL_SETUP(args);
+        meter.measure([&]
+        {
+            return _internal::channel_compare_avx2(args);
+        });
+    };
+
+#elif defined(LIEN_ARM_NEON)
+    BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)
+    {
+        COMPARE_CHANNEL_SETUP(args);
+        meter.measure([&]
+        {
+            return _internal::channel_compare_neon(args);
         });
     };
 #endif

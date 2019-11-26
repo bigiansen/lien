@@ -26,7 +26,7 @@ TEST_CASE("[ARM] Channel byte truncation")
             img.data()->data_a()[i] = 0xFF;
         }
 
-        _internal::truncate_channel_args args(&img, 1, 2, 3, 4);
+        _internal::truncate_channel_args args(img, 1, 2, 3, 4);
 
         _internal::truncate_channel_data_neon(args);
         for (size_t i = 0; i < px_count; ++i)

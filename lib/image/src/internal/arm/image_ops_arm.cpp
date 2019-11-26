@@ -128,7 +128,7 @@ namespace ien::img::_internal
         const size_t img_sz = args.len;
         if(img_sz < NEON_STRIDE)
         {
-            rgba_average_std(args);
+            return rgba_average_std(args);
         }
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
@@ -161,7 +161,7 @@ namespace ien::img::_internal
         const size_t img_sz = args.len;
         if(img_sz < NEON_STRIDE)
         {
-            rgba_max_std(args);
+            return rgba_max_std(args);
         }
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
@@ -193,7 +193,7 @@ namespace ien::img::_internal
         const size_t img_sz = args.len;
         if(img_sz < NEON_STRIDE)
         {
-            rgba_min_std(args);
+            return rgba_min_std(args);
         }
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
@@ -225,7 +225,7 @@ namespace ien::img::_internal
         const size_t img_sz = args.len;
         if(img_sz < NEON_STRIDE)
         {
-            rgb_max_std(args);
+            return rgb_max_std(args);
         }
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
@@ -255,7 +255,7 @@ namespace ien::img::_internal
         const size_t img_sz = args.len;
         if(img_sz < NEON_STRIDE)
         {
-            rgba_min_std(args);
+            return rgb_min_std(args);
         }
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
@@ -268,7 +268,7 @@ namespace ien::img::_internal
             uint8x16_t vseg_b = vld1q_u8(b + i);
 
             uint8x16_t vmin_rg = vminq_u8(vseg_r, vseg_g);
-            uint8x16_t vmin_rgb = vminq_u8(vmin_rg, vmin_b);
+            uint8x16_t vmin_rgb = vminq_u8(vmin_rg, vseg_b);
 
             vst1q_u8(result.data() + i, vmin_rgb);
         }
@@ -285,7 +285,7 @@ namespace ien::img::_internal
         const size_t img_sz = args.len;
         if(img_sz < NEON_STRIDE)
         {
-            rgba_sum_saturated_std(args);
+            return rgba_sum_saturated_std(args);
         }
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
@@ -318,7 +318,7 @@ namespace ien::img::_internal
         const size_t img_sz = args.len;
         if(img_sz < NEON_STRIDE)
         {
-            rgb_saturation_std(args);
+            return rgb_saturation_std(args);
         }
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
@@ -365,7 +365,7 @@ namespace ien::img::_internal
         const size_t img_sz = args.len;
         if(img_sz < NEON_STRIDE)
         {
-            rgb_luminance_std(args);
+            return rgb_luminance_std(args);
         }
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
