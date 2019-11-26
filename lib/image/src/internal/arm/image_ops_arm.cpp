@@ -452,6 +452,11 @@ namespace ien::img::_internal
 
         return result;
     }
+
+    fixed_vector<uint8_t> channel_compare_neon(const channel_compare_args& args)
+    {
+        return fixed_vector<uint8_t>(0);
+    }
 }
 
 #endif

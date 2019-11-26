@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ien/image.hpp>
+#include <ien/rgba_channel.hpp>
 #include <cinttypes>
 
 namespace ien::img::_internal
@@ -78,5 +79,33 @@ namespace ien::img::_internal
             , ch_g(img.cdata()->cdata_g())
             , ch_b(img.cdata()->cdata_b())
         { }
+    };
+
+    struct channel_compare_args
+    {
+        size_t len = 0;
+        const uint8_t* ch = nullptr;
+        const uint8_t threshold = 0;
+
+        channel_compare_args(const image& img, rgba_channel channel, uint8_t thres)
+            : len(img.pixel_count())
+            , threshold(thres)
+        {
+            switch(channel)
+            {
+                case rgba_channel::R:
+                    ch = img.cdata()->cdata_r();
+                    break;
+                case rgba_channel::G:
+                    ch = img.cdata()->cdata_g();
+                    break;
+                case rgba_channel::B:
+                    ch = img.cdata()->cdata_b();
+                    break;
+                case rgba_channel::A:
+                    ch = img.cdata()->cdata_a();
+                    break;
+            }
+        }
     };
 }

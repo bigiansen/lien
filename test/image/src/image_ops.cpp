@@ -276,3 +276,31 @@ TEST_CASE("[STD] Unpack Image Data")
         }
     }
 };
+
+TEST_CASE("[STD] Channel compare")
+{
+    SECTION("STD")
+    {
+        image img(41, 41);
+        size_t px_count = 41 * 41;
+
+        for (size_t i = 0; i < px_count; ++i)
+        {
+            img.data()->data_r()[i] = static_cast<uint8_t>(1 + i);
+            img.data()->data_g()[i] = static_cast<uint8_t>(2 + i);
+            img.data()->data_b()[i] = static_cast<uint8_t>(3 + i);
+            img.data()->data_a()[i] = static_cast<uint8_t>(4 + i);
+        }
+
+        _internal::channel_compare_args args(img, rgba_channel::R, 107);
+        ien::fixed_vector<uint8_t> result = _internal::channel_compare_std(args);
+
+        REQUIRE(result.size() == img.pixel_count());
+        for(size_t i = 0; i < result.size(); ++i)
+        {
+            bool res = static_cast<bool>(result[i]);
+            bool cmp = (static_cast<uint8_t>(1 + i) >= 107);
+            REQUIRE(res == cmp);
+        }
+    };
+};

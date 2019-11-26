@@ -500,5 +500,33 @@ namespace ien::img::_internal
 
         return result;
     }
+
+    fixed_vector<uint8_t> channel_compare_avx2(const channel_compare_args& args)
+    {
+        const size_t len = args.len;
+        if (len < AVX2_STRIDE)
+        {
+            return channel_compare_std(args);
+        }
+
+        fixed_vector<uint8_t> result(len, AVX2_STRIDE);
+
+        const __m256i vthreshold = _mm256_set1_epi8(args.threshold);
+
+        size_t last_v_idx = len - (len % (AVX2_STRIDE));
+        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        {
+            __m256i vseg = LOAD_SI256_CONST(args.ch + i);
+            __m256i vcmp = _mm256_cmpeq_epi8(vseg, _mm256_max_epu8(vseg, vthreshold));
+            STORE_SI256(result.data() + i, vcmp);
+        }
+
+        for (size_t i = last_v_idx; i < len; ++i)
+        {
+            result[i] = args.ch[i] >= args.threshold;
+        }
+
+        return result;
+    }
 }
 #endif

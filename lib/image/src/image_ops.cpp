@@ -215,9 +215,9 @@ namespace ien::img
 		typedef image_unpacked_data(*func_ptr_t)(const uint8_t*, size_t len);
 
 		#if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
-		static func_ptr_t func = platform::x86::get_feature(platform::x86::feature::SSSE3)
-				? &_internal::unpack_image_data_ssse3
-				: &_internal::unpack_image_data_std;
+            static func_ptr_t func = platform::x86::get_feature(platform::x86::feature::SSSE3)
+                    ? &_internal::unpack_image_data_ssse3
+                    : &_internal::unpack_image_data_std;
         #elif defined(LIEN_ARM_NEON)
             static func_ptr_t func = &_internal::unpack_image_data_neon;
 		#else
@@ -226,4 +226,24 @@ namespace ien::img
 
 		return func(data, len);
 	}
+
+    fixed_vector<uint8_t> channel_compare(const image& img, rgba_channel channel, uint8_t threshold)
+    {
+        typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_compare_args& args);
+        
+        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+            static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
+                    &_internal::channel_compare_avx2,
+                    &_internal::channel_compare_sse2,
+                    &_internal::channel_compare_std
+                );
+        #elif defined(LIEN_ARM_NEON)
+            static func_ptr_t func = &_internal::channel_compare_neon;
+		#else
+            static func_ptr_t func = &_internal::channel_compare_std;
+		#endif
+
+        _internal::channel_compare_args args(img, channel, threshold);
+		return func(args);
+    }
 }

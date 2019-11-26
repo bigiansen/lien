@@ -2,6 +2,7 @@
 
 #include <ien/fixed_vector.hpp>
 #include <ien/image.hpp>
+#include <ien/rgba_channel.hpp>
 
 #include <cinttypes>
 
@@ -22,8 +23,10 @@ namespace ien::img
     fixed_vector<uint8_t> rgba_sum_saturated(const image& img);
 
     fixed_vector<float> rgb_saturation(const image& img);
-    
+
     fixed_vector<float> rgb_luminance(const image& img);
 
-	image_unpacked_data unpack_image_data(const uint8_t* data, size_t len);
+    image_unpacked_data unpack_image_data(const uint8_t* data, size_t len);
+
+    fixed_vector<uint8_t> channel_compare(const image& img, rgba_channel channel, uint8_t threshold);
 }

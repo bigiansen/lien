@@ -205,4 +205,16 @@ namespace ien::img::_internal
 		}
 		return result;
 	}
+
+    fixed_vector<uint8_t> channel_compare_std(const channel_compare_args& args)
+    {
+        fixed_vector<uint8_t> result(args.len);
+
+        for(size_t i = 0; i < args.len; ++i)
+        {
+            result[i] = args.ch[i] >= args.threshold;
+        }
+
+        return result;
+    }
 }

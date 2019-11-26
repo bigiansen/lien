@@ -10,9 +10,9 @@ SET(LIEN_IMAGE_SOURCES
 	src/packed_image.cpp
 	src/packed_image_view.cpp
 	src/internal/std/image_ops_std.cpp
-	src/internal/x86/sse2/image_ops_x86.cpp
-        src/internal/x86/avx2/image_ops_x86.cpp
-        src/internal/arm/image_ops_arm.cpp
+	src/internal/x86/sse/image_ops_x86.cpp
+	src/internal/x86/avx2/image_ops_x86.cpp
+	src/internal/arm/image_ops_arm.cpp
 )
 
 FILE(GLOB LIEN_IMAGE_HEADERS include/ien/*.hpp include/ien/*/*.hpp include/ien/*/*/*.hpp)
