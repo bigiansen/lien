@@ -455,7 +455,30 @@ namespace ien::img::_internal
 
     fixed_vector<uint8_t> channel_compare_neon(const channel_compare_args& args)
     {
-        return fixed_vector<uint8_t>(0);
+        const size_t len = args.len;
+        if (len < NEON_STRIDE)
+        {
+            return channel_compare_std(args);
+        }
+
+        fixed_vector<uint8_t> result(len, NEON_STRIDE);
+
+        const uint8x16_t vthreshold = vld1q_dup_u8(&args.threshold);
+
+        size_t last_v_idx = len - (len % (NEON_STRIDE));
+        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        {
+            uint8x16_t vseg = vld1q_u8(args.ch + i);
+            uint8x16_t vcmp = vcgeq_u8(vseg, vthreshold);
+            vst1q_u8(result.data() + i, vcmp);
+        }
+
+        for (size_t i = last_v_idx; i < len; ++i)
+        {
+            result[i] = args.ch[i] >= args.threshold;
+        }
+
+        return result;
     }
 }
 
