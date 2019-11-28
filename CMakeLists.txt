@@ -36,6 +36,8 @@ if(LIEN_ARCH_ARM AND LIEN_ARM_ENABLE_NEON)
 	add_compile_definitions(LIEN_ARM_NEON)
 endif()
 
+LIEN_INIT_GIT_SUBMODULES()
+
 add_subdirectory("lib")
 
 if(LIEN_BUILD_TESTS)

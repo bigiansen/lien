@@ -1,10 +1,8 @@
-.vscode/ipch/12183372e88db3bf/IMAGE.ipch
-.vscode/ipch/
 build*/
 build_debug_win64/
 build_release_win64/
 build_release_win32/
 .vs/
+.vscode/
 out/*
 CMakeLists.txt.user
-.vscode/c_cpp_properties.json
