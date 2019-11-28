@@ -4,7 +4,7 @@ set(LIEN_IMAGE_TESTS_SOURCES
 )
 
 set(LIEN_IMAGE_TESTS_SOURCES_BENCHMARKS
-    src/benchmarks/image_ops_arm_benchmarks.cpp
+    src/benchmarks/image_ops_benchmarks.cpp
 )
 
 set(LIEN_IMAGE_TESTS_SOURCES_X86

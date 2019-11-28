@@ -17,12 +17,16 @@ steps:
 - task: CmdLine@2
   inputs:
     script: |
-      bash build_debug_linux.sh
+      mkdir build_debug
+      cd build_debug
+      cmake -DCMAKE_BUILD_TYPE=DEBUG -DLIEN_BUILD_TESTS_BENCHMARKS=OFF ..
+      cmake --build .
+      cd ..
 
 - task: CmdLine@2
   inputs:
     script: |
-      cd build_debug_linux/output/bin/lien_tests
+      cd build_debug/output/bin/lien_tests
       ./lien_base_tests -r junit -o lien_base_tests.xml
       ./lien_image_tests -r junit -o lien_image_tests.xml
       ./lien_parallel_tests -r junit -o lien_parallel_tests.xml
@@ -31,4 +35,4 @@ steps:
 - task: PublishTestResults@2
   inputs:
     testResultsFormat: 'JUnit'
-    testResultsFiles: 'build_debug_linux/output/bin/lien_tests/*.xml'
+    testResultsFiles: 'build_debug/output/bin/lien_tests/*.xml'
