@@ -1,4 +1,4 @@
-#include <ien/internal/arm/image_ops_arm.hpp>
+#include <ien/internal/arm/image_ops_neon.hpp>
 #include <ien/platform.hpp>
 
 #if defined(LIEN_ARM_NEON)

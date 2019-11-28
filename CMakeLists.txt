@@ -2,42 +2,24 @@ cmake_minimum_required (VERSION "3.7.0")
 
 project(lien LANGUAGES CXX C)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+include(cmake/lien.cmake)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY 			${PROJECT_BINARY_DIR}/output/lib/shared)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY 			${PROJECT_BINARY_DIR}/output/lib/static)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY 			${PROJECT_BINARY_DIR}/output/bin/lien)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG 	${PROJECT_BINARY_DIR}/output/lib/shared)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG 	${PROJECT_BINARY_DIR}/output/lib/static)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG 	${PROJECT_BINARY_DIR}/output/bin/lien)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE 	${PROJECT_BINARY_DIR}/output/lib/shared)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE 	${PROJECT_BINARY_DIR}/output/lib/static)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE 	${PROJECT_BINARY_DIR}/output/bin/lien)
+LIEN_SET_SHARED_LIB_OUTPUT_DIR(${PROJECT_BINARY_DIR}/output/lib/shared)
+LIEN_SET_STATIC_LIB_OUTPUT_DIR(${PROJECT_BINARY_DIR}/output/lib/static)
+LIEN_SET_EXECUTABLE_OUTPUT_DIR(${PROJECT_BINARY_DIR}/output/lib/lien)
 
-option(LIEN_BUILD_TESTS "Build Tests" On)
+# -- OPTIONS --
+option(LIEN_BUILD_STRUTILS "Build String utilities library" ON)
+option(LIEN_BUILD_PARALLEL "Build Parallel utilities library" ON)
+option(LIEN_BUILD_IMAGE "Build Image utilities library" ON)
 
-# Conditional library compilation options
-option(LIEN_PARALLEL "Build Parallel utilities library" On)
-option(LIEN_IMAGE "Build Image utilities library" On)
-option(LIEN_ARM_ENABLE_NEON "Enable NEON code generation on ARM platforms" On)
+option(LIEN_BUILD_TESTS "Build Tests" ON)
+option(LIEN_BUILD_TESTS_BENCHMARKS "Build Benchmarks" ON)
 
-# x86 FLAG
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
-    set (LIEN_ARCH_X86 TRUE)
-else ()
-    set (LIEN_ARCH_X86 FALSE)
-endif ()
+option(LIEN_ARM_ENABLE_NEON "Enable NEON code generation on ARM platforms" ON)
 
-# ARM FLAG
-if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm|ARM|aarch64|AARCH64")
-    set (LIEN_ARCH_ARM TRUE)
-else ()
-    set (LIEN_ARCH_ARM FALSE)
-endif ()
-
-# Enable AVX2 code generation on x86 platforms
+# Enable SSE/AVX code generation on X86 platforms
+# This should go in a toolchain, but will remain here for the moment
 if(LIEN_ARCH_X86)
     if(MSVC)
         add_definitions(/arch:AVX2)
@@ -46,7 +28,8 @@ if(LIEN_ARCH_X86)
     endif()
 endif()
 
-# Enable NEON code generation on ARM platforms, if enabled by LIEN_ARM_ENABLE_NEON
+# Enable NEON code generation on ARM platforms, if enabled by the LIEN_ARM_ENABLE_NEON option
+# This should go in a toolchain, but will remain here for the moment
 if(LIEN_ARCH_ARM AND LIEN_ARM_ENABLE_NEON)
     message("########## ARM NEON ENABLED! ###########")
     add_definitions(-mfpu=neon -mfloat-abi=hard -march=armv7-a -funsafe-math-optimizations)

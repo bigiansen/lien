@@ -1,4 +1,4 @@
-#if defined(NDEBUG)
+#if defined(LIEN_BENCHMARK)
 
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <catch2/catch.hpp>

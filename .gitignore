@@ -7,3 +7,4 @@ build_release_win32/
 .vs/
 out/*
 CMakeLists.txt.user
+.vscode/c_cpp_properties.json
