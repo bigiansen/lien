@@ -145,6 +145,11 @@ namespace ien
             return _data[index];
         }
 
+        const T& operator[](std::size_t index) const
+        {
+            return _data[index];
+        }
+
         fixed_vector::iterator begin()
         {
             return fixed_vector_iterator<T, false>(_data);
