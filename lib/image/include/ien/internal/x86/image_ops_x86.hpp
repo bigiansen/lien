@@ -21,6 +21,9 @@ namespace ien::img::_internal
     fixed_vector<uint8_t> rgba_min_sse2(const channel_info_extract_args_rgba& args);
     fixed_vector<uint8_t> rgba_min_avx2(const channel_info_extract_args_rgba& args);
 
+    fixed_vector<uint8_t> rgb_average_sse2(const channel_info_extract_args_rgb& args);
+    fixed_vector<uint8_t> rgb_average_avx2(const channel_info_extract_args_rgb& args);
+
     fixed_vector<uint8_t> rgb_max_sse2(const channel_info_extract_args_rgb& args);
     fixed_vector<uint8_t> rgb_max_avx2(const channel_info_extract_args_rgb& args);
 

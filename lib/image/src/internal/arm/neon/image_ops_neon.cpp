@@ -220,6 +220,37 @@ namespace ien::img::_internal
         return result;
     }
 
+    fixed_vector<uint8_t> rgb_average_neon(const channel_info_extract_args_rgb& args)
+    {
+        const size_t img_sz = args.len;
+        if(img_sz < NEON_STRIDE)
+        {
+            return rgb_average_std(args);
+        }
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);
+
+        fixed_vector<uint8_t> result(args.len, NEON_STRIDE);
+        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
+        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        {
+            uint8x16_t vseg_r = vld1q_u8(r + i);
+            uint8x16_t vseg_g = vld1q_u8(g + i);
+            uint8x16_t vseg_b = vld1q_u8(b + i);
+
+            uint8x16_t vavg_rg = vrhaddq_u8(vseg_r, vseg_g);
+            uint8x16_t vavg_rgb = vrhaddq_u8(vavg_rg, vseg_b);
+
+            vst1q_u8(result.data() + i, vavg_rgb);
+        }
+
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i];
+            result[i] = static_cast<uint8_t>(sum / 3);
+        }
+        return result;
+    }
+
     fixed_vector<uint8_t> rgb_max_neon(const channel_info_extract_args_rgb& args)
     {
         const size_t img_sz = args.len;

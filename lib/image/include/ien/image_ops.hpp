@@ -16,6 +16,8 @@ namespace ien::img
 
     fixed_vector<uint8_t> rgba_min(const image& img);
 
+    fixed_vector<uint8_t> rgb_average(const image& img);
+
     fixed_vector<uint8_t> rgb_max(const image& img);
 
     fixed_vector<uint8_t> rgb_min(const image& img);

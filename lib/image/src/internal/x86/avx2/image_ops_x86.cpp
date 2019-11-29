@@ -197,6 +197,40 @@ namespace ien::img::_internal
         return result;
     }
 
+    fixed_vector<uint8_t> rgb_average_avx2(const channel_info_extract_args_rgb& args)
+    {
+        const size_t img_sz = args.len;
+
+        if (img_sz < AVX2_STRIDE)
+        {
+            return rgb_average_std(args);
+        }
+
+        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
+
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);
+
+        size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
+        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        {
+            __m256i vseg_r = LOAD_SI256_CONST(r + i);
+            __m256i vseg_g = LOAD_SI256_CONST(g + i);
+            __m256i vseg_b = LOAD_SI256_CONST(b + i);
+
+            __m256i vavg_rg = _mm256_avg_epu8(vseg_r, vseg_g);
+            __m256i vavg_rgb = _mm256_avg_epu8(vavg_rg, vseg_b);
+
+            STOREU_SI256((result.data() + i), vavg_rgb);
+        }
+
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i];
+            result[i] = static_cast<uint8_t>(sum / 3);
+        }
+        return result;
+    }
+
     fixed_vector<uint8_t> rgb_max_avx2(const channel_info_extract_args_rgb& args)
     {
         const size_t img_sz = args.len;

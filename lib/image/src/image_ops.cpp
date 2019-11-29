@@ -110,6 +110,26 @@ namespace ien::img
         return func(args);
     }
 
+    fixed_vector<uint8_t> rgb_average(const image& img)
+    {
+        typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
+
+        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+            static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
+                &_internal::rgb_average_std,
+                &_internal::rgb_average_sse2,
+                &_internal::rgb_average_avx2
+            );
+        #elif defined(LIEN_ARM_NEON)
+            static func_ptr_t func = &_internal::rgb_average_neon;
+        #else
+            static func_ptr_t func = &_internal::rgb_average_std;
+        #endif
+
+        _internal::channel_info_extract_args_rgb args(img);
+        return func(args);
+    }
+
     fixed_vector<uint8_t> rgb_max(const image& img)
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
