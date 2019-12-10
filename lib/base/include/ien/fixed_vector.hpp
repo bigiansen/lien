@@ -160,6 +160,16 @@ namespace ien
             return fixed_vector_iterator<T, false>(_data + _len - 1);
         }
 
+        fixed_vector::const_iterator begin() const
+        {
+            return cbegin();
+        }
+
+        fixed_vector::const_iterator end() const
+        {
+            return cend();
+        }
+
         fixed_vector::const_iterator cbegin() const
         {
             return fixed_vector_iterator<T, true>(_data);
