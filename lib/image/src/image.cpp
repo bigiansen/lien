@@ -7,6 +7,8 @@
 #include <stb_image.h>
 #include <stb_image_resize.h>
 #include <stb_image_write.h>
+
+#include <cstring>
 #include <stdexcept>
 
 namespace ien::img
@@ -37,9 +39,20 @@ namespace ien::img
         stbi_image_free(packed_data);
     }
 
+    image::image(const image& cp_src)
+        : _data(cp_src.pixel_count())
+        , _width(cp_src._width)
+        , _height(cp_src._height)
+    {
+        std::memcpy(_data.data_r(), cp_src.cdata()->cdata_r(), cp_src.pixel_count());
+        std::memcpy(_data.data_b(), cp_src.cdata()->cdata_g(), cp_src.pixel_count());
+        std::memcpy(_data.data_b(), cp_src.cdata()->cdata_b(), cp_src.pixel_count());
+        std::memcpy(_data.data_a(), cp_src.cdata()->cdata_a(), cp_src.pixel_count());
+    }
+
     image_unpacked_data* image::data() noexcept { return &_data; }
 
-    const image_unpacked_data* image::cdata() const noexcept { return &_data; }    
+    const image_unpacked_data* image::cdata() const noexcept { return &_data; }
 
     size_t image::pixel_count() const noexcept
     {

@@ -19,6 +19,8 @@ namespace ien::img
         image(int width, int height);
         image(const std::string& path);
 
+        image(const image& cp_src);
+
         image_unpacked_data* data() noexcept;
         const image_unpacked_data* cdata() const noexcept;
 
