@@ -210,7 +210,7 @@ namespace ien::img
         return func(args);
     }
 
-    fixed_vector<float> rgb_luminance(const image img)
+    fixed_vector<float> rgb_luminance(const image& img)
     {
         typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
