@@ -45,7 +45,7 @@ namespace ien::img
         , _height(cp_src._height)
     {
         std::memcpy(_data.data_r(), cp_src.cdata()->cdata_r(), cp_src.pixel_count());
-        std::memcpy(_data.data_b(), cp_src.cdata()->cdata_g(), cp_src.pixel_count());
+        std::memcpy(_data.data_g(), cp_src.cdata()->cdata_g(), cp_src.pixel_count());
         std::memcpy(_data.data_b(), cp_src.cdata()->cdata_b(), cp_src.pixel_count());
         std::memcpy(_data.data_a(), cp_src.cdata()->cdata_a(), cp_src.pixel_count());
     }

@@ -32,15 +32,15 @@ namespace ien
 
         size_t total_bits()
         {
-            return _total_items * sizeof(T);
+            return _total_items * sizeof(T) * 8;
         }
 
         bool operator++()
         {
-            if(_current_bit == sizeof(T) - 1)
+            if(_current_bit == ((sizeof(T) * 8) - 1))
             {
                 const auto& [view_ptr, view_len] = _views[_current_view];
-                if(_current_item >= view_len)
+                if(_current_item == (view_len - 1))
                 {
                     if(_current_view == _views.size() - 1)
                     {
@@ -74,7 +74,7 @@ namespace ien
         bool operator*()
         {
             const T& item = _views[_current_view].first[_current_item];
-            return ((item >> _current_bit) | (1)) == item;
+            return ien::get_bit(item, _current_bit);
         }
     };
 }
