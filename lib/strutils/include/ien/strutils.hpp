@@ -1,9 +1,11 @@
 #pragma once
 
+#include <array>
+#include <charconv>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <vector>
-#include <array>
 
 namespace ien::strutils
 {
@@ -37,4 +39,22 @@ namespace ien::strutils
     [[nodiscard]] extern std::string_view trim_start(std::string_view str);
     [[nodiscard]] extern std::string_view trim_end(std::string_view str);
     [[nodiscard]] extern std::string_view trim(std::string_view str);
+
+    template<typename T>
+    T string_view_to_integral(std::string_view sv)
+    {
+        static_assert(std::is_integral_v<T>, "Not an integral type");
+        T result;
+        std::from_chars(sv.data(), sv.data() + sv.size(), result);
+        return result;
+    }
+
+    template<typename T>
+    T string_view_to_float(std::string_view sv)
+    {
+        static_assert(std::is_floating_point_v<T>, "Not a floating-point type");
+        T result;
+        std::from_chars(sv.data(), sv.data() + sv.size(), result);
+        return result;
+    }
 }
