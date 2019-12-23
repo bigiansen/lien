@@ -1,5 +1,6 @@
 SET(LIEN_BASE_SOURCES
     src/assert.cpp
+    src/bit_view.cpp
 	src/platform.cpp)
 
 FILE(GLOB LIEN_BASE_HEADERS include/ien/*.hpp)
