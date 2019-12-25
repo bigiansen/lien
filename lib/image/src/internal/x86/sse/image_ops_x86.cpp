@@ -93,39 +93,8 @@ namespace ien::img::_internal
 
     fixed_vector<uint8_t> rgba_average_sse2(const channel_info_extract_args_rgba& args)
     {
-        const size_t img_sz = args.len;
-
-        if (img_sz < SSE_STRIDE)
-        {
-            return rgba_average_std(args);
-        }
-
-        fixed_vector<uint8_t> result(args.len, SSE_STRIDE);
-
-        BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-
-        size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
-        {
-            __m128i vseg_r = LOAD_SI128_CONST(r + i);
-            __m128i vseg_g = LOAD_SI128_CONST(g + i);
-            __m128i vseg_b = LOAD_SI128_CONST(b + i);
-            __m128i vseg_a = LOAD_SI128_CONST(a + i);
-
-            __m128i vavg_rg = _mm_avg_epu8(vseg_r, vseg_g);
-            __m128i vavg_ba = _mm_avg_epu8(vseg_b, vseg_a);
-
-            __m128i vagv_rgba = _mm_avg_epu8(vavg_rg, vavg_ba);
-
-            STOREU_SI128((result.data() + i), vagv_rgba);
-        }
-
-        for (size_t i = last_v_idx; i < img_sz; ++i)
-        {
-            uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i] + a[i];
-            result[i] = static_cast<uint8_t>(sum / 4);
-        }
-        return result;
+        return rgba_average_std(args);
+        // Not implemented...
     }
 
     fixed_vector<uint8_t> rgba_max_sse2(const channel_info_extract_args_rgba& args)
@@ -200,36 +169,8 @@ namespace ien::img::_internal
 
     fixed_vector<uint8_t> rgb_average_sse2(const channel_info_extract_args_rgb& args)
     {
-        const size_t img_sz = args.len;
-
-        if (img_sz < SSE_STRIDE)
-        {
-            return rgb_average_std(args);
-        }
-
-        fixed_vector<uint8_t> result(args.len, SSE_STRIDE);
-
-        BIND_CHANNELS_RGB_CONST(args, r, g, b);
-
-        size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
-        {
-            __m128i vseg_r = LOAD_SI128_CONST(r + i);
-            __m128i vseg_g = LOAD_SI128_CONST(g + i);
-            __m128i vseg_b = LOAD_SI128_CONST(b + i);
-
-            __m128i vavg_rg = _mm_avg_epu8(vseg_r, vseg_g);
-            __m128i vavg_rgb = _mm_avg_epu8(vavg_rg, vseg_b);
-
-            STOREU_SI128((result.data() + i), vavg_rgb);
-        }
-
-        for (size_t i = last_v_idx; i < img_sz; ++i)
-        {
-            uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i];
-            result[i] = static_cast<uint8_t>(sum / 3);
-        }
-        return result;
+        return rgb_average_std(args);
+        // Not implemented...
     }
 
     fixed_vector<uint8_t> rgb_max_sse2(const channel_info_extract_args_rgb& args)
