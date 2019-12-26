@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-namespace ien::img
+namespace ien
 {
     packed_image_view::packed_image_view(const packed_image* img, const rect<int>& view_rect)
         : _ptr(img->cdata())

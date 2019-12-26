@@ -26,7 +26,7 @@
     const uint8_t* g = args.ch_g; \
     const uint8_t* b = args.ch_b;
 
-namespace ien::img::_internal
+namespace ien::image_ops::_internal
 {
     constexpr size_t NEON_STRIDE = 16;
 

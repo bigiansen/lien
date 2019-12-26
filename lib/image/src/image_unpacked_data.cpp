@@ -5,7 +5,7 @@
 
 #include <array>
 
-namespace ien::img
+namespace ien
 {
     image_unpacked_data::image_unpacked_data(size_t pixel_count)
         : _r(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(pixel_count, LIEN_DEFAULT_ALIGNMENT)))

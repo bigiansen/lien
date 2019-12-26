@@ -5,7 +5,7 @@
 #include <ien/fixed_vector.hpp>
 #include <ien/internal/image_ops_args.hpp>
 
-namespace ien::img::_internal
+namespace ien::image_ops::_internal
 {
     void truncate_channel_data_neon(const truncate_channel_args& args);
 

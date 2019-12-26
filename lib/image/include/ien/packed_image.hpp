@@ -4,7 +4,7 @@
 #include <cinttypes>
 #include <string>
 
-namespace ien::img
+namespace ien
 {
     class packed_image
     {

@@ -38,7 +38,7 @@
 #define LOAD_SI128_CONST(addr) \
     _mm_load_si128(reinterpret_cast<const __m128i*>(addr));
 
-namespace ien::img::_internal
+namespace ien::image_ops::_internal
 {
     const uint32_t trunc_and_table[8] = {
         0xFFFFFFFF, 0xFEFEFEFE, 0xFCFCFCFC, 0xF8F8F8F8,

@@ -3,7 +3,7 @@
 #include <ien/image.hpp>
 #include <cstring>
 
-namespace ien::img
+namespace ien
 {
     void mutable_image_view::set_pixel(int index, uint8_t* rgba)
     {

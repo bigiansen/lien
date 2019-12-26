@@ -12,7 +12,7 @@
 
 #include "utils.hpp"
 
-using namespace ien::img;
+using namespace ien;
 
 #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
 
@@ -611,7 +611,7 @@ TEST_CASE("[x86] Unpack Image Data")
             data[(i * 4) + 3] = 4;
         }
 
-        ien::img::image_unpacked_data result = _internal::unpack_image_data_ssse3(data.data(), data.size());
+        ien::image_unpacked_data result = _internal::unpack_image_data_ssse3(data.data(), data.size());
 
         for(size_t i = 0; i < result.size(); ++i)
         {

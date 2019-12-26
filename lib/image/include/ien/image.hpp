@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace ien::img
+namespace ien
 {
     class image
     {

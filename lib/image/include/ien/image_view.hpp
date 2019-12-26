@@ -8,7 +8,7 @@
 #include <cstring>
 #include <vector>
 
-namespace ien::img
+namespace ien
 {
     namespace _internal
     {

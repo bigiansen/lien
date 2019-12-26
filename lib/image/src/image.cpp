@@ -11,7 +11,7 @@
 #include <cstring>
 #include <stdexcept>
 
-namespace ien::img
+namespace ien
 {
     image::image(int width, int height)
         : _data(static_cast<size_t>(width) * height)
@@ -35,7 +35,7 @@ namespace ien::img
         {
             throw std::invalid_argument("Unable to load image with path: " + path);
         }
-        _data = unpack_image_data(packed_data, (static_cast<size_t>(_width) * _height * 4));
+        _data = image_ops::unpack_image_data(packed_data, (static_cast<size_t>(_width) * _height * 4));
         stbi_image_free(packed_data);
     }
 

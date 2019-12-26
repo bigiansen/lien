@@ -6,7 +6,7 @@
 
 #include <cinttypes>
 
-namespace ien::img
+namespace ien::image_ops
 {
     void truncate_channel_data(image_unpacked_data* img, int bits_r, int bits_g, int bits_b, int bits_a);
 

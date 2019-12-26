@@ -2,7 +2,7 @@
 
 #include <ien/type_traits.hpp>
 
-namespace ien::img
+namespace ien
 {
     template<typename T, typename = ien::tt::enable_if_is_integral_or_float<T>>
     struct rect

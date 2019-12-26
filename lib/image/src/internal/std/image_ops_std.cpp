@@ -21,7 +21,7 @@
     const uint8_t* g = args.ch_g; \
     const uint8_t* b = args.ch_b; 
 
-namespace ien::img::_internal
+namespace ien::image_ops::_internal
 {
     const uint32_t trunc_and_table[8] = {
         0xFFFFFFFF, 0xFEFEFEFE, 0xFCFCFCFC, 0xF8F8F8F8,

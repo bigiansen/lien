@@ -12,7 +12,7 @@
     #include <ien/internal/arm/image_ops_arm.hpp>
 #endif
 
-namespace ien::img
+namespace ien::image_ops
 {
 
 #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
@@ -23,7 +23,7 @@ namespace ien::img
             return platform::x86::get_feature(platform::x86::feature::AVX2) ? avx2 : sse2;
         #elif defined(LIEN_ARCH_X86)
             return platform::x86::get_feature(platform::x86::feature::AVX2) ? avx2
-                 : platform::x86::get_feature(platform::x86::feature::SSE2) ? sse2 : default;
+                 : platform::x86::get_feature(platform::x86::feature::SSE2) ? sse2 : def;
         #else
             #error "Unable to select x86 overload on non-x86 platform!"
         #endif

@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-using namespace ien::img;
+using namespace ien;
 
 TEST_CASE("[ARM] Channel byte truncation")
 {
@@ -247,7 +247,7 @@ TEST_CASE("[ARM] Unpack Image Data")
             data[(i * 4) + 3] = 4;
         }
 
-        ien::img::image_unpacked_data result = _internal::unpack_image_data_neon(data.data(), data.size());
+        ien::image_unpacked_data result = _internal::unpack_image_data_neon(data.data(), data.size());
 
         for(size_t i = 0; i < result.size(); ++i)
         {

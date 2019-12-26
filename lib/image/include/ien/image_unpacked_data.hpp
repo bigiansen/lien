@@ -4,7 +4,7 @@
 #include <cinttypes>
 #include <vector>
 
-namespace ien::img
+namespace ien
 {
     class image;
     class image_unpacked_data

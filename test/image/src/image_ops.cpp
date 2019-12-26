@@ -4,7 +4,7 @@
 #include <ien/platform.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
 
-using namespace ien::img;
+using namespace ien;
 
 TEST_CASE("[STD] Channel byte truncation")
 {
@@ -265,7 +265,7 @@ TEST_CASE("[STD] Unpack Image Data")
             data[(i * 4) + 3] = 4;
         }
 
-        ien::img::image_unpacked_data result = _internal::unpack_image_data_std(data.data(), data.size());
+        ien::image_unpacked_data result = _internal::unpack_image_data_std(data.data(), data.size());
 
         for(size_t i = 0; i < result.size(); ++i)
         {

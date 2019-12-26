@@ -7,7 +7,7 @@
 
 #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
 
-namespace ien::img::_internal
+namespace ien::image_ops::_internal
 {
     void truncate_channel_data_sse2(const truncate_channel_args& args);
     void truncate_channel_data_avx2(const truncate_channel_args& args);

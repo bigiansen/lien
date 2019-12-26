@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ien::img
+namespace ien
 {
     enum class rgba_channel
     {

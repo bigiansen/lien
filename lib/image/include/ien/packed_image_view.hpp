@@ -3,7 +3,7 @@
 #include <ien/packed_image.hpp>
 #include <ien/rect.hpp>
 
-namespace ien::img
+namespace ien
 {
     class packed_image_view
     {

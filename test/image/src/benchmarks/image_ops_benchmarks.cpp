@@ -13,7 +13,7 @@
     #include <ien/internal/arm/image_ops_arm.hpp>
 #endif
 
-using namespace ien::img;
+using namespace ien;
 
 void fill_image_random(image& img)
 {

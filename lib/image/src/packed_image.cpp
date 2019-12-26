@@ -9,7 +9,7 @@
 #include <cstring>
 #include <stdexcept>
 
-namespace ien::img
+namespace ien
 {
     packed_image::packed_image(int width, int height)
         : _width(width)

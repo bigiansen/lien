@@ -4,7 +4,7 @@
 #include <ien/rgba_channel.hpp>
 #include <cinttypes>
 
-namespace ien::img::_internal
+namespace ien::image_ops::_internal
 {
     struct truncate_channel_args
     {

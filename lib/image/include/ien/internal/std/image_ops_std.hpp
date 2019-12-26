@@ -5,7 +5,7 @@
 
 #include <cinttypes>
 
-namespace ien::img::_internal
+namespace ien::image_ops::_internal
 {
     void truncate_channel_data_std(const truncate_channel_args& args);
 
