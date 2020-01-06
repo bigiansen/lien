@@ -21,9 +21,9 @@ TEST_CASE("[STD] Channel byte truncation")
             img.data()->data_a()[i] = 0xFF;
         }
 
-        _internal::truncate_channel_args args(img, 1, 2, 3, 4);
+        image_ops::_internal::truncate_channel_args args(img, 1, 2, 3, 4);
 
-        _internal::truncate_channel_data_std(args);
+        image_ops::_internal::truncate_channel_data_std(args);
         for (size_t i = 0; i < px_count; ++i)
         {
             REQUIRE(img.cdata()->cdata_r()[i] == 0xFE);
@@ -49,8 +49,8 @@ TEST_CASE("[STD] Channel average RGBA")
             img.data()->data_a()[i] = 15;
         }
 
-        _internal::channel_info_extract_args_rgba args(img);
-        auto result = _internal::rgba_average_std(args);
+        image_ops::_internal::channel_info_extract_args_rgba args(img);
+        auto result = image_ops::_internal::rgba_average_std(args);
         for (size_t i = 0; i < px_count; ++i)
         {
             REQUIRE(result[i] == 7);
@@ -73,8 +73,8 @@ TEST_CASE("[STD] Channel max RGBA")
             img.data()->data_a()[i] = 15;
         }
 
-        _internal::channel_info_extract_args_rgba args(img);
-        auto result = _internal::rgba_max_std(args);
+        image_ops::_internal::channel_info_extract_args_rgba args(img);
+        auto result = image_ops::_internal::rgba_max_std(args);
         for (size_t i = 0; i < px_count; ++i)
         {
             REQUIRE(result[i] == 15);
@@ -97,8 +97,8 @@ TEST_CASE("[STD] Channel min RGBA")
             img.data()->data_a()[i] = 4;
         }
 
-        _internal::channel_info_extract_args_rgba args(img);
-        auto result = _internal::rgba_min_std(args);
+        image_ops::_internal::channel_info_extract_args_rgba args(img);
+        auto result = image_ops::_internal::rgba_min_std(args);
         for (size_t i = 0; i < px_count; ++i)
         {
             REQUIRE(result[i] == 3);
@@ -121,8 +121,8 @@ TEST_CASE("[STD] Channel max RGB")
             img.data()->data_a()[i] = 15;
         }
 
-        _internal::channel_info_extract_args_rgb args(img);
-        auto result = _internal::rgb_max_std(args);
+        image_ops::_internal::channel_info_extract_args_rgb args(img);
+        auto result = image_ops::_internal::rgb_max_std(args);
         for (size_t i = 0; i < px_count; ++i)
         {
             REQUIRE(result[i] == 10);
@@ -145,8 +145,8 @@ TEST_CASE("[STD] Channel min RGB")
             img.data()->data_a()[i] = 1;
         }
 
-        _internal::channel_info_extract_args_rgb args(img);
-        auto result = _internal::rgb_min_std(args);
+        image_ops::_internal::channel_info_extract_args_rgb args(img);
+        auto result = image_ops::_internal::rgb_min_std(args);
         for (size_t i = 0; i < px_count; ++i)
         {
             REQUIRE(result[i] == 3);
@@ -169,8 +169,8 @@ TEST_CASE("[STD] Channel sum saturated RGBA")
             img.data()->data_a()[i] = 4;
         }
 
-        _internal::channel_info_extract_args_rgba args(img);
-        auto result = _internal::rgba_sum_saturated_std(args);
+        image_ops::_internal::channel_info_extract_args_rgba args(img);
+        auto result = image_ops::_internal::rgba_sum_saturated_std(args);
         for (size_t i = 0; i < px_count; ++i)
         {
             REQUIRE(result[i] == 19);
@@ -190,8 +190,8 @@ TEST_CASE("[STD] Channel sum saturated RGBA")
             img.data()->data_a()[i] = 184;
         }
 
-        _internal::channel_info_extract_args_rgba args(img);
-        auto result = _internal::rgba_sum_saturated_std(args);
+        image_ops::_internal::channel_info_extract_args_rgba args(img);
+        auto result = image_ops::_internal::rgba_sum_saturated_std(args);
         for (size_t i = 0; i < px_count; ++i)
         {
             REQUIRE(result[i] == 255u);
@@ -214,8 +214,8 @@ TEST_CASE("[STD] Saturation")
             img.data()->data_a()[i] = static_cast<uint8_t>(4);
         }
  
-        _internal::channel_info_extract_args_rgb args(img);
-        ien::fixed_vector<float> result = _internal::rgb_saturation_std(args);
+        image_ops::_internal::channel_info_extract_args_rgb args(img);
+        ien::fixed_vector<float> result = image_ops::_internal::rgb_saturation_std(args);
 
         REQUIRE(result.size() == img.pixel_count());
         for(size_t i = 0; i < result.size(); ++i)
@@ -240,8 +240,8 @@ TEST_CASE("[STD] Luminance")
             img.data()->data_a()[i] = static_cast<uint8_t>(4);
         }
 
-        _internal::channel_info_extract_args_rgb args(img);
-        ien::fixed_vector<float> result = _internal::rgb_luminance_std(args);
+        image_ops::_internal::channel_info_extract_args_rgb args(img);
+        ien::fixed_vector<float> result = image_ops::_internal::rgb_luminance_std(args);
 
         REQUIRE(result.size() == img.pixel_count());
         for(size_t i = 0; i < result.size(); ++i)
@@ -265,7 +265,7 @@ TEST_CASE("[STD] Unpack Image Data")
             data[(i * 4) + 3] = 4;
         }
 
-        ien::image_unpacked_data result = _internal::unpack_image_data_std(data.data(), data.size());
+        ien::image_unpacked_data result = image_ops::_internal::unpack_image_data_std(data.data(), data.size());
 
         for(size_t i = 0; i < result.size(); ++i)
         {
@@ -292,8 +292,8 @@ TEST_CASE("[STD] Channel compare")
             img.data()->data_a()[i] = static_cast<uint8_t>(4 + i);
         }
 
-        _internal::channel_compare_args args(img, rgba_channel::R, 107);
-        ien::fixed_vector<uint8_t> result = _internal::channel_compare_std(args);
+        image_ops::_internal::channel_compare_args args(img, rgba_channel::R, 107);
+        ien::fixed_vector<uint8_t> result = image_ops::_internal::channel_compare_std(args);
 
         REQUIRE(result.size() == img.pixel_count());
         for(size_t i = 0; i < result.size(); ++i)

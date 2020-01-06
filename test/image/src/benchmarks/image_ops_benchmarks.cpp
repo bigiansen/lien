@@ -30,7 +30,7 @@ void fill_image_random(image& img)
 #define TRUNCATE_CHANNEL_BITS_SETUP(args) \
     image img(IMG_DIM, IMG_DIM); \
     fill_image_random(img);\
-    _internal::truncate_channel_args args(img, 1, 2, 3, 4)
+    image_ops::_internal::truncate_channel_args args(img, 1, 2, 3, 4)
 
 const size_t IMG_DIM = 200;
 
@@ -41,7 +41,7 @@ TEST_CASE("Benchmark truncate channel bits")
         TRUNCATE_CHANNEL_BITS_SETUP(args);
         meter.measure([&]
         {
-            _internal::truncate_channel_data_std(args);
+            image_ops::_internal::truncate_channel_data_std(args);
         });
     };
 
@@ -51,7 +51,7 @@ TEST_CASE("Benchmark truncate channel bits")
         TRUNCATE_CHANNEL_BITS_SETUP(args);
         meter.measure([&]
         {
-            _internal::truncate_channel_data_sse2(args);
+            image_ops::_internal::truncate_channel_data_sse2(args);
         });
     };
 
@@ -60,7 +60,7 @@ TEST_CASE("Benchmark truncate channel bits")
         TRUNCATE_CHANNEL_BITS_SETUP(args);
         meter.measure([&]
         {
-            _internal::truncate_channel_data_avx2(args);
+            image_ops::_internal::truncate_channel_data_avx2(args);
         });
     };
 
@@ -70,7 +70,7 @@ TEST_CASE("Benchmark truncate channel bits")
         TRUNCATE_CHANNEL_BITS_SETUP(args);
         meter.measure([&]
         {
-            _internal::truncate_channel_data_neon(args);
+            image_ops::_internal::truncate_channel_data_neon(args);
         });
     };
 #endif
@@ -79,12 +79,12 @@ TEST_CASE("Benchmark truncate channel bits")
 #define EXTRACT_CHANNEL_DATA_RGBA_SETUP(args) \
     image img(IMG_DIM, IMG_DIM); \
     fill_image_random(img);\
-    _internal::channel_info_extract_args_rgba args(img)
+    image_ops::_internal::channel_info_extract_args_rgba args(img)
 
 #define EXTRACT_CHANNEL_DATA_RGB_SETUP(args) \
     image img(IMG_DIM, IMG_DIM); \
     fill_image_random(img);\
-    _internal::channel_info_extract_args_rgb args(img)
+    image_ops::_internal::channel_info_extract_args_rgb args(img)
 
 TEST_CASE("Benchmark rgba average")
 {
@@ -93,7 +93,7 @@ TEST_CASE("Benchmark rgba average")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_average_std(args);
+            return image_ops::_internal::rgba_average_std(args);
         });
     };
 #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
@@ -102,7 +102,7 @@ TEST_CASE("Benchmark rgba average")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_average_sse2(args);
+            return image_ops::_internal::rgba_average_sse2(args);
         });
     };
 
@@ -111,7 +111,7 @@ TEST_CASE("Benchmark rgba average")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_average_avx2(args);
+            return image_ops::_internal::rgba_average_avx2(args);
         });
     };
 
@@ -121,7 +121,7 @@ TEST_CASE("Benchmark rgba average")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_average_neon(args);
+            return image_ops::_internal::rgba_average_neon(args);
         });
     };
 #endif
@@ -134,7 +134,7 @@ TEST_CASE("Benchmark rgba max")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_max_std(args);
+            return image_ops::_internal::rgba_max_std(args);
         });
     };
 #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
@@ -143,7 +143,7 @@ TEST_CASE("Benchmark rgba max")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_max_sse2(args);
+            return image_ops::_internal::rgba_max_sse2(args);
         });
     };
 
@@ -152,7 +152,7 @@ TEST_CASE("Benchmark rgba max")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_max_avx2(args);
+            return image_ops::_internal::rgba_max_avx2(args);
         });
     };
 
@@ -162,7 +162,7 @@ TEST_CASE("Benchmark rgba max")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_max_neon(args);
+            return image_ops::_internal::rgba_max_neon(args);
         });
     };
 #endif
@@ -175,7 +175,7 @@ TEST_CASE("Benchmark rgba min")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_min_std(args);
+            return image_ops::_internal::rgba_min_std(args);
         });
     };
 
@@ -185,7 +185,7 @@ TEST_CASE("Benchmark rgba min")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_min_sse2(args);
+            return image_ops::_internal::rgba_min_sse2(args);
         });
     };
 
@@ -194,7 +194,7 @@ TEST_CASE("Benchmark rgba min")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_min_avx2(args);
+            return image_ops::_internal::rgba_min_avx2(args);
         });
     };
 
@@ -204,7 +204,7 @@ TEST_CASE("Benchmark rgba min")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_min_neon(args);
+            return image_ops::_internal::rgba_min_neon(args);
         });
     };
 #endif
@@ -217,7 +217,7 @@ TEST_CASE("Benchmark rgb max")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_max_std(args);
+            return image_ops::_internal::rgb_max_std(args);
         });
     };
 #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
@@ -226,7 +226,7 @@ TEST_CASE("Benchmark rgb max")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_max_sse2(args);
+            return image_ops::_internal::rgb_max_sse2(args);
         });
     };
 
@@ -235,7 +235,7 @@ TEST_CASE("Benchmark rgb max")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_max_avx2(args);
+            return image_ops::_internal::rgb_max_avx2(args);
         });
     };
 
@@ -245,7 +245,7 @@ TEST_CASE("Benchmark rgb max")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_max_neon(args);
+            return image_ops::_internal::rgb_max_neon(args);
         });
     };
 #endif
@@ -258,7 +258,7 @@ TEST_CASE("Benchmark rgb min")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_min_std(args);
+            return image_ops::_internal::rgb_min_std(args);
         });
     };
 
@@ -268,7 +268,7 @@ TEST_CASE("Benchmark rgb min")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_min_sse2(args);
+            return image_ops::_internal::rgb_min_sse2(args);
         });
     };
 
@@ -277,7 +277,7 @@ TEST_CASE("Benchmark rgb min")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_min_avx2(args);
+            return image_ops::_internal::rgb_min_avx2(args);
         });
     };
 
@@ -287,7 +287,7 @@ TEST_CASE("Benchmark rgb min")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_min_neon(args);
+            return image_ops::_internal::rgb_min_neon(args);
         });
     };
 #endif
@@ -300,7 +300,7 @@ TEST_CASE("Benchmark rgba sum saturated")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_sum_saturated_std(args);
+            return image_ops::_internal::rgba_sum_saturated_std(args);
         });
     };
 
@@ -310,7 +310,7 @@ TEST_CASE("Benchmark rgba sum saturated")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_sum_saturated_sse2(args);
+            return image_ops::_internal::rgba_sum_saturated_sse2(args);
         });
     };
 
@@ -319,7 +319,7 @@ TEST_CASE("Benchmark rgba sum saturated")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_sum_saturated_avx2(args);
+            return image_ops::_internal::rgba_sum_saturated_avx2(args);
         });
     };
 
@@ -329,7 +329,7 @@ TEST_CASE("Benchmark rgba sum saturated")
         EXTRACT_CHANNEL_DATA_RGBA_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgba_sum_saturated_neon(args);
+            return image_ops::_internal::rgba_sum_saturated_neon(args);
         });
     };
 #endif
@@ -342,7 +342,7 @@ TEST_CASE("Benchmark rgb saturation")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_saturation_std(args);
+            return image_ops::_internal::rgb_saturation_std(args);
         });
     };
 
@@ -352,7 +352,7 @@ TEST_CASE("Benchmark rgb saturation")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_saturation_sse2(args);
+            return image_ops::_internal::rgb_saturation_sse2(args);
         });
     };
 
@@ -361,7 +361,7 @@ TEST_CASE("Benchmark rgb saturation")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_saturation_avx2(args);
+            return image_ops::_internal::rgb_saturation_avx2(args);
         });
     };
 
@@ -371,7 +371,7 @@ TEST_CASE("Benchmark rgb saturation")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_saturation_neon(args);
+            return image_ops::_internal::rgb_saturation_neon(args);
         });
     };
 #endif
@@ -384,7 +384,7 @@ TEST_CASE("Benchmark rgba luminance")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_luminance_std(args);
+            return image_ops::_internal::rgb_luminance_std(args);
         });
     };
 
@@ -394,7 +394,7 @@ TEST_CASE("Benchmark rgba luminance")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_luminance_sse2(args);
+            return image_ops::_internal::rgb_luminance_sse2(args);
         });
     };
 
@@ -403,7 +403,7 @@ TEST_CASE("Benchmark rgba luminance")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_luminance_avx2(args);
+            return image_ops::_internal::rgb_luminance_avx2(args);
         });
     };
 
@@ -413,7 +413,7 @@ TEST_CASE("Benchmark rgba luminance")
         EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
         meter.measure([&]
         {
-            return _internal::rgb_luminance_neon(args);
+            return image_ops::_internal::rgb_luminance_neon(args);
         });
     };
 #endif
@@ -436,7 +436,7 @@ TEST_CASE("Benchmark unpack image data")
 
         meter.measure([&]
         {
-            return _internal::unpack_image_data_std(data.data(), data.size());
+            return image_ops::_internal::unpack_image_data_std(data.data(), data.size());
         });
     };
 
@@ -454,7 +454,7 @@ TEST_CASE("Benchmark unpack image data")
 
         meter.measure([&]
         {
-            return _internal::unpack_image_data_ssse3(data.data(), data.size());
+            return image_ops::_internal::unpack_image_data_ssse3(data.data(), data.size());
         });
     };
     
@@ -472,7 +472,7 @@ TEST_CASE("Benchmark unpack image data")
 
         meter.measure([&]
         {
-            return _internal::unpack_image_data_neon(data.data(), data.size());
+            return image_ops::_internal::unpack_image_data_neon(data.data(), data.size());
         });
     };
 #endif
@@ -481,7 +481,7 @@ TEST_CASE("Benchmark unpack image data")
 #define COMPARE_CHANNEL_SETUP(args) \
     image img(IMG_DIM, IMG_DIM); \
     fill_image_random(img);\
-    _internal::channel_compare_args args(img, rgba_channel::R, 123)
+    image_ops::_internal::channel_compare_args args(img, rgba_channel::R, 123)
 
 TEST_CASE("Benchmark channel compare")
 {
@@ -490,7 +490,7 @@ TEST_CASE("Benchmark channel compare")
         COMPARE_CHANNEL_SETUP(args);
         meter.measure([&]
         {
-            return _internal::channel_compare_std(args);
+            return image_ops::_internal::channel_compare_std(args);
         });
     };
 
@@ -500,7 +500,7 @@ TEST_CASE("Benchmark channel compare")
         COMPARE_CHANNEL_SETUP(args);
         meter.measure([&]
         {
-            return _internal::channel_compare_sse2(args);
+            return image_ops::_internal::channel_compare_sse2(args);
         });
     };
 
@@ -509,7 +509,7 @@ TEST_CASE("Benchmark channel compare")
         COMPARE_CHANNEL_SETUP(args);
         meter.measure([&]
         {
-            return _internal::channel_compare_avx2(args);
+            return image_ops::_internal::channel_compare_avx2(args);
         });
     };
 
@@ -519,7 +519,7 @@ TEST_CASE("Benchmark channel compare")
         COMPARE_CHANNEL_SETUP(args);
         meter.measure([&]
         {
-            return _internal::channel_compare_neon(args);
+            return image_ops::_internal::channel_compare_neon(args);
         });
     };
 #endif
