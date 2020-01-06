@@ -6,7 +6,7 @@
 
 namespace ien
 {
-    XSTEG_RELEASE_CONSTEXPR inline void debug_assert(bool cond, const std::string& msg)
+    LIEN_RELEASE_CONSTEXPR inline void debug_assert(bool cond, const std::string& msg)
     {
     #ifdef NDEBUG
         return;
