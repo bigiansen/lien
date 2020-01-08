@@ -45,7 +45,11 @@ namespace ien::strutils
     {
         static_assert(std::is_integral_v<T>, "Not an integral type");
         T result;
-        std::from_chars(sv.data(), sv.data() + sv.size(), result);
+        std::from_chars_result op_result = std::from_chars(sv.data(), sv.data() + sv.size(), result);
+        if(op_result.ec == std::errc::invalid_argument)
+        {
+            throw std::invalid_argument("String view does not represent an integral type");
+        }
         return result;
     }
 
@@ -54,7 +58,11 @@ namespace ien::strutils
     {
         static_assert(std::is_floating_point_v<T>, "Not a floating-point type");
         T result;
-        std::from_chars(sv.data(), sv.data() + sv.size(), result);
+        std::from_chars_result op_result = std::from_chars(sv.data(), sv.data() + sv.size(), result);
+        if(op_result.ec == std::errc::invalid_argument)
+        {
+            throw std::invalid_argument("String view does not represent a float type");
+        }
         return result;
     }
 }
