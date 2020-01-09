@@ -8,6 +8,7 @@
 #include <ien/internal/x86/image_ops_x86.hpp>
 #endif
 
+#include <cmath>
 #include <iostream>
 
 #include "utils.hpp"
