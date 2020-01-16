@@ -94,7 +94,7 @@ namespace ien
     {
     private:
         T* _data = nullptr;
-        const std::size_t _len;
+        std::size_t _len;
         const std::size_t _alignment;
 
     public:
