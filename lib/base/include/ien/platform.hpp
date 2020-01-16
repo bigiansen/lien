@@ -96,9 +96,10 @@
     #define LIEN_ALIGNED_FREE(ptr) _aligned_free(ptr)
     #define LIEN_ALIGNED_REALLOC(ptr, sz, alig) _aligned_realloc(ptr, LIEN_ALIGNED_SZ(sz, alig), alig)
 #else
-    #define LIEN_ALIGNED_ALLOC(sz, alig) std::aligned_alloc(alig, LIEN_ALIGNED_SZ(sz, alig))
-    #define LIEN_ALIGNED_FREE(ptr) std::free(ptr)
-    #define LIEN_ALIGNED_REALLOC(ptr, sz, alig) std::realloc(ptr, LIEN_ALIGNED_SZ(sz, alig))
+    #include <stdlib.h> // Seems that std::aligned_alloc is not well supported yet
+    #define LIEN_ALIGNED_ALLOC(sz, alig) aligned_alloc(alig, LIEN_ALIGNED_SZ(sz, alig))
+    #define LIEN_ALIGNED_FREE(ptr) free(ptr)
+    #define LIEN_ALIGNED_REALLOC(ptr, sz, alig) realloc(ptr, LIEN_ALIGNED_SZ(sz, alig))
 #endif
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
