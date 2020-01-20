@@ -56,6 +56,9 @@ namespace ien
         iterator_type operator-(offset_t offset) const noexcept
         { return iterator_type(_data - offset); }
 
+        difference_type operator-(iterator_type other) const noexcept
+        { return _data - other._data; }
+
         reference operator[](std::size_t index) noexcept { return _data[index]; }
 
         bool operator>(const iterator_type& other) const noexcept { return _data > other._data; }
