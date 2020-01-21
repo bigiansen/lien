@@ -41,28 +41,58 @@ namespace ien::strutils
     [[nodiscard]] extern std::string_view trim(std::string_view str);
 
     template<typename T>
-    [[nodiscard]] T string_view_to_integral(std::string_view sv)
+    [[nodiscard]] T to_integral(std::string_view sv)
     {
         static_assert(std::is_integral_v<T>, "Not an integral type");
         T result;
-        std::from_chars_result op_result = std::from_chars(sv.data(), sv.data() + sv.size(), result);
-        if(op_result.ec == std::errc::invalid_argument)
+        char* endptr;
+
+        if constexpr(std::is_signed_v<T>)
         {
-            throw std::invalid_argument("String view does not represent an integral type");
+            if constexpr(sizeof(T) <= sizeof(long))
+                result = static_cast<T>(std::strtol(sv.data(), &endptr, 10));
+            else if constexpr(sizeof(T) <= sizeof(long long))
+                result = static_cast<T>(std::strtoll(sv.data(), &endptr, 10));
+            else
+                throw std::out_of_range("Integral size is larger than expected");
         }
+        else
+        {
+            if constexpr(sizeof(T) <= sizeof(unsigned long))
+                result = static_cast<T>(std::strtoul(sv.data(), &endptr, 10));
+            else if constexpr(sizeof(T) <= sizeof(unsigned long long))
+                result = static_cast<T>(std::strtoull(sv.data(), &endptr, 10));
+            else
+                throw std::out_of_range("Integral size is larger than expected");
+        }
+
+        if(result == 0 && endptr == sv.data())
+            throw std::invalid_argument("Unable to parse integral");
+        else if(errno == ERANGE)
+            throw std::out_of_range("Integral value is out of representable range");
+        
         return result;
     }
 
     template<typename T>
-    [[nodiscard]] T string_view_to_float(std::string_view sv)
+    [[nodiscard]] T to_floating_point(std::string_view sv)
     {
         static_assert(std::is_floating_point_v<T>, "Not a floating-point type");
         T result;
-        std::from_chars_result op_result = std::from_chars(sv.data(), sv.data() + sv.size(), result);
-        if(op_result.ec == std::errc::invalid_argument)
-        {
-            throw std::invalid_argument("String view does not represent a float type");
-        }
+        char* endptr;
+        
+        if constexpr(std::is_same_v<std::decay_t<T>, float>)
+            result = std::strtof(sv.data(), &endptr);
+        else if constexpr(std::is_same_v<std::decay_t<T>, double>)
+            result = std::strtod(sv.data(), &endptr);
+        else
+            result = std::strtold(sv.data(), &endptr);
+
+        if(result == 0 && endptr == sv.data())
+            throw std::invalid_argument("Unable to parse floating-point type");
+        else if(errno == ERANGE)
+            throw std::out_of_range("Floating-point value is out of representable range");
+        
         return result;
     }
 }
