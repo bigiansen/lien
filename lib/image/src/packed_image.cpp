@@ -1,5 +1,6 @@
 #include <ien/packed_image.hpp>
 
+#include <ien/alignment.hpp>
 #include <ien/platform.hpp>
 
 #include <stb_image.h>
@@ -9,8 +10,6 @@
 #include <cstring>
 #include <stdexcept>
 
-#define PKIMG_ALIGNMENT LIEN_DEFAULT_ALIGNMENT
-
 namespace ien
 {
     packed_image::packed_image(int width, int height)
@@ -19,8 +18,9 @@ namespace ien
     { 
         _data = std::make_unique<ien::fixed_vector<uint8_t>>(
             static_cast<size_t>(_width * _height * 4),
-            PKIMG_ALIGNMENT
+            LIEN_DEFAULT_ALIGNMENT
         );
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
     }
 
     packed_image::packed_image(const std::string& path)
@@ -31,11 +31,13 @@ namespace ien
         {
             throw std::invalid_argument("Invalid image path or file format");
         }
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, stbdata);
 
         _data = std::make_unique<ien::fixed_vector<uint8_t>>(
             static_cast<size_t>(_width * _height * 4),
-            PKIMG_ALIGNMENT
+            LIEN_DEFAULT_ALIGNMENT
         );
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
 
         std::copy(stbdata, stbdata + (_width * _height * 4), _data->data());
     }
@@ -47,6 +49,7 @@ namespace ien
     {
         _width = 0;
         _height = 0;
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
     }
 
     uint8_t* packed_image::data() noexcept { return _data->data(); }
@@ -55,14 +58,12 @@ namespace ien
 
     void packed_image::set_pixel(int idx, const uint8_t* rgba)
     {
-        uint8_t* dataptr = LIEN_HINT_ALIGNED(_data->data(), PKIMG_ALIGNMENT);
-        std::memcpy(dataptr + (static_cast<size_t>(idx) * 4), rgba, 4);
+        std::memcpy(_data->data() + (static_cast<size_t>(idx) * 4), rgba, 4);
     }
     
     void packed_image::set_pixel(int x, int y, const uint8_t* rgba)
     {
-        uint8_t* dataptr = LIEN_HINT_ALIGNED(_data->data(), PKIMG_ALIGNMENT);
-        std::memcpy(dataptr + (static_cast<size_t>(x) * y * _width * 4), rgba, 4);
+        std::memcpy(_data->data() + (static_cast<size_t>(x) * y * _width * 4), rgba, 4);
     }
 
     size_t packed_image::pixel_count() const noexcept { return static_cast<size_t>(_width) * _height; }
@@ -74,28 +75,30 @@ namespace ien
     bool packed_image::save_to_file_png(const std::string& path, int compression_level) const
     {
         stbi_write_png_compression_level = compression_level;
-        const uint8_t* dataptr = LIEN_HINT_ALIGNED(_data->cdata(), PKIMG_ALIGNMENT);
-        return stbi_write_png(path.c_str(), _width, _height, 4, dataptr, _width * 4);
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
+        return stbi_write_png(path.c_str(), _width, _height, 4, _data->data(), _width * 4);
     }
 
     bool packed_image::save_to_file_jpeg(const std::string& path, int quality) const
     {
-        const uint8_t* dataptr = LIEN_HINT_ALIGNED(_data->cdata(), PKIMG_ALIGNMENT);
-        return stbi_write_jpg(path.c_str(), _width, _height, 4, dataptr, quality);
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
+        return stbi_write_jpg(path.c_str(), _width, _height, 4, _data->data(), quality);
     }
 
     bool packed_image::save_to_file_tga(const std::string& path) const
     {
-        const uint8_t* dataptr = LIEN_HINT_ALIGNED(_data->cdata(), PKIMG_ALIGNMENT);
-        return stbi_write_tga(path.c_str(), _width, _height, 4, dataptr);
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
+        return stbi_write_tga(path.c_str(), _width, _height, 4, _data->data());
     }
 
     void packed_image::resize_absolute(int w, int h)
     {
         std::unique_ptr<data_t> resized_data = std::make_unique<data_t>(
             static_cast<uint8_t>(w) * h * 4, 
-            PKIMG_ALIGNMENT
+            LIEN_DEFAULT_ALIGNMENT
         );
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, resized_data->data());
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
 
         stbir_resize_uint8(_data->cdata(), _width, _height, 4, resized_data->data(), w, h, 4, 4);
         _data = std::move(resized_data);

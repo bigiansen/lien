@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ien/alignment.hpp>
 #include <ien/platform.hpp>
 #include <cstddef>
 #include <iterator>
@@ -111,6 +112,7 @@ namespace ien
             _data = reinterpret_cast<T*>(
                 LIEN_ALIGNED_ALLOC(len * sizeof(T), alignment)
             );
+            debug_assert_ptr_aligned(alignment, _data);
         }
 
         fixed_vector(fixed_vector&& mv_src) noexcept
@@ -119,6 +121,7 @@ namespace ien
             , _alignment(mv_src._alignment)
         {
             mv_src._data = nullptr;
+            debug_assert_ptr_aligned(_alignment, _data);
         }
 
         virtual ~fixed_vector()
@@ -141,6 +144,7 @@ namespace ien
             _data = reinterpret_cast<T*>(
                 LIEN_ALIGNED_REALLOC(_data, sz, _alignment)
             );
+            debug_assert_ptr_aligned(_alignment, _data);
         }
 
         T& operator[](std::size_t index)
@@ -161,6 +165,7 @@ namespace ien
             
             mv_src._data = nullptr;
             mv_src._len = 0;
+            debug_assert_ptr_aligned(_alignment, _data);
         }
 
         fixed_vector::iterator begin()

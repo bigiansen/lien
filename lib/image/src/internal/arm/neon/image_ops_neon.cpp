@@ -3,6 +3,7 @@
 
 #if defined(LIEN_ARM_NEON)
 
+#include <ien/alignment.hpp>
 #include <ien/assert.hpp>
 #include <ien/internal/image_ops_args.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
@@ -28,7 +29,7 @@
 
 namespace ien::image_ops::_internal
 {
-    constexpr size_t NEON_STRIDE = 16;
+    constexpr size_t NEON_ALIGNMENT = 16;
 
     float32x4x4_t extract_4x4f32_from_8x16u8(uint8x16_t v)
     {                                                                           // v = v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15
@@ -83,20 +84,21 @@ namespace ien::image_ops::_internal
 
         const size_t img_sz = args.len;
 
-        if(img_sz < NEON_STRIDE)
+        if(img_sz < NEON_ALIGNMENT)
         {
             truncate_channel_data_std(args);
         }
 
         BIND_CHANNELS(args, r, g, b, a);
+        debug_assert_ptr_aligned(NEON_ALIGNMENT, r, g, b, a);
 
         const uint8x16_t vmask_r = vld1q_dup_u8(&trunc_and_table[args.bits_r]);
         const uint8x16_t vmask_g = vld1q_dup_u8(&trunc_and_table[args.bits_g]);
         const uint8x16_t vmask_b = vld1q_dup_u8(&trunc_and_table[args.bits_b]);
         const uint8x16_t vmask_a = vld1q_dup_u8(&trunc_and_table[args.bits_a]);
 
-        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % NEON_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
         {
             uint8x16_t vseg_r = vld1q_u8(r + i);
             uint8x16_t vseg_g = vld1q_u8(g + i);
@@ -132,15 +134,16 @@ namespace ien::image_ops::_internal
     fixed_vector<uint8_t> rgba_max_neon(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;
-        if(img_sz < NEON_STRIDE)
+        if(img_sz < NEON_ALIGNMENT)
         {
             return rgba_max_std(args);
         }
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+        debug_assert_ptr_aligned(NEON_ALIGNMENT, r, g, b, a);
 
-        fixed_vector<uint8_t> result(args.len, NEON_STRIDE);
-        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        fixed_vector<uint8_t> result(args.len, NEON_ALIGNMENT);
+        size_t last_v_idx = img_sz - (img_sz % NEON_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
         {
             uint8x16_t vseg_r = vld1q_u8(r + i);
             uint8x16_t vseg_g = vld1q_u8(g + i);
@@ -164,15 +167,16 @@ namespace ien::image_ops::_internal
     fixed_vector<uint8_t> rgba_min_neon(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;
-        if(img_sz < NEON_STRIDE)
+        if(img_sz < NEON_ALIGNMENT)
         {
             return rgba_min_std(args);
         }
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+        debug_assert_ptr_aligned(NEON_ALIGNMENT, r, g, b, a);
 
-        fixed_vector<uint8_t> result(args.len, NEON_STRIDE);
-        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        fixed_vector<uint8_t> result(args.len, NEON_ALIGNMENT);
+        size_t last_v_idx = img_sz - (img_sz % NEON_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
         {
             uint8x16_t vseg_r = vld1q_u8(r + i);
             uint8x16_t vseg_g = vld1q_u8(g + i);
@@ -202,15 +206,16 @@ namespace ien::image_ops::_internal
     fixed_vector<uint8_t> rgb_max_neon(const channel_info_extract_args_rgb& args)
     {
         const size_t img_sz = args.len;
-        if(img_sz < NEON_STRIDE)
+        if(img_sz < NEON_ALIGNMENT)
         {
             return rgb_max_std(args);
         }
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(NEON_ALIGNMENT, r, g, b);
 
-        fixed_vector<uint8_t> result(args.len, NEON_STRIDE);
-        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        fixed_vector<uint8_t> result(args.len, NEON_ALIGNMENT);
+        size_t last_v_idx = img_sz - (img_sz % NEON_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
         {
             uint8x16_t vseg_r = vld1q_u8(r + i);
             uint8x16_t vseg_g = vld1q_u8(g + i);
@@ -232,15 +237,16 @@ namespace ien::image_ops::_internal
     fixed_vector<uint8_t> rgb_min_neon(const channel_info_extract_args_rgb& args)
     {
         const size_t img_sz = args.len;
-        if(img_sz < NEON_STRIDE)
+        if(img_sz < NEON_ALIGNMENT)
         {
             return rgb_min_std(args);
         }
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(NEON_ALIGNMENT, r, g, b);
 
-        fixed_vector<uint8_t> result(args.len, NEON_STRIDE);
-        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        fixed_vector<uint8_t> result(args.len, NEON_ALIGNMENT);
+        size_t last_v_idx = img_sz - (img_sz % NEON_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
         {
             uint8x16_t vseg_r = vld1q_u8(r + i);
             uint8x16_t vseg_g = vld1q_u8(g + i);
@@ -262,15 +268,16 @@ namespace ien::image_ops::_internal
     fixed_vector<uint8_t> rgba_sum_saturated_neon(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;
-        if(img_sz < NEON_STRIDE)
+        if(img_sz < NEON_ALIGNMENT)
         {
             return rgba_sum_saturated_std(args);
         }
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+        debug_assert_ptr_aligned(NEON_ALIGNMENT, r, g, b, a);
 
-        fixed_vector<uint8_t> result(args.len, NEON_STRIDE);
-        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        fixed_vector<uint8_t> result(args.len, NEON_ALIGNMENT);
+        size_t last_v_idx = img_sz - (img_sz % NEON_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
         {
             uint8x16_t vseg_r = vld1q_u8(r + i);
             uint8x16_t vseg_g = vld1q_u8(g + i);
@@ -295,16 +302,17 @@ namespace ien::image_ops::_internal
     fixed_vector<float> rgb_saturation_neon(const channel_info_extract_args_rgb& args)
     {
         const size_t img_sz = args.len;
-        if(img_sz < NEON_STRIDE)
+        if(img_sz < NEON_ALIGNMENT)
         {
             return rgb_saturation_std(args);
         }
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(NEON_ALIGNMENT, r, g, b);
 
-        fixed_vector<float> result(args.len, NEON_STRIDE);
+        fixed_vector<float> result(args.len, NEON_ALIGNMENT);
 
-        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % NEON_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
         {
             uint8x16_t vseg_r = vld1q_u8(r + i);
             uint8x16_t vseg_g = vld1q_u8(g + i);
@@ -342,19 +350,20 @@ namespace ien::image_ops::_internal
     fixed_vector<float> rgb_luminance_neon(const channel_info_extract_args_rgb& args)
     {
         const size_t img_sz = args.len;
-        if(img_sz < NEON_STRIDE)
+        if(img_sz < NEON_ALIGNMENT)
         {
             return rgb_luminance_std(args);
         }
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(NEON_ALIGNMENT, r, g, b);
 
-        fixed_vector<float> result(args.len, NEON_STRIDE);
+        fixed_vector<float> result(args.len, NEON_ALIGNMENT);
 
         const float lum_mul = 0.0019607843137254F;
         float32x4_t vlum_mul = vld1q_dup_f32(&lum_mul);
 
-        size_t last_v_idx = img_sz - (img_sz % NEON_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % NEON_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
         {
             uint8x16_t vseg_r = vld1q_u8(r + i);
             uint8x16_t vseg_g = vld1q_u8(g + i);
@@ -396,7 +405,7 @@ namespace ien::image_ops::_internal
 
     image_unpacked_data unpack_image_data_neon(const uint8_t* data, size_t len)
     {
-        if(len < NEON_STRIDE)
+        if(len < NEON_ALIGNMENT)
         {
             return unpack_image_data_std(data, len);
         }
@@ -407,9 +416,10 @@ namespace ien::image_ops::_internal
         uint8_t* g = result.data_g();
         uint8_t* b = result.data_b();
         uint8_t* a = result.data_a();
+        debug_assert_ptr_aligned(NEON_ALIGNMENT, r, g, b, a);
 
-        size_t last_v_idx = len - (len % NEON_STRIDE);
-        for(size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        size_t last_v_idx = len - (len % NEON_ALIGNMENT);
+        for(size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
         {
             uint8x16x4_t vrgba = vld4q_u8(data + i);
 
@@ -435,17 +445,17 @@ namespace ien::image_ops::_internal
     fixed_vector<uint8_t> channel_compare_neon(const channel_compare_args& args)
     {
         const size_t len = args.len;
-        if (len < NEON_STRIDE)
+        if (len < NEON_ALIGNMENT)
         {
             return channel_compare_std(args);
         }
 
-        fixed_vector<uint8_t> result(len, NEON_STRIDE);
+        fixed_vector<uint8_t> result(len, NEON_ALIGNMENT);
 
         const uint8x16_t vthreshold = vld1q_dup_u8(&args.threshold);
 
-        size_t last_v_idx = len - (len % (NEON_STRIDE));
-        for (size_t i = 0; i < last_v_idx; i += NEON_STRIDE)
+        size_t last_v_idx = len - (len % (NEON_ALIGNMENT));
+        for (size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
         {
             uint8x16_t vseg = vld1q_u8(args.ch + i);
             uint8x16_t vcmp = vcgeq_u8(vseg, vthreshold);

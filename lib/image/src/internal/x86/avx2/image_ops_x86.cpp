@@ -1,5 +1,6 @@
 #include <ien/internal/x86/image_ops_x86.hpp>
 
+#include <ien/alignment.hpp>
 #include <ien/platform.hpp>
 
 #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
@@ -45,26 +46,27 @@ namespace ien::image_ops::_internal
         0xF0F0F0F0, 0xE0E0E0E0, 0xC0C0C0C0, 0x80808080
     };
 
-    const size_t AVX2_STRIDE = 32;
+    const size_t AVX_ALIGNMENT = 32;
 
     void truncate_channel_data_avx2(const truncate_channel_args& args)
     {
         const size_t img_sz = args.len;
-        if (img_sz < AVX2_STRIDE)
+        if (img_sz < AVX_ALIGNMENT)
         {
             truncate_channel_data_std(args);
             return;
         }
 
         BIND_CHANNELS(args, r, g, b, a);
+        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b, a);
 
         const __m256i vmask_r = _mm256_set1_epi8(trunc_and_table[args.bits_r]);
         const __m256i vmask_g = _mm256_set1_epi8(trunc_and_table[args.bits_g]);
         const __m256i vmask_b = _mm256_set1_epi8(trunc_and_table[args.bits_b]);
         const __m256i vmask_a = _mm256_set1_epi8(trunc_and_table[args.bits_a]);
 
-        size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
         {
             __m256i seg_r = LOAD_SI256(r + i);
             __m256i seg_g = LOAD_SI256(g + i);
@@ -101,17 +103,18 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < AVX2_STRIDE)
+        if (img_sz < AVX_ALIGNMENT)
         {
             return rgba_max_std(args);
         }
 
-        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
+        fixed_vector<uint8_t> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b, a);
 
-        size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
         {
             __m256i vseg_r = LOAD_SI256_CONST(r + i);
             __m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -136,17 +139,18 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < AVX2_STRIDE)
+        if (img_sz < AVX_ALIGNMENT)
         {
             return rgba_min_std(args);
         }
 
-        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
+        fixed_vector<uint8_t> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b, a);
 
-        size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
         {
             __m256i vseg_r = LOAD_SI256_CONST(r + i);
             __m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -177,17 +181,18 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < AVX2_STRIDE)
+        if (img_sz < AVX_ALIGNMENT)
         {
             return rgb_max_std(args);
         }
 
-        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
+        fixed_vector<uint8_t> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b);
 
-        size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
         {
             __m256i vseg_r = LOAD_SI256_CONST(r + i);
             __m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -210,17 +215,18 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < AVX2_STRIDE)
+        if (img_sz < AVX_ALIGNMENT)
         {
             return rgb_min_std(args);
         }
 
-        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
+        fixed_vector<uint8_t> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b);
 
-        size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
         {
             __m256i vseg_r = LOAD_SI256_CONST(r + i);
             __m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -243,17 +249,18 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < AVX2_STRIDE)
+        if (img_sz < AVX_ALIGNMENT)
         {
             return rgba_sum_saturated_std(args);
         }
 
-        fixed_vector<uint8_t> result(args.len, AVX2_STRIDE);
+        fixed_vector<uint8_t> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b, a);
 
-        size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
         {
             __m256i vseg_r = LOAD_SI256_CONST(r + i);
             __m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -280,19 +287,20 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < AVX2_STRIDE)
+        if (img_sz < AVX_ALIGNMENT)
         {
             return rgb_saturation_std(args);
         }
 
-        fixed_vector<float> result(args.len, AVX2_STRIDE);
+        fixed_vector<float> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b);
 
         __m256i fpcast_mask = _mm256_set1_epi32(0x000000FF);
 
-        size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
         {
             __m256i vseg_r = LOAD_SI256_CONST(r + i);
             __m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -329,7 +337,7 @@ namespace ien::image_ops::_internal
             __m256 vsat2 = _mm256_div_ps(_mm256_sub_ps(vfmax2, vfmin2), vfmax2);
             __m256 vsat3 = _mm256_div_ps(_mm256_sub_ps(vfmax3, vfmin3), vfmax3);
 
-            alignas(AVX2_STRIDE) float aux_result[AVX2_STRIDE];
+            alignas(AVX_ALIGNMENT) float aux_result[AVX_ALIGNMENT];
 
             _mm256_store_ps(aux_result + 0, vsat0);
             _mm256_store_ps(aux_result + 8, vsat1);
@@ -359,20 +367,21 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < AVX2_STRIDE)
+        if (img_sz < AVX_ALIGNMENT)
         {
             return rgb_luminance_std(args);
         }
 
-        fixed_vector<float> result(args.len, AVX2_STRIDE);
+        fixed_vector<float> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b);
 
         __m256i vfpcast_mask = _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
         __m256 vlum_mulv = _mm256_set1_ps(0.00392156862F / 2);
 
-        size_t last_v_idx = img_sz - (img_sz % AVX2_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
         {
             __m256i vseg_r = LOAD_SI256_CONST(r + i);
             __m256i vseg_g = LOAD_SI256_CONST(g + i);
@@ -480,17 +489,18 @@ namespace ien::image_ops::_internal
     fixed_vector<uint8_t> channel_compare_avx2(const channel_compare_args& args)
     {
         const size_t len = args.len;
-        if (len < AVX2_STRIDE)
+        if (len < AVX_ALIGNMENT)
         {
             return channel_compare_std(args);
         }
 
-        fixed_vector<uint8_t> result(len, AVX2_STRIDE);
+        fixed_vector<uint8_t> result(len, AVX_ALIGNMENT);
+        debug_assert_ptr_aligned(AVX_ALIGNMENT, result.data());
 
         const __m256i vthreshold = _mm256_set1_epi8(args.threshold);
 
-        size_t last_v_idx = len - (len % (AVX2_STRIDE));
-        for (size_t i = 0; i < last_v_idx; i += AVX2_STRIDE)
+        size_t last_v_idx = len - (len % (AVX_ALIGNMENT));
+        for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
         {
             __m256i vseg = LOAD_SI256_CONST(args.ch + i);
             __m256i vcmp = _mm256_cmpeq_epi8(vseg, _mm256_max_epu8(vseg, vthreshold));

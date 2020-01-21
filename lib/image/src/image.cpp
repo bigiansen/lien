@@ -1,5 +1,6 @@
 #include <ien/image.hpp>
 
+#include <ien/alignment.hpp>
 #include <ien/assert.hpp>
 #include <ien/platform.hpp>
 #include <ien/image_ops.hpp>
@@ -14,11 +15,24 @@
 
 namespace ien
 {
+    LIEN_RELEASE_CONSTEXPR void debug_assert_image_unpk_data_aligned(const image_unpacked_data& data)
+    {
+        debug_assert_ptr_aligned(
+            LIEN_DEFAULT_ALIGNMENT,
+            data.cdata_r(),
+            data.cdata_g(),
+            data.cdata_b(),
+            data.cdata_a()
+        );
+    }
+    
     image::image(int width, int height)
         : _data(static_cast<size_t>(width) * height)
         , _width(width)
         , _height(height)
-    { }
+    { 
+        debug_assert_image_unpk_data_aligned(_data);
+    }
 
     image::image(const std::string& path)
         : _width(0), _height(0)
@@ -31,12 +45,15 @@ namespace ien
             &channels_dummy,
             4
         );
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, packed_data);
 
         if(packed_data == nullptr)
         {
             throw std::invalid_argument("Unable to load image with path: " + path);
         }
         _data = image_ops::unpack_image_data(packed_data, (static_cast<size_t>(_width) * _height * 4));
+        debug_assert_image_unpk_data_aligned(_data);
+
         stbi_image_free(packed_data);
     }
 
@@ -49,6 +66,7 @@ namespace ien
         std::memcpy(_data.data_g(), cp_src.cdata()->cdata_g(), cp_src.pixel_count());
         std::memcpy(_data.data_b(), cp_src.cdata()->cdata_b(), cp_src.pixel_count());
         std::memcpy(_data.data_a(), cp_src.cdata()->cdata_a(), cp_src.pixel_count());
+        debug_assert_image_unpk_data_aligned(_data);
     }
 
     image_unpacked_data* image::data() noexcept { return &_data; }
@@ -98,6 +116,8 @@ namespace ien
     bool image::save_to_file_png(const std::string& path, int compression_level) const
     {
         ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, packed_data.data());
+
         stbi_write_png_compression_level = compression_level;
         return stbi_write_png(path.c_str(), _width, _height, 4, packed_data.data(), _width * 4);
     }
@@ -105,12 +125,16 @@ namespace ien
     bool image::save_to_file_jpeg(const std::string& path, int quality) const
     {
         ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, packed_data.data());
+
         return stbi_write_jpg(path.c_str(), _width, _height, 4, packed_data.data(), quality);
     }
 
     bool image::save_to_file_tga(const std::string& path) const
     {
         ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, packed_data.data());
+        
         return stbi_write_tga(path.c_str(), _width, _height, 4, packed_data.data());
     }
 

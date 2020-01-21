@@ -1,5 +1,6 @@
 #include <ien/internal/x86/image_ops_x86.hpp>
 
+#include <ien/alignment.hpp>
 #include <ien/platform.hpp>
 
 #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
@@ -45,26 +46,27 @@ namespace ien::image_ops::_internal
         0xF0F0F0F0, 0xE0E0E0E0, 0xC0C0C0C0, 0x80808080
     };
 
-    constexpr size_t SSE_STRIDE = 16;
+    constexpr size_t SSE_ALIGNMENT = 16;
 
     void truncate_channel_data_sse2(const truncate_channel_args& args)
     {
         const size_t img_sz = args.len;
-        if (img_sz < SSE_STRIDE)
+        if (img_sz < SSE_ALIGNMENT)
         {
             truncate_channel_data_std(args);
             return;
         }
 
         BIND_CHANNELS(args, r, g, b, a);
+        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b, a);
 
         const __m128i vmask_r = _mm_set1_epi32(trunc_and_table[args.bits_r]);
         const __m128i vmask_g = _mm_set1_epi32(trunc_and_table[args.bits_g]);
         const __m128i vmask_b = _mm_set1_epi32(trunc_and_table[args.bits_b]);
         const __m128i vmask_a = _mm_set1_epi32(trunc_and_table[args.bits_a]);
 
-        size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
         {
             __m128i seg_r = LOAD_SI128(r + i);
             __m128i seg_g = LOAD_SI128(g + i);
@@ -101,17 +103,18 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < SSE_STRIDE)
+        if (img_sz < SSE_ALIGNMENT)
         {
             return rgba_max_std(args);
         }
 
-        fixed_vector<uint8_t> result(args.len, SSE_STRIDE);
+        fixed_vector<uint8_t> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b, a);
 
-        size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
         {
             __m128i vseg_r = LOAD_SI128_CONST(r + i);
             __m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -136,17 +139,18 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < SSE_STRIDE)
+        if (img_sz < SSE_ALIGNMENT)
         {
             return rgba_min_std(args);
         }
 
-        fixed_vector<uint8_t> result(args.len, SSE_STRIDE);
+        fixed_vector<uint8_t> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b, a);
 
-        size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
         {
             __m128i vseg_r = LOAD_SI128_CONST(r + i);
             __m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -177,17 +181,18 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < SSE_STRIDE)
+        if (img_sz < SSE_ALIGNMENT)
         {
             return rgb_max_std(args);
         }
 
-        fixed_vector<uint8_t> result(args.len, SSE_STRIDE);
+        fixed_vector<uint8_t> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b);
 
-        size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
         {
             __m128i vseg_r = LOAD_SI128_CONST(r + i);
             __m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -210,17 +215,18 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < SSE_STRIDE)
+        if (img_sz < SSE_ALIGNMENT)
         {
             return rgb_min_std(args);
         }
 
-        fixed_vector<uint8_t> result(args.len, SSE_STRIDE);
+        fixed_vector<uint8_t> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b);
 
-        size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
         {
             __m128i vseg_r = LOAD_SI128_CONST(r + i);
             __m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -243,17 +249,18 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < SSE_STRIDE)
+        if (img_sz < SSE_ALIGNMENT)
         {
             return rgba_sum_saturated_std(args);
         }
 
-        fixed_vector<uint8_t> result(args.len, SSE_STRIDE);
+        fixed_vector<uint8_t> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b, a);
 
-        size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
         {
             __m128i vseg_r = LOAD_SI128_CONST(r + i);
             __m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -279,19 +286,20 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < SSE_STRIDE)
+        if (img_sz < SSE_ALIGNMENT)
         {
             return rgb_saturation_std(args);
         }
 
-        fixed_vector<float> result(args.len, SSE_STRIDE);
+        fixed_vector<float> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b);
 
         __m128i fpcast_mask = _mm_set1_epi32(0x000000FF);
 
-        size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
         {
             __m128i vseg_r = LOAD_SI128_CONST(r + i);
             __m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -328,7 +336,7 @@ namespace ien::image_ops::_internal
             __m128 vsat2 = _mm_div_ps(_mm_sub_ps(vfmax2, vfmin2), vfmax2);
             __m128 vsat3 = _mm_div_ps(_mm_sub_ps(vfmax3, vfmin3), vfmax3);
 
-            alignas(SSE_STRIDE) float aux_result[SSE_STRIDE];
+            alignas(SSE_ALIGNMENT) float aux_result[SSE_ALIGNMENT];
 
             _mm_store_ps(aux_result + 0, vsat0);
             _mm_store_ps(aux_result + 4, vsat1);
@@ -359,21 +367,22 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
 
-        if (img_sz < SSE_STRIDE)
+        if (img_sz < SSE_ALIGNMENT)
         {
             return rgb_luminance_std(args);
         }
 
-        fixed_vector<float> result(args.len, SSE_STRIDE);
+        fixed_vector<float> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b);
 
         __m128i fpcast_mask = _mm_set1_epi32(0x000000FF);
         __m128 vhalfmul = _mm_set_ps1(0.5F);
         __m128 vzeroonediv = _mm_set_ps1(255.F);
 
-        size_t last_v_idx = img_sz - (img_sz % SSE_STRIDE);
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
+        size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
         {
             __m128i vseg_r = LOAD_SI128_CONST(r + i);
             __m128i vseg_g = LOAD_SI128_CONST(g + i);
@@ -415,7 +424,7 @@ namespace ien::image_ops::_internal
             vlum2 = _mm_div_ps(vlum2, vzeroonediv);
             vlum3 = _mm_div_ps(vlum3, vzeroonediv);
 
-            alignas(SSE_STRIDE) float aux_result[SSE_STRIDE];
+            alignas(SSE_ALIGNMENT) float aux_result[SSE_ALIGNMENT];
 
             _mm_store_ps(aux_result + 0, vlum0);
             _mm_store_ps(aux_result + 4, vlum1);
@@ -445,7 +454,7 @@ namespace ien::image_ops::_internal
 
     image_unpacked_data unpack_image_data_ssse3(const uint8_t* data, size_t len)
     {
-        if (len < SSE_STRIDE * 4)
+        if (len < SSE_ALIGNMENT * 4)
         {
             return unpack_image_data_std(data, len);
         }
@@ -455,6 +464,7 @@ namespace ien::image_ops::_internal
         uint8_t* g = result.data_g();
         uint8_t* b = result.data_b();
         uint8_t* a = result.data_a();
+        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b, a);
 
         const __m128i vshufmask = _mm_set_epi8(
             15, 11, 7, 3,
@@ -463,13 +473,13 @@ namespace ien::image_ops::_internal
             12, 8, 4, 0
         );
 
-        size_t last_v_idx = len - (len % (SSE_STRIDE * 4));
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE * 4)
+        size_t last_v_idx = len - (len % (SSE_ALIGNMENT * 4));
+        for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT * 4)
         {
-            __m128i vdata0 = LOAD_SI128_CONST(data + i + (SSE_STRIDE * 0));
-            __m128i vdata1 = LOAD_SI128_CONST(data + i + (SSE_STRIDE * 1));
-            __m128i vdata2 = LOAD_SI128_CONST(data + i + (SSE_STRIDE * 2));
-            __m128i vdata3 = LOAD_SI128_CONST(data + i + (SSE_STRIDE * 3));
+            __m128i vdata0 = LOAD_SI128_CONST(data + i + (SSE_ALIGNMENT * 0));
+            __m128i vdata1 = LOAD_SI128_CONST(data + i + (SSE_ALIGNMENT * 1));
+            __m128i vdata2 = LOAD_SI128_CONST(data + i + (SSE_ALIGNMENT * 2));
+            __m128i vdata3 = LOAD_SI128_CONST(data + i + (SSE_ALIGNMENT * 3));
 
             __m128i v_di_data0 = _mm_shuffle_epi8(vdata0, vshufmask);
             __m128i v_di_data1 = _mm_shuffle_epi8(vdata1, vshufmask);
@@ -506,17 +516,18 @@ namespace ien::image_ops::_internal
     fixed_vector<uint8_t> channel_compare_sse2(const channel_compare_args& args)
     {
         const size_t len = args.len;
-        if (len < SSE_STRIDE)
+        if (len < SSE_ALIGNMENT)
         {
             return channel_compare_std(args);
         }
 
-        fixed_vector<uint8_t> result(len, SSE_STRIDE);
+        fixed_vector<uint8_t> result(len, SSE_ALIGNMENT);
+        debug_assert_ptr_aligned(SSE_ALIGNMENT, result.data());
 
         const __m128i vthreshold = _mm_set1_epi8(args.threshold);
 
-        size_t last_v_idx = len - (len % (SSE_STRIDE));
-        for (size_t i = 0; i < last_v_idx; i += SSE_STRIDE)
+        size_t last_v_idx = len - (len % (SSE_ALIGNMENT));
+        for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
         {
             __m128i vseg = LOAD_SI128_CONST(args.ch + i);
             __m128i vcmp = _mm_cmpeq_epi8(vseg, _mm_max_epu8(vseg, vthreshold));

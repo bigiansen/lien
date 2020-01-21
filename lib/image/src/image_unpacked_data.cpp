@@ -1,5 +1,6 @@
 #include <ien/image_unpacked_data.hpp>
 
+#include <ien/alignment.hpp>
 #include <ien/assert.hpp>
 #include <ien/platform.hpp>
 
@@ -13,7 +14,9 @@ namespace ien
         , _b(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
         , _a(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
         , _size(pixel_count)
-    { }
+    {
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _r, _g, _b, _a);
+    }
 
     image_unpacked_data::~image_unpacked_data()
     {
@@ -35,6 +38,7 @@ namespace ien
         , _moved(false)
     {
         mv_src._moved = true;
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _r, _g, _b, _a);
     }
 
     void image_unpacked_data::operator=(image_unpacked_data&& mv_src)
@@ -46,6 +50,7 @@ namespace ien
         _size = mv_src._size;
         _moved = mv_src._moved;
         mv_src._moved = true;
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _r, _g, _b, _a);
     }
 
     uint8_t* image_unpacked_data::data_r() noexcept { return _r; }
@@ -66,6 +71,7 @@ namespace ien
         _g = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_g, pixel_count, LIEN_DEFAULT_ALIGNMENT));
         _b = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_b, pixel_count, LIEN_DEFAULT_ALIGNMENT));
         _a = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_a, pixel_count, LIEN_DEFAULT_ALIGNMENT));
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _r, _g, _b, _a);
     }
 
     std::array<uint8_t, 4> image_unpacked_data::read_pixel(int index) const
@@ -84,6 +90,8 @@ namespace ien
     ien::fixed_vector<uint8_t> image_unpacked_data::pack_data() const
     {
         ien::fixed_vector<uint8_t> result(this->size() * 4, LIEN_DEFAULT_ALIGNMENT);
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, result.data());
+
         for(size_t i = 0; i < _size; ++i)
         {
             result[(i * 4) + 0] = _r[i];
