@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ien/fixed_vector.hpp>
+
 #include <array>
 #include <cinttypes>
 #include <vector>
@@ -52,6 +54,6 @@ namespace ien
         std::array<uint8_t, 4> read_pixel(int index) const;
         void set_pixel(int index, const uint8_t* rgba);
 
-        [[nodiscard]] std::vector<uint8_t> pack_data() const;
+        [[nodiscard]] ien::fixed_vector<uint8_t> pack_data() const;
     };
 }

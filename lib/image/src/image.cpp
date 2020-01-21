@@ -3,6 +3,7 @@
 #include <ien/assert.hpp>
 #include <ien/platform.hpp>
 #include <ien/image_ops.hpp>
+#include <ien/packed_image.hpp>
 
 #include <stb_image.h>
 #include <stb_image_resize.h>
@@ -96,33 +97,33 @@ namespace ien
 
     bool image::save_to_file_png(const std::string& path, int compression_level) const
     {
-        std::vector<uint8_t> packed_data = _data.pack_data();
+        ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
         stbi_write_png_compression_level = compression_level;
         return stbi_write_png(path.c_str(), _width, _height, 4, packed_data.data(), _width * 4);
     }
 
     bool image::save_to_file_jpeg(const std::string& path, int quality) const
     {
-        std::vector<uint8_t> packed_data = _data.pack_data();
+        ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
         return stbi_write_jpg(path.c_str(), _width, _height, 4, packed_data.data(), quality);
     }
 
     bool image::save_to_file_tga(const std::string& path) const
     {
-        std::vector<uint8_t> packed_data = _data.pack_data();
+        ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
         return stbi_write_tga(path.c_str(), _width, _height, 4, packed_data.data());
     }
 
     void image::resize_absolute(int w, int h)
     {
-        const std::vector<uint8_t> packed_data = _data.pack_data();
+        const ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
         _data.resize(static_cast<size_t>(w) * h); // realloc unpacked data buffers
         
         std::vector<uint8_t> resized_packed_data;
         resized_packed_data.resize(size_t(w) * h * 4);
 
         stbir_resize_uint8(
-            packed_data.data(), _width, _height, 4, resized_packed_data.data(), w, h, 4, 4
+            packed_data.cdata(), _width, _height, 4, resized_packed_data.data(), w, h, 4, 4
         );
         
         uint8_t* r = _data.data_r();
@@ -145,5 +146,13 @@ namespace ien
         int real_h = static_cast<int>(static_cast<float>(_height) * h);
 
         resize_absolute(real_w, real_h);
+    }
+
+    packed_image image::to_packed_image()
+    {
+        auto packed_data = _data.pack_data();
+        packed_image result(_width, _height);
+        std::copy(packed_data.begin(), packed_data.end(), result.data());
+        return result;
     }
 }

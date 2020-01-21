@@ -1,7 +1,10 @@
 #pragma once
 
+#include <ien/fixed_vector.hpp>
+
 #include <array>
 #include <cinttypes>
+#include <memory>
 #include <string>
 
 namespace ien
@@ -9,15 +12,15 @@ namespace ien
     class packed_image
     {
     private:
-        uint8_t* _data;
+        using data_t = ien::fixed_vector<uint8_t>;
+
+        std::unique_ptr<data_t> _data;
         int _width, _height;
-        bool _stb_free = false;
 
     public:
         packed_image(int width, int height);
         packed_image(const std::string& path);
         packed_image(packed_image&& mv_src);
-        ~packed_image();
 
         uint8_t* data() noexcept;
         const uint8_t* cdata() const noexcept;

@@ -81,10 +81,9 @@ namespace ien
         _a[index] = rgba[3];
     }
 
-    std::vector<uint8_t> image_unpacked_data::pack_data() const
+    ien::fixed_vector<uint8_t> image_unpacked_data::pack_data() const
     {
-        std::vector<uint8_t> result;
-        result.resize(_size * 4);
+        ien::fixed_vector<uint8_t> result(this->size() * 4, LIEN_DEFAULT_ALIGNMENT);
         for(size_t i = 0; i < _size; ++i)
         {
             result[(i * 4) + 0] = _r[i];

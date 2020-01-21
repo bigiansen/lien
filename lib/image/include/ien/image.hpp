@@ -9,6 +9,8 @@
 
 namespace ien
 {
+    class packed_image;
+
     class image
     {
     private:
@@ -40,5 +42,7 @@ namespace ien
 
         void resize_absolute(int w, int h);
         void resize_relative(float w, float h);
+
+        packed_image to_packed_image();
     };
 }

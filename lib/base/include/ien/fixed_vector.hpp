@@ -153,6 +153,16 @@ namespace ien
             return _data[index];
         }
 
+        void operator=(fixed_vector<T>&& mv_src)
+        {
+            this->_data = mv_src._data;
+            this->_alignment = mv_src._alignment;
+            this->_len = mv_src._len;
+            
+            mv_src._data = nullptr;
+            mv_src._len = 0;
+        }
+
         fixed_vector::iterator begin()
         {
             return fixed_vector_iterator<T, false>(_data);

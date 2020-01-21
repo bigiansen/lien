@@ -103,6 +103,20 @@
 #endif
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// ALIGNMENT HINTS
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+#if defined(LIEN_COMPILER_MSVC)
+    #define LIEN_HINT_ALIGNED(arg, alig) arg; __assume((((char*) arg) - ((char*) 0)) % (alig) == 0)
+#elif defined(LIEN_COMPILER_GNU) || defined(LIEN_COMPILER_CLANG)
+    #define LIEN_HINT_ALIGNED(arg, alig) __builtin_assume_aligned(arg, alig)
+#elif defined(LIEN_COMPILER_INTEL)
+    #define LIEN_HINT_ALIGNED(arg, alig) arg; __assume_aligned(arg, alig)
+#else
+    #define LIEN_HINT_ALIGNED(arg, alig) arg
+#endif
+
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 // UNSUPPORTED COMPILER GUARDS
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
