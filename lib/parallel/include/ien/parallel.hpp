@@ -1,7 +1,5 @@
 #pragma once
 
-#include <ien/type_traits.hpp>
-
 #include <functional>
 #include <thread>
 #include <vector>

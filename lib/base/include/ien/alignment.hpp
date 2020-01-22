@@ -13,7 +13,7 @@ namespace ien
     {
         auto ptrval = 
             reinterpret_cast<const char*>(ptr) -
-            reinterpret_cast<const char*>(nullptr);
+            reinterpret_cast<const char*>(0);
 
         return (ptrval % alignment) == 0;
     }
@@ -25,7 +25,7 @@ namespace ien
         debug_assert((alignment & (alignment - 1)) == 0, "Alignment value must be a power of two");
 
         #ifndef NDEBUG
-        bool aligned = (((reinterpret_cast<const char*>(ptrs) - reinterpret_cast<const char*>(nullptr)) % alignment == 0) && ...);
+        bool aligned = (((reinterpret_cast<const char*>(ptrs) - reinterpret_cast<const char*>(0)) % alignment == 0) && ...);
         if(!aligned)
         {
             throw std::logic_error("One or more pointers are not aligned to expected alignment value");

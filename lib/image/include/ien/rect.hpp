@@ -1,12 +1,15 @@
 #pragma once
 
-#include <ien/type_traits.hpp>
-
 namespace ien
 {
-    template<typename T, typename = ien::tt::enable_if_is_integral_or_float<T>>
+    template<typename T>
     struct rect
     {
+        static_assert(
+            std::is_integral_v<T> || std::is_floating_point_v<T>,
+            "rect only admits integral or floating point template types"
+        );
+
         T x = static_cast<T>(0);
         T y = static_cast<T>(0);
         T w = static_cast<T>(0);

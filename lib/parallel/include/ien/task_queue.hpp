@@ -7,8 +7,6 @@
 #include <type_traits>
 #include <vector>
 
-#include <ien/type_traits.hpp>
-
 namespace ien
 {
     typedef std::function<void()> task_t;
@@ -26,24 +24,14 @@ namespace ien
     public:
         task_queue(size_t max_concurrent_tasks = std::thread::hardware_concurrency()) noexcept;
 
-        template<typename TTask, typename = tt::enable_if_is_type<TTask, task_t>>
+        template<typename TTask>
         void emplace_back(TTask&& task)
         {
+            static_assert(
+                std::is_same_v<std::decay_t<TTask>, task_t>, 
+                "Not a valid task type"
+            );
             _tasks.push_back(std::forward(task));
-        }
-
-        template<typename TContainer, 
-            typename = std::enable_if_t<tt::is_iterable_of<TContainer, task_t>>>
-        void emplace_back_many(TContainer&& cont)
-        {
-            if constexpr(std::is_rvalue_reference_v<decltype(cont)>)
-            {
-                std::move(cont.begin(), cont.end(), std::back_inserter(_tasks));
-            }
-            else
-            {
-                std::copy(cont.begin(), cont.end(), std::back_inserter(_tasks));
-            }
         }
 
         void run(bool detached = false);
