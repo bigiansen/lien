@@ -36,7 +36,7 @@ namespace ien
         void set_pixel(int index, const uint8_t* rgba);
         void set_pixel(int x, int y, const uint8_t* rgba);
 
-        bool save_to_file_png(const std::string& path, int compression_level = 8) const;
+        bool save_to_file_png(const std::string& path, int compression_level = 4) const;
         bool save_to_file_jpeg(const std::string& path, int quality = 100) const;
         bool save_to_file_tga(const std::string& path) const;
 
