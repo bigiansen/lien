@@ -1,6 +1,7 @@
 #include <ien/image.hpp>
 
 #include <ien/alignment.hpp>
+#include <ien/arithmetic.hpp>
 #include <ien/assert.hpp>
 #include <ien/platform.hpp>
 #include <ien/image_ops.hpp>
@@ -27,7 +28,7 @@ namespace ien
     }
     
     image::image(int width, int height)
-        : _data(static_cast<size_t>(width) * height)
+        : _data(safe_mul<size_t>(width, height))
         , _width(width)
         , _height(height)
     { 
@@ -51,7 +52,7 @@ namespace ien
         {
             throw std::invalid_argument("Unable to load image with path: " + path);
         }
-        _data = image_ops::unpack_image_data(packed_data, (static_cast<size_t>(_width) * _height * 4));
+        _data = image_ops::unpack_image_data(packed_data, (safe_mul<size_t>(_width, _height, 4)));
         debug_assert_image_unpk_data_aligned(_data);
 
         stbi_image_free(packed_data);
@@ -75,7 +76,7 @@ namespace ien
 
     size_t image::pixel_count() const noexcept
     {
-        return static_cast<size_t>(_width) * _height;
+        return safe_mul<size_t>(_width, _height);
     }
 
     int image::width() const noexcept { return _width; }
@@ -141,10 +142,10 @@ namespace ien
     void image::resize_absolute(int w, int h)
     {
         const ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
-        _data.resize(static_cast<size_t>(w) * h); // realloc unpacked data buffers
+        _data.resize(safe_mul<size_t>(w, h)); // realloc unpacked data buffers
         
         std::vector<uint8_t> resized_packed_data;
-        resized_packed_data.resize(size_t(w) * h * 4);
+        resized_packed_data.resize(safe_mul<size_t>(w, h, 4));
 
         stbir_resize_uint8(
             packed_data.cdata(), _width, _height, 4, resized_packed_data.data(), w, h, 4, 4
@@ -166,8 +167,8 @@ namespace ien
 
     void image::resize_relative(float w, float h)
     {
-        int real_w = static_cast<int>(static_cast<float>(_width) * w);
-        int real_h = static_cast<int>(static_cast<float>(_height) * h);
+        int real_w = static_cast<int>(safe_mul<float>(_width, w));
+        int real_h = static_cast<int>(safe_mul<float>(_height, h));
 
         resize_absolute(real_w, real_h);
     }

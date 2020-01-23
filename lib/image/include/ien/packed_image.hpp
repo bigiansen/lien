@@ -20,7 +20,7 @@ namespace ien
     public:
         packed_image(int width, int height);
         packed_image(const std::string& path);
-        packed_image(packed_image&& mv_src);
+        packed_image(packed_image&& mv_src) LIEN_RELEASE_NOEXCEPT;
 
         uint8_t* data() noexcept;
         const uint8_t* cdata() const noexcept;

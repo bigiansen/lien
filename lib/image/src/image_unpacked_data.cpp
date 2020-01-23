@@ -29,7 +29,7 @@ namespace ien
         }
     }
 
-    image_unpacked_data::image_unpacked_data(image_unpacked_data&& mv_src)
+	image_unpacked_data::image_unpacked_data(image_unpacked_data&& mv_src) noexcept
         : _r(mv_src._r)
         , _g(mv_src._g)
         , _b(mv_src._b)

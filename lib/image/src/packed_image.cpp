@@ -1,6 +1,7 @@
 #include <ien/packed_image.hpp>
 
 #include <ien/alignment.hpp>
+#include <ien/arithmetic.hpp>
 #include <ien/platform.hpp>
 
 #include <stb_image.h>
@@ -17,7 +18,7 @@ namespace ien
         , _height(height)
     { 
         _data = std::make_unique<ien::fixed_vector<uint8_t>>(
-            static_cast<size_t>(_width * _height * 4),
+            safe_mul<size_t>(_width, _height , 4),
             LIEN_DEFAULT_ALIGNMENT
         );
         debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
@@ -34,15 +35,15 @@ namespace ien
         debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, stbdata);
 
         _data = std::make_unique<ien::fixed_vector<uint8_t>>(
-            static_cast<size_t>(_width * _height * 4),
+            safe_mul<size_t>(_width, _height , 4),
             LIEN_DEFAULT_ALIGNMENT
         );
         debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
 
-        std::copy(stbdata, stbdata + (_width * _height * 4), _data->data());
+        std::copy(stbdata, stbdata + safe_mul<size_t>(_width, _height, 4), _data->data());
     }
 
-    packed_image::packed_image(packed_image&& mv_src)
+    packed_image::packed_image(packed_image&& mv_src) LIEN_RELEASE_NOEXCEPT
         : _data(std::move(mv_src._data))
         , _width(mv_src._width)
         , _height(mv_src._height)
@@ -58,15 +59,15 @@ namespace ien
 
     void packed_image::set_pixel(int idx, const uint8_t* rgba)
     {
-        std::memcpy(_data->data() + (static_cast<size_t>(idx) * 4), rgba, 4);
+        std::memcpy(_data->data() + safe_mul<size_t>(idx, 4), rgba, 4);
     }
     
     void packed_image::set_pixel(int x, int y, const uint8_t* rgba)
     {
-        std::memcpy(_data->data() + (static_cast<size_t>(x) * y * _width * 4), rgba, 4);
+        std::memcpy(_data->data() + safe_mul<size_t>(x, y, _width, 4), rgba, 4);
     }
 
-    size_t packed_image::pixel_count() const noexcept { return static_cast<size_t>(_width) * _height; }
+    size_t packed_image::pixel_count() const noexcept { return safe_mul<size_t>(_width, _height); }
 
     int packed_image::width() const noexcept { return _width; }
     
@@ -94,7 +95,7 @@ namespace ien
     void packed_image::resize_absolute(int w, int h)
     {
         std::unique_ptr<data_t> resized_data = std::make_unique<data_t>(
-            static_cast<uint8_t>(w) * h * 4, 
+            safe_mul<uint8_t>(w, h, 4), 
             LIEN_DEFAULT_ALIGNMENT
         );
         debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, resized_data->data());
@@ -106,8 +107,8 @@ namespace ien
 
     void packed_image::resize_relative(float w, float h)
     {
-        int real_w = static_cast<int>(float(_width) * w);
-        int real_h = static_cast<int>(float(_height) * h);
+        int real_w = static_cast<int>(safe_mul<float>(_width, w));
+        int real_h = static_cast<int>(safe_mul<float>(_height, h));
 
         resize_absolute(real_w, real_h);
     }

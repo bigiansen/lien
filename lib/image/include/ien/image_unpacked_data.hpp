@@ -33,7 +33,7 @@ namespace ien
         image_unpacked_data(size_t pixel_count);
         ~image_unpacked_data();
 
-        image_unpacked_data(image_unpacked_data&& mv_src);
+        image_unpacked_data(image_unpacked_data&& mv_src) noexcept;
 
         void operator=(image_unpacked_data&& mv_src);
 

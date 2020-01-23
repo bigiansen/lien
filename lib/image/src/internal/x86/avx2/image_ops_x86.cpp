@@ -344,7 +344,7 @@ namespace ien::image_ops::_internal
             _mm256_store_ps(aux_result + 16, vsat2);
             _mm256_store_ps(aux_result + 24, vsat3);
 
-            for (int k = 0; k < 8; ++k)
+            for (size_t k = 0; k < 8; ++k)
             {
                 result[0 + i + (k * 4)] = aux_result[0 + k];
                 result[1 + i + (k * 4)] = aux_result[8 + k];
