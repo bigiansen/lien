@@ -44,11 +44,11 @@ namespace ien
 
     packed_image::packed_image(packed_image&& mv_src)
         : _data(std::move(mv_src._data))
-        , _width(mv_src._height)
+        , _width(mv_src._width)
         , _height(mv_src._height)
     {
-        _width = 0;
-        _height = 0;
+        mv_src._width = 0;
+        mv_src._height = 0;
         debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
     }
 
