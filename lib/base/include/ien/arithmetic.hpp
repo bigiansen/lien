@@ -13,6 +13,6 @@ namespace ien
 	constexpr T safe_mul(TArgs... args)
 	{
 		static_assert(std::is_arithmetic_v<T>, "Not an arithmetic type");
-		return (static_cast<T>(args) + ...);
+		return (static_cast<T>(args) * ...);
 	}
 }

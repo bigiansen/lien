@@ -38,6 +38,12 @@ namespace ien
         , _moved(false)
     {
         mv_src._moved = true;
+		mv_src._r = nullptr;
+		mv_src._g = nullptr;
+		mv_src._b = nullptr;
+		mv_src._a = nullptr;
+		mv_src._size = 0;
+
         debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _r, _g, _b, _a);
     }
 

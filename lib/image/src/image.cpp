@@ -52,7 +52,7 @@ namespace ien
         {
             throw std::invalid_argument("Unable to load image with path: " + path);
         }
-        _data = image_ops::unpack_image_data(packed_data, (safe_mul<size_t>(_width, _height, 4)));
+        _data = image_ops::unpack_image_data(packed_data, safe_mul<size_t>(_width, _height, 4));
         debug_assert_image_unpk_data_aligned(_data);
 
         stbi_image_free(packed_data);
@@ -67,6 +67,14 @@ namespace ien
         std::memcpy(_data.data_g(), cp_src.cdata()->cdata_g(), cp_src.pixel_count());
         std::memcpy(_data.data_b(), cp_src.cdata()->cdata_b(), cp_src.pixel_count());
         std::memcpy(_data.data_a(), cp_src.cdata()->cdata_a(), cp_src.pixel_count());
+        debug_assert_image_unpk_data_aligned(_data);
+    }
+
+    image::image(const uint8_t* rgba_buff, int w, int h)
+        : _data(image_ops::unpack_image_data(rgba_buff, safe_mul<size_t>(_width, _height, 4)))
+        , _width(w)
+        , _height(h)
+    {
         debug_assert_image_unpk_data_aligned(_data);
     }
 

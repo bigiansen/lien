@@ -23,6 +23,8 @@ namespace ien
 
         image(const image& cp_src);
 
+        image(const uint8_t* rgba_buff, int w, int h);
+
         image_unpacked_data* data() noexcept;
         const image_unpacked_data* cdata() const noexcept;
 

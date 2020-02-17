@@ -11,7 +11,7 @@ TEST_CASE("[STD] Channel byte truncation")
     SECTION("STD")
     {
         image img(41, 41);
-        size_t px_count = 41 * 41;
+        size_t px_count = img.pixel_count();
 
         for (size_t i = 0; i < px_count; ++i)
         {
