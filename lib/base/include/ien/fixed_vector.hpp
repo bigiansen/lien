@@ -2,14 +2,17 @@
 
 #include <ien/alignment.hpp>
 #include <ien/platform.hpp>
+
+#include <algorithm>
 #include <cstddef>
 #include <iterator>
+#include <numeric>
 
 namespace ien
 {
     template<typename T, bool Const>
     class fixed_vector_iterator
-    {     
+    {
     private:
         T* _data = nullptr;
 
@@ -96,7 +99,7 @@ namespace ien
     template<typename T>
     class fixed_vector
     {
-    private:
+    protected:
         T* _data = nullptr;
         std::size_t _len;
         const std::size_t _alignment;
@@ -107,8 +110,8 @@ namespace ien
 
         fixed_vector(std::size_t len, std::size_t alignment = alignof(T))
             : _len(len)
-            , _alignment(alignment)
-        { 
+            , _alignment(std::max(alignment, ien::platform::min_alignment))
+        {
             _data = reinterpret_cast<T*>(
                 LIEN_ALIGNED_ALLOC(len * sizeof(T), alignment)
             );

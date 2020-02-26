@@ -92,6 +92,7 @@
 #endif
 
 #if defined(LIEN_COMPILER_MSVC)
+    #include <stdlib.h>
     #define LIEN_ALIGNED_ALLOC(sz, alig) _aligned_malloc(LIEN_ALIGNED_SZ(sz, alig), alig)
     #define LIEN_ALIGNED_FREE(ptr) _aligned_free(ptr)
     #define LIEN_ALIGNED_REALLOC(ptr, sz, alig) _aligned_realloc(ptr, LIEN_ALIGNED_SZ(sz, alig), alig)
@@ -157,6 +158,31 @@
         #endif
     #endif
 #endif
+
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+// PLATFORM UTILITES
+//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+namespace ien::platform
+{
+    namespace internal
+    {
+        static inline size_t _minimum_supported_alignment()
+        {
+            size_t result = 1;
+            while(result <= 1024)
+            {
+                void* ptr = LIEN_ALIGNED_ALLOC(result * 4, result);
+                if(ptr != nullptr)
+                    return result;
+                
+                result *= 2;
+            }
+            return 0;
+        }
+    }
+    const size_t min_alignment = internal::_minimum_supported_alignment();
+}
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 // PLATFORM FEATURES (x86)
