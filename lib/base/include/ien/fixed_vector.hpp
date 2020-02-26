@@ -113,8 +113,12 @@ namespace ien
             , _alignment(std::max(alignment, ien::platform::min_alignment))
         {
             _data = reinterpret_cast<T*>(
-                LIEN_ALIGNED_ALLOC(len * sizeof(T), alignment)
+                LIEN_ALIGNED_ALLOC(len * sizeof(T), _alignment)
             );
+
+            if(_data == nullptr)
+                throw std::bad_alloc();
+
             debug_assert_ptr_aligned(alignment, _data);
         }
 
@@ -147,6 +151,10 @@ namespace ien
             _data = reinterpret_cast<T*>(
                 LIEN_ALIGNED_REALLOC(_data, sz, _alignment)
             );
+
+            if(_data == nullptr)
+                throw std::bad_alloc();
+
             debug_assert_ptr_aligned(_alignment, _data);
         }
 
