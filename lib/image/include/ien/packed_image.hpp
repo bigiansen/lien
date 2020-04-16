@@ -18,9 +18,16 @@ namespace ien
         int _width, _height;
 
     public:
+        constexpr packed_image()
+            : _width(0)
+            , _height(0)
+        { }
+
+        packed_image(const packed_image& cp_src);
+        packed_image(packed_image&& mv_src);
+
         packed_image(int width, int height);
         packed_image(const std::string& path);
-        packed_image(packed_image&& mv_src) LIEN_RELEASE_NOEXCEPT;
 
         uint8_t* data() noexcept;
         const uint8_t* cdata() const noexcept;
@@ -38,5 +45,10 @@ namespace ien
 
         void resize_absolute(int w, int h);
         void resize_relative(float w, float h);
+
+        ien::fixed_vector<uint8_t> get_rgba_buff_copy();
+
+        packed_image& operator=(const packed_image& cp_src);
+        packed_image& operator=(packed_image&& mv_src);
     };
 }

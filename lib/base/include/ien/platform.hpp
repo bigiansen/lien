@@ -97,10 +97,29 @@
     #define LIEN_ALIGNED_FREE(ptr) _aligned_free(ptr)
     #define LIEN_ALIGNED_REALLOC(ptr, sz, alig) _aligned_realloc(ptr, LIEN_ALIGNED_SZ(sz, alig), alig)
 #else
-    #include <stdlib.h> // Seems that std::aligned_alloc is not well supported yet
+    #include <new>
+    #include <stdio.h>
+    #include <stdlib.h>
+
     #define LIEN_ALIGNED_ALLOC(sz, alig) aligned_alloc(alig, LIEN_ALIGNED_SZ(sz, alig))
     #define LIEN_ALIGNED_FREE(ptr) free(ptr)
-    #define LIEN_ALIGNED_REALLOC(ptr, sz, alig) realloc(ptr, LIEN_ALIGNED_SZ(sz, alig))
+
+    namespace ien::platform::_internal {
+        static void* aligned_alloc(size_t sz, size_t alig) {
+            void* ptr = LIEN_ALIGNED_ALLOC(sz, alig);
+            if(ptr == nullptr) {
+                printf("aligned_alloc failure: sz=%lu | alig=%lu | real_sz=%lu\n", sz, alig, LIEN_ALIGNED_SZ(sz, alig));
+                throw std::bad_alloc();
+            }
+            return ptr;
+        }
+
+        static void* realloc(void* ptr, size_t sz, size_t alig) {
+            LIEN_ALIGNED_FREE(ptr);
+            return aligned_alloc(sz, alig);
+        }
+    }
+    #define LIEN_ALIGNED_REALLOC(ptr, sz, alig) ien::platform::_internal::realloc(ptr, sz, alig)
 #endif
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+

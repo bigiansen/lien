@@ -43,6 +43,14 @@ namespace ien
         std::copy(stbdata, stbdata + safe_mul<size_t>(_width, _height, 4), _data->data());
     }
 
+    packed_image::packed_image(const packed_image& cp_src)
+        : _data(std::make_unique<data_t>(*cp_src._data))
+        , _width(cp_src._width)
+        , _height(cp_src._height)
+    {
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
+    }
+
     packed_image::packed_image(packed_image&& mv_src) LIEN_RELEASE_NOEXCEPT
         : _data(std::move(mv_src._data))
         , _width(mv_src._width)
@@ -111,5 +119,31 @@ namespace ien
         int real_h = static_cast<int>(safe_mul<float>(_height, h));
 
         resize_absolute(real_w, real_h);
+    }
+
+    ien::fixed_vector<uint8_t> packed_image::get_rgba_buff_copy()
+    {
+        return *_data;
+    }
+
+    packed_image& packed_image::operator=(const packed_image& cp_src)
+    {
+        *_data = *cp_src._data;
+        _width = cp_src._width;
+        _height = cp_src._height;
+
+        return *this;
+    }
+
+    packed_image& packed_image::operator=(packed_image&& mv_src)
+    {
+        *_data = std::move(*mv_src._data);
+        _width = mv_src._width;
+        _height = mv_src._height;
+
+        mv_src._width = 0;
+        mv_src._height = 0;
+        
+        return *this;
     }
 }

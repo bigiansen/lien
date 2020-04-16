@@ -58,20 +58,8 @@ namespace ien
         stbi_image_free(packed_data);
     }
 
-    image::image(const image& cp_src)
-        : _data(cp_src.pixel_count())
-        , _width(cp_src._width)
-        , _height(cp_src._height)
-    {
-        std::memcpy(_data.data_r(), cp_src.cdata()->cdata_r(), cp_src.pixel_count());
-        std::memcpy(_data.data_g(), cp_src.cdata()->cdata_g(), cp_src.pixel_count());
-        std::memcpy(_data.data_b(), cp_src.cdata()->cdata_b(), cp_src.pixel_count());
-        std::memcpy(_data.data_a(), cp_src.cdata()->cdata_a(), cp_src.pixel_count());
-        debug_assert_image_unpk_data_aligned(_data);
-    }
-
     image::image(const uint8_t* rgba_buff, int w, int h)
-        : _data(image_ops::unpack_image_data(rgba_buff, safe_mul<size_t>(_width, _height, 4)))
+        : _data(image_ops::unpack_image_data(rgba_buff, safe_mul<size_t>(w, h, 4)))
         , _width(w)
         , _height(h)
     {
@@ -147,6 +135,74 @@ namespace ien
         return stbi_write_tga(path.c_str(), _width, _height, 4, packed_data.data());
     }
 
+    void save_to_memory_func(void* ctx, void* data, int size)
+    {
+        printf("STBI REPORTED LEN: %d\n", size);
+        auto* vec = reinterpret_cast<ien::fixed_vector<uint8_t>*>(ctx);
+        
+        *vec = ien::fixed_vector<uint8_t>(size);
+        std::memcpy(vec->data(), data, size);
+    }
+
+    ien::fixed_vector<uint8_t> image::save_to_memory_png(int compression_level) const
+    {
+        ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, packed_data.data());
+
+        ien::fixed_vector<uint8_t> result;
+
+        stbi_write_png_compression_level = compression_level;
+        bool ok = stbi_write_png_to_func(
+            save_to_memory_func, 
+            reinterpret_cast<void*>(&result), 
+            _width, 
+            _height, 
+            4, 
+            packed_data.data(), 
+            _width * 4
+        );
+
+        if(!ok)
+            throw std::runtime_error("Failed to write png data to memory");
+
+        return result;
+    }
+
+    ien::fixed_vector<uint8_t> image::save_to_memory_jpeg(int quality) const
+    {
+        ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, packed_data.data());
+
+        ien::fixed_vector<uint8_t> result;
+        stbi_write_jpg_to_func(
+            save_to_memory_func,
+            reinterpret_cast<void*>(&result), 
+            _width, 
+            _height,
+            4,
+            packed_data.data(),
+            quality
+        );
+        return result;
+    }
+
+    ien::fixed_vector<uint8_t> image::save_to_memory_tga() const
+    {
+        ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, packed_data.data());
+
+        ien::fixed_vector<uint8_t> result;
+        stbi_write_tga_to_func(
+            save_to_memory_func,
+            reinterpret_cast<void*>(&result), 
+            _width, 
+            _height,
+            4,
+            packed_data.data()
+        );
+        return result;
+    }
+
     void image::resize_absolute(int w, int h)
     {
         const ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
@@ -187,5 +243,38 @@ namespace ien
         packed_image result(_width, _height);
         std::copy(packed_data.begin(), packed_data.end(), result.data());
         return result;
+    }
+
+    image& image::operator=(const image& cp_src)
+    {
+        size_t len = cp_src.pixel_count();
+
+        // Needs realloc ?
+        if(_data._size == 0)
+            _data = image_unpacked_data(len);
+        else if(_data._size != cp_src._data._size)
+            _data.resize(len);
+
+        std::memcpy(_data.data_r(), cp_src._data.cdata_r(), len);
+        std::memcpy(_data.data_g(), cp_src._data.cdata_g(), len);
+        std::memcpy(_data.data_b(), cp_src._data.cdata_b(), len);
+        std::memcpy(_data.data_a(), cp_src._data.cdata_b(), len);
+
+        this->_width = cp_src._width;
+        this->_height = cp_src._height;
+
+        return *this;
+    }
+
+    image& image::operator=(image&& mv_src)
+    {
+        _data = std::move(mv_src._data);
+        _width = mv_src._width;
+        _height = mv_src._height;
+
+        mv_src._width = 0;
+        mv_src._height = 0;
+
+        return *this;
     }
 }

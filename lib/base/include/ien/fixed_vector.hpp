@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstring>
 #include <iterator>
 #include <numeric>
 
@@ -102,16 +103,24 @@ namespace ien
     protected:
         T* _data = nullptr;
         std::size_t _len;
-        const std::size_t _alignment;
+        std::size_t _alignment;
 
     public:
         using iterator = fixed_vector_iterator<T, false>;
         using const_iterator = fixed_vector_iterator<T, true>;
 
-        fixed_vector(std::size_t len, std::size_t alignment = alignof(T))
+        constexpr fixed_vector()
+            : _len(0)
+            , _alignment(std::max(alignof(T), ien::platform::min_alignment))
+        { }
+
+        fixed_vector(std::size_t len)
             : _len(len)
-            , _alignment(std::max(alignment, ien::platform::min_alignment))
+            , _alignment(std::max(alignof(T), ien::platform::min_alignment))
         {
+            if(len == 0)
+                return;
+
             _data = reinterpret_cast<T*>(
                 LIEN_ALIGNED_ALLOC(len * sizeof(T), _alignment)
             );
@@ -119,7 +128,33 @@ namespace ien
             if(_data == nullptr)
                 throw std::bad_alloc();
 
-            debug_assert_ptr_aligned(alignment, _data);
+            debug_assert_ptr_aligned(_alignment, _data);
+        }
+
+        fixed_vector(std::size_t len, std::size_t alignment)
+            : _len(len)
+            , _alignment(std::max(alignment, ien::platform::min_alignment))
+        {
+            if(len == 0)
+                return;
+
+            _data = reinterpret_cast<T*>(
+                LIEN_ALIGNED_ALLOC(len * sizeof(T), _alignment)
+            );
+
+            if(_data == nullptr)
+                throw std::bad_alloc();
+
+            debug_assert_ptr_aligned(_alignment, _data);
+        }
+
+        fixed_vector(const fixed_vector& cp_src)
+            : _data(reinterpret_cast<T*>(LIEN_ALIGNED_ALLOC(cp_src._len, cp_src._alignment)))
+            , _len(cp_src._len)
+            , _alignment(cp_src._alignment)
+        {
+            std::memcpy(_data, cp_src._data, _len);
+            debug_assert_ptr_aligned(_alignment, _data);
         }
 
         fixed_vector(fixed_vector&& mv_src) noexcept
@@ -145,19 +180,6 @@ namespace ien
         T* data() noexcept { return _data; }
         const T* cdata() const noexcept { return _data; }
 
-        void resize(size_t sz)
-        {
-            _len = sz;
-            _data = reinterpret_cast<T*>(
-                LIEN_ALIGNED_REALLOC(_data, sz, _alignment)
-            );
-
-            if(_data == nullptr)
-                throw std::bad_alloc();
-
-            debug_assert_ptr_aligned(_alignment, _data);
-        }
-
         T& operator[](std::size_t index)
         {
             return _data[index];
@@ -166,6 +188,26 @@ namespace ien
         const T& operator[](std::size_t index) const
         {
             return _data[index];
+        }
+
+        T& at(std::size_t index)
+        {
+            return _data[index];
+        }
+
+        const T& at(std::size_t index) const
+        {
+            return _data[index];
+        }
+
+        void operator=(const fixed_vector<T>& cp_src)
+        {
+            _data = reinterpret_cast<T*>(LIEN_ALIGNED_REALLOC(_data, cp_src._len, cp_src._alignment));
+            std::memcpy(_data, cp_src._data, cp_src.size());
+            
+            _alignment = cp_src._alignment;
+            _len = cp_src._len;
+            debug_assert_ptr_aligned(_alignment, _data);
         }
 
         void operator=(fixed_vector<T>&& mv_src)

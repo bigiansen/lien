@@ -20,7 +20,7 @@ option(LIEN_ARM_ENABLE_NEON "Enable NEON code generation on ARM platforms" ON)
 
 # Enable SSE/AVX code generation on X86 platforms
 # This should go in a toolchain, but will remain here for the moment
-if(LIEN_ARCH_X86)
+if(LIEN_ARCH_X86 AND NOT EMSCRIPTEN)
     if(MSVC)
         add_definitions(/arch:AVX2)
     else()

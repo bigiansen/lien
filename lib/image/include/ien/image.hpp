@@ -18,10 +18,16 @@ namespace ien
         int _width, _height;
 
     public:
+        constexpr image() 
+            : _width(0)
+            , _height(0)
+        { }
+
         image(int width, int height);
         image(const std::string& path);
 
-        image(const image& cp_src);
+        image(const image& cp_src) = default;
+        image(image&& mv_src) = default;
 
         image(const uint8_t* rgba_buff, int w, int h);
 
@@ -42,9 +48,16 @@ namespace ien
         bool save_to_file_jpeg(const std::string& path, int quality = 100) const;
         bool save_to_file_tga(const std::string& path) const;
 
+        ien::fixed_vector<uint8_t> save_to_memory_png(int compression_level = 4) const;
+        ien::fixed_vector<uint8_t> save_to_memory_jpeg(int quality = 100) const;
+        ien::fixed_vector<uint8_t> save_to_memory_tga() const;
+
         void resize_absolute(int w, int h);
         void resize_relative(float w, float h);
 
         packed_image to_packed_image();
+
+        image& operator=(const image& cp_src);
+        image& operator=(image&& mv_src);
     };
 }

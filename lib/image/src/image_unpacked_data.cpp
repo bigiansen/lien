@@ -5,6 +5,7 @@
 #include <ien/platform.hpp>
 
 #include <array>
+#include <cstring>
 
 namespace ien
 {
@@ -27,6 +28,21 @@ namespace ien
             LIEN_ALIGNED_FREE(_b);
             LIEN_ALIGNED_FREE(_a);
         }
+    }
+
+    image_unpacked_data::image_unpacked_data(const image_unpacked_data& cp_src)
+        : _r(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, LIEN_DEFAULT_ALIGNMENT)))
+        , _g(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, LIEN_DEFAULT_ALIGNMENT)))
+        , _b(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, LIEN_DEFAULT_ALIGNMENT)))
+        , _a(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, LIEN_DEFAULT_ALIGNMENT)))
+        , _size(cp_src._size)
+        , _moved(cp_src._moved)
+    {
+        std::memcpy(_r, cp_src._r, cp_src._size);
+        std::memcpy(_g, cp_src._g, cp_src._size);
+        std::memcpy(_b, cp_src._b, cp_src._size);
+        std::memcpy(_a, cp_src._a, cp_src._size);
+        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _r, _g, _b, _a);
     }
 
 	image_unpacked_data::image_unpacked_data(image_unpacked_data&& mv_src) noexcept
