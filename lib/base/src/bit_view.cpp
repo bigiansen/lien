@@ -12,7 +12,7 @@ namespace ien
 
     bool bit_view::operator[](size_t index) const
     {
-        ien::debug_assert((index < (_len * 8)), "Out of range!");
+        LIEN_DEBUG_ASSERT_MSG((index < (_len * 8)), "Out of range!");
 
         size_t byte_idx = index / 8;
         size_t bit_idx = index % 8;

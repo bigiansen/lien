@@ -128,7 +128,7 @@ namespace ien
             if(_data == nullptr)
                 throw std::bad_alloc();
 
-            debug_assert_ptr_aligned(_alignment, _data);
+            LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(_data, _alignment));
         }
 
         fixed_vector(std::size_t len, std::size_t alignment)
@@ -145,7 +145,7 @@ namespace ien
             if(_data == nullptr)
                 throw std::bad_alloc();
 
-            debug_assert_ptr_aligned(_alignment, _data);
+            LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(_data, _alignment));
         }
 
         fixed_vector(const fixed_vector& cp_src)
@@ -154,7 +154,6 @@ namespace ien
             , _alignment(cp_src._alignment)
         {
             std::memcpy(_data, cp_src._data, _len);
-            debug_assert_ptr_aligned(_alignment, _data);
         }
 
         fixed_vector(fixed_vector&& mv_src) noexcept
@@ -163,7 +162,6 @@ namespace ien
             , _alignment(mv_src._alignment)
         {
             mv_src._data = nullptr;
-            debug_assert_ptr_aligned(_alignment, _data);
         }
 
         virtual ~fixed_vector()
@@ -207,10 +205,11 @@ namespace ien
             
             _alignment = cp_src._alignment;
             _len = cp_src._len;
-            debug_assert_ptr_aligned(_alignment, _data);
+
+            LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(_data, _alignment));
         }
 
-        void operator=(fixed_vector<T>&& mv_src)
+        void operator=(fixed_vector<T>&& mv_src) noexcept
         {
             this->_data = mv_src._data;
             this->_alignment = mv_src._alignment;
@@ -218,7 +217,6 @@ namespace ien
             
             mv_src._data = nullptr;
             mv_src._len = 0;
-            debug_assert_ptr_aligned(_alignment, _data);
         }
 
         fixed_vector::iterator begin()

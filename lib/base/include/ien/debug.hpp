@@ -1,9 +1,9 @@
 #pragma once
 
 #ifdef NDEBUG
-    #define LIEN_RELEASE_CONSTEXPR constexpr
-	#define LIEN_RELEASE_NOEXCEPT noexcept
+    #define LIEN_RELEASE_ONLY(keyword) keyword
+    #define LIEN_DEBUG_ONLY(keyword)
 #else
-    #define LIEN_RELEASE_CONSTEXPR
-	#define LIEN_RELEASE_NOEXCEPT
+    #define LIEN_RELEASE_ONLY(keyword)
+    #define LIEN_DEBUG_ONLY(keyword) keyword
 #endif

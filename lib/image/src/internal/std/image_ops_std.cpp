@@ -36,7 +36,6 @@ namespace ien::image_ops::_internal
     {
         const size_t img_sz = args.len;
         BIND_CHANNELS(args, r, g, b, a);
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, r, g, b, a);
 
         uint32_t mask_r = trunc_and_table[args.bits_r];
         uint32_t mask_g = trunc_and_table[args.bits_g];
@@ -68,7 +67,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, r, g, b, a);
 
         for(size_t i = 0; i < img_sz; ++i)
         {
@@ -85,7 +83,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, r, g, b, a);
 
         for (size_t i = 0; i < img_sz; ++i)
         {
@@ -101,7 +98,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, r, g, b, a);
 
         for (size_t i = 0; i < img_sz; ++i)
         {
@@ -117,7 +113,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, r, g, b);
 
         for(size_t i = 0; i < img_sz; ++i)
         {
@@ -133,7 +128,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, r, g, b);
 
         for (size_t i = 0; i < img_sz; ++i)
         {
@@ -148,7 +142,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, r, g, b);
 
         for (size_t i = 0; i < img_sz; ++i)
         {
@@ -164,7 +157,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, r, g, b, a);
 
         for (size_t i = 0; i < img_sz; ++i)
         {
@@ -181,10 +173,8 @@ namespace ien::image_ops::_internal
         fixed_vector<float> result(args.len);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, r, g, b);
 
         // SATURATION(r, g, b) = (MAX(r, g, b) - MIN(r, g, b)) / MAX(r, g, b)
-
         for (size_t i = 0; i < img_sz; ++i)
         {
             float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] })) / 255.0F;
@@ -202,7 +192,6 @@ namespace ien::image_ops::_internal
         fixed_vector<float> result(args.len);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, r, g, b);
 
         // LUMINANCE(r, g, b) = (((MAX(r, b, g) + MIN(r, g, b)) * 0.5) / 255.0F
 

@@ -4,7 +4,6 @@
 #include <ien/debug.hpp>
 #include <ien/platform.hpp>
 #include <cstddef>
-#include <stdexcept>
 
 namespace ien
 {
@@ -16,20 +15,5 @@ namespace ien
             reinterpret_cast<const char*>(0);
 
         return (ptrval % alignment) == 0;
-    }
-    
-    template<typename ... TArgs>
-    LIEN_RELEASE_CONSTEXPR void debug_assert_ptr_aligned(size_t alignment, const TArgs&... ptrs)
-    {
-        static_assert((std::is_pointer_v<TArgs> && ...), "Argument list contains non-pointer type(s)");
-        debug_assert((alignment & (alignment - 1)) == 0, "Alignment value must be a power of two");
-
-        #ifndef NDEBUG
-        bool aligned = (((reinterpret_cast<const char*>(ptrs) - reinterpret_cast<const char*>(0)) % alignment == 0) && ...);
-        if(!aligned)
-        {
-            throw std::logic_error("One or more pointers are not aligned to expected alignment value");
-        }
-        #endif
     }
 }

@@ -5,16 +5,11 @@ namespace ien
 {
     task_queue::task_queue(size_t max_concurrent_tasks) noexcept
         : _max_concurrent(max_concurrent_tasks)
-    {
-        ien::runtime_assert(
-            max_concurrent_tasks > 0, 
-            "Max concurrent task must be at least one!"
-        );
-    }
+    { }
 
     void task_queue::run(bool detached)
     {
-        { // lock guard
+        {
             std::lock_guard lock(_run_mux);
             if (_started) { return; }
             _started = true;

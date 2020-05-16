@@ -58,6 +58,6 @@ namespace ien
         packed_image to_packed_image();
 
         image& operator=(const image& cp_src);
-        image& operator=(image&& mv_src);
+        image& operator=(image&& mv_src) noexcept;
     };
 }

@@ -21,7 +21,6 @@ namespace ien
             safe_mul<size_t>(_width, _height , 4),
             LIEN_DEFAULT_ALIGNMENT
         );
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
     }
 
     packed_image::packed_image(const std::string& path)
@@ -32,13 +31,11 @@ namespace ien
         {
             throw std::invalid_argument("Invalid image path or file format");
         }
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, stbdata);
 
         _data = std::make_unique<ien::fixed_vector<uint8_t>>(
             safe_mul<size_t>(_width, _height , 4),
             LIEN_DEFAULT_ALIGNMENT
         );
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
 
         std::copy(stbdata, stbdata + safe_mul<size_t>(_width, _height, 4), _data->data());
     }
@@ -47,18 +44,15 @@ namespace ien
         : _data(std::make_unique<data_t>(*cp_src._data))
         , _width(cp_src._width)
         , _height(cp_src._height)
-    {
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
-    }
+    { }
 
-    packed_image::packed_image(packed_image&& mv_src) LIEN_RELEASE_NOEXCEPT
+    packed_image::packed_image(packed_image&& mv_src) noexcept
         : _data(std::move(mv_src._data))
         , _width(mv_src._width)
         , _height(mv_src._height)
     {
         mv_src._width = 0;
         mv_src._height = 0;
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
     }
 
     uint8_t* packed_image::data() noexcept { return _data->data(); }
@@ -84,19 +78,16 @@ namespace ien
     bool packed_image::save_to_file_png(const std::string& path, int compression_level) const
     {
         stbi_write_png_compression_level = compression_level;
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
         return stbi_write_png(path.c_str(), _width, _height, 4, _data->data(), _width * 4);
     }
 
     bool packed_image::save_to_file_jpeg(const std::string& path, int quality) const
     {
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
         return stbi_write_jpg(path.c_str(), _width, _height, 4, _data->data(), quality);
     }
 
     bool packed_image::save_to_file_tga(const std::string& path) const
     {
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
         return stbi_write_tga(path.c_str(), _width, _height, 4, _data->data());
     }
 
@@ -106,8 +97,6 @@ namespace ien
             safe_mul<uint8_t>(w, h, 4), 
             LIEN_DEFAULT_ALIGNMENT
         );
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, resized_data->data());
-        debug_assert_ptr_aligned(LIEN_DEFAULT_ALIGNMENT, _data->data());
 
         stbir_resize_uint8(_data->cdata(), _width, _height, 4, resized_data->data(), w, h, 4, 4);
         _data = std::move(resized_data);
@@ -135,7 +124,7 @@ namespace ien
         return *this;
     }
 
-    packed_image& packed_image::operator=(packed_image&& mv_src)
+    packed_image& packed_image::operator=(packed_image&& mv_src) noexcept
     {
         *_data = std::move(*mv_src._data);
         _width = mv_src._width;

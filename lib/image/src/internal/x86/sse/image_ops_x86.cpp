@@ -10,22 +10,38 @@
 #include <algorithm>
 #include <immintrin.h>
 
+#define SSE_ALIGNMENT 16
+
+#define DEBUG_ASSERT_RGBA_ALIGNED(r, g, b, a) \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(r, SSE_ALIGNMENT)); \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(g, SSE_ALIGNMENT)); \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(b, SSE_ALIGNMENT)); \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(a, SSE_ALIGNMENT))
+
+#define DEBUG_ASSERT_RGB_ALIGNED(r, g, b) \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(r, SSE_ALIGNMENT)); \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(g, SSE_ALIGNMENT)); \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(b, SSE_ALIGNMENT))    
+
 #define BIND_CHANNELS(args, r, g, b, a) \
     uint8_t* r = args.ch_r; \
     uint8_t* g = args.ch_g; \
     uint8_t* b = args.ch_b; \
-    uint8_t* a = args.ch_a
+    uint8_t* a = args.ch_a; \
+    DEBUG_ASSERT_RGBA_ALIGNED(r, g, b, a)
 
 #define BIND_CHANNELS_RGBA_CONST(args, r, g, b, a) \
     const uint8_t* r = args.ch_r; \
     const uint8_t* g = args.ch_g; \
     const uint8_t* b = args.ch_b; \
-    const uint8_t* a = args.ch_a
+    const uint8_t* a = args.ch_a; \
+    DEBUG_ASSERT_RGBA_ALIGNED(r, g, b, a)
 
 #define BIND_CHANNELS_RGB_CONST(args, r, g, b) \
     const uint8_t* r = args.ch_r; \
     const uint8_t* g = args.ch_g; \
-    const uint8_t* b = args.ch_b;
+    const uint8_t* b = args.ch_b; \
+    DEBUG_ASSERT_RGB_ALIGNED(r, g, b)
 
 #define LOAD_SI128(addr) \
     _mm_load_si128(reinterpret_cast<__m128i*>(addr));
@@ -46,8 +62,6 @@ namespace ien::image_ops::_internal
         0xF0F0F0F0, 0xE0E0E0E0, 0xC0C0C0C0, 0x80808080
     };
 
-    constexpr size_t SSE_ALIGNMENT = 16;
-
     void truncate_channel_data_sse2(const truncate_channel_args& args)
     {
         const size_t img_sz = args.len;
@@ -58,7 +72,6 @@ namespace ien::image_ops::_internal
         }
 
         BIND_CHANNELS(args, r, g, b, a);
-        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b, a);
 
         const __m128i vmask_r = _mm_set1_epi32(trunc_and_table[args.bits_r]);
         const __m128i vmask_g = _mm_set1_epi32(trunc_and_table[args.bits_g]);
@@ -111,7 +124,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b, a);
 
         size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
@@ -147,7 +159,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b, a);
 
         size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
@@ -189,7 +200,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b);
 
         size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
@@ -223,7 +233,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b);
 
         size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
@@ -257,7 +266,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b, a);
 
         size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
@@ -294,7 +302,6 @@ namespace ien::image_ops::_internal
         fixed_vector<float> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b);
 
         __m128i fpcast_mask = _mm_set1_epi32(0x000000FF);
 
@@ -375,7 +382,6 @@ namespace ien::image_ops::_internal
         fixed_vector<float> result(args.len, SSE_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b);
 
         __m128i fpcast_mask = _mm_set1_epi32(0x000000FF);
         __m128 vhalfmul = _mm_set_ps1(0.5F);
@@ -464,7 +470,6 @@ namespace ien::image_ops::_internal
         uint8_t* g = result.data_g();
         uint8_t* b = result.data_b();
         uint8_t* a = result.data_a();
-        debug_assert_ptr_aligned(SSE_ALIGNMENT, r, g, b, a);
 
         const __m128i vshufmask = _mm_set_epi8(
             15, 11, 7, 3,
@@ -522,7 +527,6 @@ namespace ien::image_ops::_internal
         }
 
         fixed_vector<uint8_t> result(len, SSE_ALIGNMENT);
-        debug_assert_ptr_aligned(SSE_ALIGNMENT, result.data());
 
         const __m128i vthreshold = _mm_set1_epi8(args.threshold);
 

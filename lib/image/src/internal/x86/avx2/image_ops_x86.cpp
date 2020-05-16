@@ -10,22 +10,38 @@
 #include <algorithm>
 #include <immintrin.h>
 
+#define AVX_ALIGNMENT 32
+
+#define DEBUG_ASSERT_RGBA_ALIGNED(r, g, b, a) \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(r, AVX_ALIGNMENT)); \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(g, AVX_ALIGNMENT)); \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(b, AVX_ALIGNMENT)); \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(a, AVX_ALIGNMENT))
+
+#define DEBUG_ASSERT_RGB_ALIGNED(r, g, b) \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(r, AVX_ALIGNMENT)); \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(g, AVX_ALIGNMENT)); \
+    LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(b, AVX_ALIGNMENT))    
+
 #define BIND_CHANNELS(args, r, g, b, a) \
     uint8_t* r = args.ch_r; \
     uint8_t* g = args.ch_g; \
     uint8_t* b = args.ch_b; \
-    uint8_t* a = args.ch_a
+    uint8_t* a = args.ch_a; \
+    DEBUG_ASSERT_RGBA_ALIGNED(r, g, b, a)
 
 #define BIND_CHANNELS_RGBA_CONST(args, r, g, b, a) \
     const uint8_t* r = args.ch_r; \
     const uint8_t* g = args.ch_g; \
     const uint8_t* b = args.ch_b; \
-    const uint8_t* a = args.ch_a
+    const uint8_t* a = args.ch_a; \
+    DEBUG_ASSERT_RGBA_ALIGNED(r, g, b, a)
 
 #define BIND_CHANNELS_RGB_CONST(args, r, g, b) \
     const uint8_t* r = args.ch_r; \
     const uint8_t* g = args.ch_g; \
-    const uint8_t* b = args.ch_b; 
+    const uint8_t* b = args.ch_b; \
+    DEBUG_ASSERT_RGB_ALIGNED(r, g, b)
 
 #define LOAD_SI256(addr) \
     _mm256_load_si256(reinterpret_cast<__m256i*>(addr));
@@ -46,8 +62,6 @@ namespace ien::image_ops::_internal
         0xF0F0F0F0, 0xE0E0E0E0, 0xC0C0C0C0, 0x80808080
     };
 
-    const size_t AVX_ALIGNMENT = 32;
-
     void truncate_channel_data_avx2(const truncate_channel_args& args)
     {
         const size_t img_sz = args.len;
@@ -58,7 +72,6 @@ namespace ien::image_ops::_internal
         }
 
         BIND_CHANNELS(args, r, g, b, a);
-        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b, a);
 
         const __m256i vmask_r = _mm256_set1_epi8(trunc_and_table[args.bits_r]);
         const __m256i vmask_g = _mm256_set1_epi8(trunc_and_table[args.bits_g]);
@@ -111,7 +124,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b, a);
 
         size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
@@ -147,7 +159,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b, a);
 
         size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
@@ -189,7 +200,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b);
 
         size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
@@ -223,7 +233,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b);
 
         size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
@@ -257,7 +266,6 @@ namespace ien::image_ops::_internal
         fixed_vector<uint8_t> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b, a);
 
         size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
@@ -295,7 +303,6 @@ namespace ien::image_ops::_internal
         fixed_vector<float> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b);
 
         __m256i fpcast_mask = _mm256_set1_epi32(0x000000FF);
 
@@ -375,7 +382,6 @@ namespace ien::image_ops::_internal
         fixed_vector<float> result(args.len, AVX_ALIGNMENT);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        debug_assert_ptr_aligned(AVX_ALIGNMENT, r, g, b);
 
         __m256i vfpcast_mask = _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
         __m256 vlum_mulv = _mm256_set1_ps(0.00392156862F / 2);
@@ -495,7 +501,6 @@ namespace ien::image_ops::_internal
         }
 
         fixed_vector<uint8_t> result(len, AVX_ALIGNMENT);
-        debug_assert_ptr_aligned(AVX_ALIGNMENT, result.data());
 
         const __m256i vthreshold = _mm256_set1_epi8(args.threshold);
 

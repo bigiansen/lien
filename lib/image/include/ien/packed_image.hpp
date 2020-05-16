@@ -24,7 +24,7 @@ namespace ien
         { }
 
         packed_image(const packed_image& cp_src);
-        packed_image(packed_image&& mv_src);
+        packed_image(packed_image&& mv_src) noexcept;
 
         packed_image(int width, int height);
         packed_image(const std::string& path);
@@ -49,6 +49,6 @@ namespace ien
         ien::fixed_vector<uint8_t> get_rgba_buff_copy();
 
         packed_image& operator=(const packed_image& cp_src);
-        packed_image& operator=(packed_image&& mv_src);
+        packed_image& operator=(packed_image&& mv_src) noexcept;
     };
 }
