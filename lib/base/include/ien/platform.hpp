@@ -81,6 +81,8 @@
 // ALIGNED ALLOCATION
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+#include <cstddef>
+
 namespace ien
 {
     template<typename T>
@@ -115,7 +117,6 @@ namespace ien
     #include <stdlib.h>
 
     #include <ien/assert.hpp>
-    #include <ien/alignment.hpp>
 
     #define LIEN_ALIGNED_ALLOC(sz, alig) aligned_alloc(alig, LIEN_ALIGNED_SZ(sz, alig))
     #define LIEN_ALIGNED_FREE(ptr) free(ptr)
