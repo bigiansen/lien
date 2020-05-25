@@ -1,6 +1,5 @@
 #include <ien/internal/x86/image_ops_x86.hpp>
 
-#include <ien/alignment.hpp>
 #include <ien/platform.hpp>
 
 #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
