@@ -81,6 +81,19 @@
 // ALIGNED ALLOCATION
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+namespace ien
+{
+    template<typename T>
+    constexpr bool is_ptr_aligned(const T* ptr, size_t alignment)
+    {
+        auto ptrval = 
+            reinterpret_cast<const char*>(ptr) -
+            reinterpret_cast<const char*>(0);
+
+        return (ptrval % alignment) == 0;
+    }
+}
+
 #define LIEN_ALIGNED_SZ(sz, alig) (sz - (sz % alig) + alig)
 
 #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
