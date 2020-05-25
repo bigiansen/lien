@@ -3,7 +3,6 @@
 
 #if defined(LIEN_ARM_NEON)
 
-#include <ien/alignment.hpp>
 #include <ien/assert.hpp>
 #include <ien/internal/image_ops_args.hpp>
 #include <ien/internal/std/image_ops_std.hpp>

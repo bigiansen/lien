@@ -1,6 +1,5 @@
 #include <ien/image.hpp>
 
-#include <ien/alignment.hpp>
 #include <ien/arithmetic.hpp>
 #include <ien/assert.hpp>
 #include <ien/platform.hpp>

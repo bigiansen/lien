@@ -1,6 +1,5 @@
 #include <ien/image_unpacked_data.hpp>
 
-#include <ien/alignment.hpp>
 #include <ien/assert.hpp>
 #include <ien/platform.hpp>
 

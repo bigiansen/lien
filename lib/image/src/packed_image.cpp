@@ -1,6 +1,5 @@
 #include <ien/packed_image.hpp>
 
-#include <ien/alignment.hpp>
 #include <ien/arithmetic.hpp>
 #include <ien/platform.hpp>
 
