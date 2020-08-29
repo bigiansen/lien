@@ -7,4 +7,4 @@ FILE(GLOB STB_HEADERS include/*.h include/*.hpp)
 
 add_library(stb ${STB_SOURCES} ${STB_HEADERS})
 target_include_directories(stb PUBLIC include)
-target_link_libraries(stb lien_base zlib)
+target_link_libraries(stb lien_base)
