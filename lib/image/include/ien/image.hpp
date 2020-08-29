@@ -56,6 +56,7 @@ namespace ien
         void resize_relative(float w, float h);
 
         packed_image to_packed_image();
+        std::string to_png_base64(int comp_level = 4);
 
         image& operator=(const image& cp_src);
         image& operator=(image&& mv_src) noexcept;

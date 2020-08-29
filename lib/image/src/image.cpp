@@ -2,6 +2,7 @@
 
 #include <ien/arithmetic.hpp>
 #include <ien/assert.hpp>
+#include <ien/base64.hpp>
 #include <ien/platform.hpp>
 #include <ien/image_ops.hpp>
 #include <ien/packed_image.hpp>
@@ -217,6 +218,12 @@ namespace ien
         packed_image result(_width, _height);
         std::copy(packed_data.begin(), packed_data.end(), result.data());
         return result;
+    }
+
+    std::string image::to_png_base64(int comp_level)
+    {
+        ien::fixed_vector<uint8_t> data = save_to_memory_png(comp_level);
+        return ien::base64::encode(data.cdata(), data.size());
     }
 
     image& image::operator=(const image& cp_src)
