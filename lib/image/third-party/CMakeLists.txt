@@ -4,5 +4,4 @@ else()
     add_definitions(-w)
 endif()
 
-add_subdirectory(zlib)
 add_subdirectory(stb)
