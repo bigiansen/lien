@@ -8,7 +8,8 @@
 #include <string>
 
 namespace ien
-{
+{ 
+    class image;
     class packed_image
     {
     private:
@@ -47,6 +48,8 @@ namespace ien
         void resize_relative(float w, float h);
 
         ien::fixed_vector<uint8_t> get_rgba_buff_copy();
+
+        ien::image to_image();
 
         packed_image& operator=(const packed_image& cp_src);
         packed_image& operator=(packed_image&& mv_src) noexcept;

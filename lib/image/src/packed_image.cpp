@@ -1,6 +1,7 @@
 #include <ien/packed_image.hpp>
 
 #include <ien/arithmetic.hpp>
+#include <ien/image.hpp>
 #include <ien/platform.hpp>
 
 #include <stb_image.h>
@@ -112,6 +113,11 @@ namespace ien
     ien::fixed_vector<uint8_t> packed_image::get_rgba_buff_copy()
     {
         return *_data;
+    }
+
+    ien::image packed_image::to_image()
+    {
+        return ien::image(this->_data->data(), _width, _height);
     }
 
     packed_image& packed_image::operator=(const packed_image& cp_src)
