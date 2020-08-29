@@ -41,7 +41,7 @@ namespace ien
     }
 
     packed_image::packed_image(const packed_image& cp_src)
-        : _data(std::make_unique<data_t>(*cp_src._data))
+        : _data(std::make_unique<ien::fixed_vector<uint8_t>>(*cp_src._data))
         , _width(cp_src._width)
         , _height(cp_src._height)
     { }
@@ -93,7 +93,7 @@ namespace ien
 
     void packed_image::resize_absolute(int w, int h)
     {
-        std::unique_ptr<data_t> resized_data = std::make_unique<data_t>(
+        std::unique_ptr<ien::fixed_vector<uint8_t>> resized_data = std::make_unique<ien::fixed_vector<uint8_t>>(
             safe_mul<uint8_t>(w, h, 4), 
             LIEN_DEFAULT_ALIGNMENT
         );
@@ -122,7 +122,11 @@ namespace ien
 
     packed_image& packed_image::operator=(const packed_image& cp_src)
     {
-        *_data = *cp_src._data;
+        _data = std::make_unique<ien::fixed_vector<uint8_t>>(
+            cp_src.pixel_count() * 4,
+            LIEN_DEFAULT_ALIGNMENT
+        );
+        std::memcpy(_data->data(), cp_src.cdata(), cp_src.pixel_count() * 4);
         _width = cp_src._width;
         _height = cp_src._height;
 
@@ -131,7 +135,7 @@ namespace ien
 
     packed_image& packed_image::operator=(packed_image&& mv_src) noexcept
     {
-        *_data = std::move(*mv_src._data);
+        _data = std::move(mv_src._data);
         _width = mv_src._width;
         _height = mv_src._height;
 

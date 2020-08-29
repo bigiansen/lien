@@ -13,9 +13,7 @@ namespace ien
     class packed_image
     {
     private:
-        using data_t = ien::fixed_vector<uint8_t>;
-
-        std::unique_ptr<data_t> _data;
+        std::unique_ptr<ien::fixed_vector<uint8_t>> _data;
         int _width, _height;
 
     public:
