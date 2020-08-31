@@ -22,10 +22,12 @@ option(LIEN_ARM_ENABLE_NEON "Enable NEON code generation on ARM platforms" ON)
 # This should go in a toolchain, but will remain here for the moment
 if(LIEN_ARCH_X86 AND NOT EMSCRIPTEN)
     if(MSVC)
-        add_definitions(/arch:AVX2)
+        add_definitions(/arch:AVX2)    
     else()
         add_definitions(-mavx2)
     endif()
+elseif(EMSCRIPTEN)
+    add_definitions(-msimd128)
 endif()
 
 # Enable NEON code generation on ARM platforms, if enabled by the LIEN_ARM_ENABLE_NEON option
