@@ -121,7 +121,7 @@ namespace ien
                 return;
 
             _data = reinterpret_cast<T*>(
-                LIEN_ALIGNED_ALLOC(len * sizeof(T), _alignment)
+                ien::platform::aligned_alloc(len * sizeof(T), _alignment)
             );
 
             if(_data == nullptr)
@@ -138,7 +138,7 @@ namespace ien
                 return;
 
             _data = reinterpret_cast<T*>(
-                LIEN_ALIGNED_ALLOC(len * sizeof(T), _alignment)
+                ien::platform::aligned_alloc(len * sizeof(T), _alignment)
             );
 
             if(_data == nullptr)
@@ -148,7 +148,7 @@ namespace ien
         }
 
         fixed_vector(const fixed_vector& cp_src)
-            : _data(reinterpret_cast<T*>(LIEN_ALIGNED_ALLOC(cp_src._len, cp_src._alignment)))
+            : _data(reinterpret_cast<T*>(ien::platform::aligned_alloc(cp_src._len, cp_src._alignment)))
             , _len(cp_src._len)
             , _alignment(cp_src._alignment)
         {

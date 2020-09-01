@@ -5,8 +5,8 @@
 
 #include <ien/platform.hpp>
 
-#define STBI_MALLOC(sz) LIEN_ALIGNED_ALLOC(sz, LIEN_DEFAULT_ALIGNMENT)
-#define STBI_FREE(ptr) LIEN_ALIGNED_FREE(ptr)
-#define STBI_REALLOC(ptr, sz) LIEN_ALIGNED_REALLOC(ptr, sz, LIEN_DEFAULT_ALIGNMENT)
+#define STBI_MALLOC(sz) ien::platform::aligned_alloc(sz, LIEN_DEFAULT_ALIGNMENT)
+#define STBI_FREE(ptr) ien::platform::aligned_free(ptr)
+#define STBI_REALLOC(ptr, sz) ien::platform::aligned_realloc(ptr, sz, LIEN_DEFAULT_ALIGNMENT)
 
 #include "stb_image.h"

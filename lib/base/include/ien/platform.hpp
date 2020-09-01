@@ -121,19 +121,28 @@ namespace ien
     #define LIEN_ALIGNED_ALLOC(sz, alig) aligned_alloc(alig, LIEN_ALIGNED_SZ(sz, alig))
     #define LIEN_ALIGNED_FREE(ptr) free(ptr)
 
-    namespace ien::platform::_internal {
-        static void* aligned_alloc(size_t sz, size_t alig) {
+    namespace ien::platform
+    {
+        static void* aligned_alloc(size_t sz, size_t alig) 
+        {
             void* ptr = LIEN_ALIGNED_ALLOC(sz, alig);
-            LIEN_ASSERT(ien::is_ptr_aligned(ptr, alig));
+            LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(ptr, alig));
             return ptr;
         }
 
-        static void* realloc(void* ptr, size_t sz, size_t alig) {
+        static void* aligned_realloc(void* ptr, size_t sz, size_t alig) 
+        {
+            LIEN_DEBUG_ASSERT(ptr != nullptr);
             LIEN_ALIGNED_FREE(ptr);
             return aligned_alloc(sz, alig);
         }
+
+        static void aligned_free(void* ptr) 
+        {
+            LIEN_DEBUG_ASSERT(ptr != nullptr);
+            LIEN_ALIGNED_FREE(ptr);
+        }
     }
-    #define LIEN_ALIGNED_REALLOC(ptr, sz, alig) ien::platform::_internal::realloc(ptr, sz, alig)
 #endif
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+

@@ -10,10 +10,10 @@
 namespace ien
 {
     image_unpacked_data::image_unpacked_data(size_t pixel_count)
-        : _r(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
-        , _g(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
-        , _b(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
-        , _a(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
+        : _r(reinterpret_cast<uint8_t*>(ien::platform::aligned_alloc(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
+        , _g(reinterpret_cast<uint8_t*>(ien::platform::aligned_alloc(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
+        , _b(reinterpret_cast<uint8_t*>(ien::platform::aligned_alloc(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
+        , _a(reinterpret_cast<uint8_t*>(ien::platform::aligned_alloc(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
         , _alignment(LIEN_DEFAULT_ALIGNMENT)
         , _size(pixel_count)        
     { }
@@ -22,18 +22,18 @@ namespace ien
     {
         if(!_moved)
         {
-            LIEN_ALIGNED_FREE(_r);
-            LIEN_ALIGNED_FREE(_g);
-            LIEN_ALIGNED_FREE(_b);
-            LIEN_ALIGNED_FREE(_a);
+            ien::platform::aligned_free(_r);
+            ien::platform::aligned_free(_g);
+            ien::platform::aligned_free(_b);
+            ien::platform::aligned_free(_a);
         }
     }
 
     image_unpacked_data::image_unpacked_data(const image_unpacked_data& cp_src)
-        : _r(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, cp_src._alignment)))
-        , _g(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, cp_src._alignment)))
-        , _b(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, cp_src._alignment)))
-        , _a(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, cp_src._alignment)))
+        : _r(reinterpret_cast<uint8_t*>(ien::platform::aligned_alloc(cp_src._size, cp_src._alignment)))
+        , _g(reinterpret_cast<uint8_t*>(ien::platform::aligned_alloc(cp_src._size, cp_src._alignment)))
+        , _b(reinterpret_cast<uint8_t*>(ien::platform::aligned_alloc(cp_src._size, cp_src._alignment)))
+        , _a(reinterpret_cast<uint8_t*>(ien::platform::aligned_alloc(cp_src._size, cp_src._alignment)))
         , _alignment(cp_src._alignment)
         , _size(cp_src._size)
         , _moved(cp_src._moved)
@@ -87,10 +87,10 @@ namespace ien
 
     void image_unpacked_data::resize(size_t pixel_count)
     {
-        _r = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_r, pixel_count, _alignment));
-        _g = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_g, pixel_count, _alignment));
-        _b = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_b, pixel_count, _alignment));
-        _a = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_a, pixel_count, _alignment));
+        _r = reinterpret_cast<uint8_t*>(ien::platform::aligned_realloc(_r, pixel_count, _alignment));
+        _g = reinterpret_cast<uint8_t*>(ien::platform::aligned_realloc(_g, pixel_count, _alignment));
+        _b = reinterpret_cast<uint8_t*>(ien::platform::aligned_realloc(_b, pixel_count, _alignment));
+        _a = reinterpret_cast<uint8_t*>(ien::platform::aligned_realloc(_a, pixel_count, _alignment));
     }
 
     uint32_t image_unpacked_data::get_pixel(size_t index) const
