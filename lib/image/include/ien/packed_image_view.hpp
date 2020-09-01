@@ -9,14 +9,14 @@ namespace ien
     {
     private:
         const uint8_t* _ptr;
-        rect<int> _view_rect;
-        rect<int> _image_rect;
+        rect<size_t> _view_rect;
+        rect<size_t> _image_rect;
     
     public:
-        packed_image_view(const packed_image*, const rect<int>& view_rect);
+        packed_image_view(const packed_image*, const rect<size_t>& view_rect);
 
-        std::array<uint8_t, 4> read_pixel(int index) const;
-        std::array<uint8_t, 4> read_pixel(int x, int y) const;
+        uint32_t read_pixel(size_t index) const;
+        uint32_t read_pixel(size_t x, size_t y) const;
 
         packed_image build_packed_image() const;
     };

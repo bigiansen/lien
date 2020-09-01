@@ -54,23 +54,27 @@ namespace ien
 
     const image_unpacked_data* image::cdata() const noexcept { return &_data; }
 
+    // Expensive, consider using packed_image instead
     uint32_t image::get_pixel(size_t index) const
-    {
-        // Expensive, consider using packed_image instead
-        return static_cast<uint32_t>(_data.cdata_r()[index]) << 24
-            | static_cast<uint32_t>(_data.cdata_g()[index]) << 16
-            | static_cast<uint32_t>(_data.cdata_b()[index]) << 8
-            | static_cast<uint32_t>(_data.cdata_a()[index]);
+    {        
+        return construct4<uint32_t>(
+            _data.cdata_r()[index], 
+            _data.cdata_g()[index], 
+            _data.cdata_b()[index], 
+            _data.cdata_a()[index]
+        );
     }
 
     // Expensive, consider using packed_image instead
     uint32_t image::get_pixel(size_t x, size_t y) const
     {        
         size_t index = (y * _width) + x;        
-        return static_cast<uint32_t>(_data.cdata_r()[index]) << 24
-            | static_cast<uint32_t>(_data.cdata_g()[index]) << 16
-            | static_cast<uint32_t>(_data.cdata_b()[index]) << 8
-            | static_cast<uint32_t>(_data.cdata_a()[index]);
+        return construct4<uint32_t>(
+            _data.cdata_r()[index], 
+            _data.cdata_g()[index], 
+            _data.cdata_b()[index], 
+            _data.cdata_a()[index]
+        );
     }
 
     void image::set_pixel(size_t index, uint32_t rgba)

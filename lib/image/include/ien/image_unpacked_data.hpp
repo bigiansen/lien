@@ -18,6 +18,7 @@ namespace ien
         uint8_t* _g;
         uint8_t* _b;
         uint8_t* _a;
+        size_t _alignment;
         size_t _size;
         bool _moved = false;
 
@@ -26,6 +27,7 @@ namespace ien
             , _g(nullptr)
             , _b(nullptr)
             , _a(nullptr)
+            , _alignment(0)
             , _size(0)
         { }
         

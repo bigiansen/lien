@@ -1,5 +1,6 @@
 #include <ien/image_unpacked_data.hpp>
 
+#include <ien/arithmetic.hpp>
 #include <ien/assert.hpp>
 #include <ien/platform.hpp>
 
@@ -13,7 +14,8 @@ namespace ien
         , _g(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
         , _b(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
         , _a(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(pixel_count, LIEN_DEFAULT_ALIGNMENT)))
-        , _size(pixel_count)
+        , _alignment(LIEN_DEFAULT_ALIGNMENT)
+        , _size(pixel_count)        
     { }
 
     image_unpacked_data::~image_unpacked_data()
@@ -28,10 +30,11 @@ namespace ien
     }
 
     image_unpacked_data::image_unpacked_data(const image_unpacked_data& cp_src)
-        : _r(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, LIEN_DEFAULT_ALIGNMENT)))
-        , _g(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, LIEN_DEFAULT_ALIGNMENT)))
-        , _b(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, LIEN_DEFAULT_ALIGNMENT)))
-        , _a(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, LIEN_DEFAULT_ALIGNMENT)))
+        : _r(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, cp_src._alignment)))
+        , _g(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, cp_src._alignment)))
+        , _b(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, cp_src._alignment)))
+        , _a(reinterpret_cast<uint8_t*>(LIEN_ALIGNED_ALLOC(cp_src._size, cp_src._alignment)))
+        , _alignment(cp_src._alignment)
         , _size(cp_src._size)
         , _moved(cp_src._moved)
     {
@@ -46,6 +49,7 @@ namespace ien
         , _g(mv_src._g)
         , _b(mv_src._b)
         , _a(mv_src._a)
+        , _alignment(mv_src._alignment)
         , _size(mv_src._size)
         , _moved(false)
     {
@@ -63,6 +67,7 @@ namespace ien
         _g = mv_src._g;
         _b = mv_src._b;
         _a = mv_src._a;
+        _alignment = mv_src._alignment;
         _size = mv_src._size;
         _moved = mv_src._moved;
         mv_src._moved = true;
@@ -82,18 +87,15 @@ namespace ien
 
     void image_unpacked_data::resize(size_t pixel_count)
     {
-        _r = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_r, pixel_count, LIEN_DEFAULT_ALIGNMENT));
-        _g = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_g, pixel_count, LIEN_DEFAULT_ALIGNMENT));
-        _b = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_b, pixel_count, LIEN_DEFAULT_ALIGNMENT));
-        _a = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_a, pixel_count, LIEN_DEFAULT_ALIGNMENT));
+        _r = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_r, pixel_count, _alignment));
+        _g = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_g, pixel_count, _alignment));
+        _b = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_b, pixel_count, _alignment));
+        _a = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_a, pixel_count, _alignment));
     }
 
     uint32_t image_unpacked_data::get_pixel(size_t index) const
     {
-        return static_cast<uint32_t>(_r[index]) >> 24
-            | static_cast<uint32_t>(_g[index]) >> 16
-            | static_cast<uint32_t>(_b[index]) >> 8
-            | static_cast<uint32_t>(_a[index]);
+        return construct4<uint32_t>(_r[index], _g[index], _b[index], _a[index]);
     }
 
     void image_unpacked_data::set_pixel(size_t index, uint32_t rgba)
@@ -106,7 +108,7 @@ namespace ien
 
     ien::fixed_vector<uint8_t> image_unpacked_data::pack_data() const
     {
-        ien::fixed_vector<uint8_t> result(this->size() * 4, LIEN_DEFAULT_ALIGNMENT);
+        ien::fixed_vector<uint8_t> result(this->size() * 4, _alignment);
 
         for(size_t i = 0; i < _size; ++i)
         {

@@ -5,32 +5,27 @@
 
 namespace ien
 {
-    packed_image_view::packed_image_view(const packed_image* img, const rect<int>& view_rect)
+    packed_image_view::packed_image_view(const packed_image* img, const rect<size_t>& view_rect)
         : _ptr(img->cdata())
         , _view_rect(view_rect)
         , _image_rect(0, 0, img->width(), img->height())
     { }
 
-    std::array<uint8_t, 4> packed_image_view::read_pixel(int index) const
+    uint32_t packed_image_view::read_pixel(size_t index) const
     {
-        int sub_y = index / _view_rect.w;
-        int sub_x = index % _view_rect.w;
+        size_t sub_y = index / _view_rect.w;
+        size_t sub_x = index % _view_rect.w;
 
-        int real_y = _view_rect.y + sub_y;
-        int real_x = _view_rect.x + sub_x;
+        size_t real_y = _view_rect.y + sub_y;
+        size_t real_x = _view_rect.x + sub_x;
 
-        int real_index = (real_y * _image_rect.w) + real_x;
-        return { 
-            _ptr[real_index + 0],
-            _ptr[real_index + 1],
-            _ptr[real_index + 2],
-            _ptr[real_index + 3] 
-        };
+        size_t real_index = (real_y * _image_rect.w) + real_x;
+        return construct4<uint32_t>(_ptr[real_index + 0], _ptr[real_index + 1], _ptr[real_index + 2], _ptr[real_index + 3]);
     }
 
-    std::array<uint8_t, 4> packed_image_view::read_pixel(int x, int y) const
+    uint32_t packed_image_view::read_pixel(size_t x, size_t y) const
     {
-        int index = (y * _view_rect.w) + x;
+        size_t index = (y * _view_rect.w) + x;
         return read_pixel(index);
     }
 
