@@ -52,8 +52,8 @@ namespace ien
 
         void resize(size_t len);
 
-        std::array<uint8_t, 4> read_pixel(int index) const;
-        void set_pixel(int index, const uint8_t* rgba);
+        uint32_t get_pixel(size_t index) const;
+        void set_pixel(size_t index, uint32_t rgba);
 
         [[nodiscard]] ien::fixed_vector<uint8_t> pack_data() const;
     };

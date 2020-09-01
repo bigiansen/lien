@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ien/fixed_vector.hpp>
+#include <ien/generic_image.hpp>
 
 #include <array>
 #include <cinttypes>
@@ -10,40 +11,42 @@
 namespace ien
 { 
     class image;
-    class packed_image
+
+    class packed_image : public generic_image
     {
     private:
         std::unique_ptr<ien::fixed_vector<uint8_t>> _data;
-        int _width, _height;
 
     public:
         constexpr packed_image()
-            : _width(0)
-            , _height(0)
+            : generic_image()
         { }
 
         packed_image(const packed_image& cp_src);
         packed_image(packed_image&& mv_src) noexcept;
 
-        packed_image(int width, int height);
+        packed_image(size_t width, size_t height);
         packed_image(const std::string& path);
 
         uint8_t* data() noexcept;
         const uint8_t* cdata() const noexcept;
 
-        void set_pixel(int idx, const uint8_t* rgba);
-        void set_pixel(int x, int y, const uint8_t* rgba);
+        uint32_t get_pixel(size_t index) const override;
+        uint32_t get_pixel(size_t x, size_t y) const override;
 
-        size_t pixel_count() const noexcept;
-        int width() const noexcept;
-        int height() const noexcept;
+        void set_pixel(size_t idx, uint32_t rgba) override;
+        void set_pixel(size_t x, size_t y, uint32_t rgba) override;
 
-        bool save_to_file_png(const std::string& path, int compression_level = 4) const;
-        bool save_to_file_jpeg(const std::string& path, int quality = 100) const;
-        bool save_to_file_tga(const std::string& path) const;
+        bool save_to_file_png(const std::string& path, int compression_level = 4) const override;
+        bool save_to_file_jpeg(const std::string& path, int quality = 100) const override;
+        bool save_to_file_tga(const std::string& path) const override;
 
-        void resize_absolute(int w, int h);
-        void resize_relative(float w, float h);
+        ien::fixed_vector<uint8_t> save_to_memory_png(int compression_level = 4) const override;
+        ien::fixed_vector<uint8_t> save_to_memory_jpeg(int quality = 100) const override;
+        ien::fixed_vector<uint8_t> save_to_memory_tga() const override;
+
+        void resize_absolute(size_t w, size_t h) override;
+        void resize_relative(float w, float h) override;
 
         ien::fixed_vector<uint8_t> get_rgba_buff_copy();
 

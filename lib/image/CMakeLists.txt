@@ -3,6 +3,7 @@ add_subdirectory(third-party)
 find_package(Threads REQUIRED)
 
 set(LIEN_IMAGE_SOURCES
+	src/generic_image.cpp
     src/image.cpp
     src/image_ops.cpp
 	src/image_unpacked_data.cpp

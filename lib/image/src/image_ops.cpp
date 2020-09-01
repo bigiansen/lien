@@ -8,7 +8,7 @@
 
 #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
     #include <ien/internal/x86/image_ops_x86.hpp>
-#elif defined(LIEN_ARCH_ARM) || defined(LIEN_ARCH_ARM64)
+#elif (defined(LIEN_ARCH_ARM) || defined(LIEN_ARCH_ARM64)) && defined(LIEN_ARM_NEON)
     #include <ien/internal/arm/neon/image_ops_neon.hpp>
 #endif
 
@@ -34,13 +34,13 @@ namespace ien::image_ops
     {
         typedef void(*func_ptr_t)(const _internal::truncate_channel_args& args);
 
-        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
                 &_internal::truncate_channel_data_std,
                 &_internal::truncate_channel_data_sse2,
                 &_internal::truncate_channel_data_avx2
             );
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::truncate_channel_data_neon;
         #else
             static func_ptr_t func = &_internal::truncate_channel_data_std;
@@ -54,13 +54,13 @@ namespace ien::image_ops
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
-        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
                 &_internal::rgba_average_std,
                 &_internal::rgba_average_sse2,
                 &_internal::rgba_average_avx2
             );
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::rgba_average_neon;
         #else
             static func_ptr_t func = &_internal::rgba_average_std;
@@ -74,13 +74,13 @@ namespace ien::image_ops
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
-        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
                 &_internal::rgba_max_std,
                 &_internal::rgba_max_sse2,
                 &_internal::rgba_max_avx2
             );
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::rgba_max_neon;
         #else
             static func_ptr_t func = &_internal::rgba_max_std;
@@ -94,13 +94,13 @@ namespace ien::image_ops
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
-        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
                 &_internal::rgba_min_std,
                 &_internal::rgba_min_sse2,
                 &_internal::rgba_min_avx2
             );
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::rgba_min_neon;
         #else
             static func_ptr_t func = &_internal::rgba_min_std;
@@ -114,13 +114,13 @@ namespace ien::image_ops
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
-        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
                 &_internal::rgb_average_std,
                 &_internal::rgb_average_sse2,
                 &_internal::rgb_average_avx2
             );
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::rgb_average_neon;
         #else
             static func_ptr_t func = &_internal::rgb_average_std;
@@ -134,13 +134,13 @@ namespace ien::image_ops
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
-        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
                 &_internal::rgb_max_std,
                 &_internal::rgb_max_sse2,
                 &_internal::rgb_max_avx2
             );
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::rgb_max_neon;
         #else
             static func_ptr_t func = &_internal::rgb_max_std;
@@ -154,13 +154,13 @@ namespace ien::image_ops
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
-        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
                 &_internal::rgb_min_std,
                 &_internal::rgb_min_sse2,
                 &_internal::rgb_min_avx2
             );
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::rgb_min_neon;
         #else
             static func_ptr_t func = &_internal::rgb_min_std;
@@ -174,13 +174,13 @@ namespace ien::image_ops
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
-        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
                 &_internal::rgba_sum_saturated_std,
                 &_internal::rgba_sum_saturated_sse2,
                 &_internal::rgba_sum_saturated_avx2
             );
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::rgba_sum_saturated_neon;
         #else
             static func_ptr_t func = &_internal::rgba_sum_saturated_std;
@@ -194,13 +194,13 @@ namespace ien::image_ops
     {
         typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
-        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
                 &_internal::rgb_saturation_std,
                 &_internal::rgb_saturation_sse2,
                 &_internal::rgb_saturation_avx2
             );
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::rgb_saturation_neon;
         #else
             static func_ptr_t func = &_internal::rgb_saturation_std;
@@ -214,13 +214,13 @@ namespace ien::image_ops
     {
         typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
-        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
                 &_internal::rgb_luminance_std,
                 &_internal::rgb_luminance_sse2,
                 &_internal::rgb_luminance_avx2
             );
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::rgb_luminance_neon;
         #else
             static func_ptr_t func = &_internal::rgb_luminance_std;
@@ -234,11 +234,11 @@ namespace ien::image_ops
 	{
 		typedef image_unpacked_data(*func_ptr_t)(const uint8_t*, size_t len);
 
-		#if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+		#if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = platform::x86::get_feature(platform::x86::feature::SSSE3)
                     ? &_internal::unpack_image_data_ssse3
                     : &_internal::unpack_image_data_std;
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::unpack_image_data_neon;
 		#else
             static func_ptr_t func = &_internal::unpack_image_data_std;
@@ -251,13 +251,13 @@ namespace ien::image_ops
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_compare_args& args);
         
-        #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+        #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
                     &_internal::channel_compare_avx2,
                     &_internal::channel_compare_sse2,
                     &_internal::channel_compare_std
                 );
-        #elif defined(LIEN_ARM_NEON)
+        #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::channel_compare_neon;
 		#else
             static func_ptr_t func = &_internal::channel_compare_std;

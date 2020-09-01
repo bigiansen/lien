@@ -13,9 +13,8 @@
 
 namespace ien
 {
-    packed_image::packed_image(int width, int height)
-        : _width(width)
-        , _height(height)
+    packed_image::packed_image(size_t width, size_t height)
+        : generic_image(width, height)
     { 
         _data = std::make_unique<ien::fixed_vector<uint8_t>>(
             safe_mul<size_t>(_width, _height , 4),
@@ -26,7 +25,10 @@ namespace ien
     packed_image::packed_image(const std::string& path)
     {
         int ch_dummy;
-        uint8_t* stbdata = stbi_load(path.c_str(), &_width, &_height, &ch_dummy, 4);
+        int w, h;
+        uint8_t* stbdata = stbi_load(path.c_str(), &w, &h, &ch_dummy, 4);
+        _width = w;
+        _height = h;
         if(stbdata == nullptr)
         {
             throw std::invalid_argument("Invalid image path or file format");
@@ -42,14 +44,12 @@ namespace ien
 
     packed_image::packed_image(const packed_image& cp_src)
         : _data(std::make_unique<ien::fixed_vector<uint8_t>>(*cp_src._data))
-        , _width(cp_src._width)
-        , _height(cp_src._height)
+        , generic_image(cp_src._width, cp_src._height)
     { }
 
     packed_image::packed_image(packed_image&& mv_src) noexcept
         : _data(std::move(mv_src._data))
-        , _width(mv_src._width)
-        , _height(mv_src._height)
+        , generic_image(mv_src._width, mv_src._height)
     {
         mv_src._width = 0;
         mv_src._height = 0;
@@ -59,21 +59,15 @@ namespace ien
 
     const uint8_t* packed_image::cdata() const noexcept { return _data->cdata(); }
 
-    void packed_image::set_pixel(int idx, const uint8_t* rgba)
+    void packed_image::set_pixel(size_t idx, uint32_t rgba)
     {
-        std::memcpy(_data->data() + safe_mul<size_t>(idx, 4), rgba, 4);
+        *reinterpret_cast<uint32_t*>(_data->data() + (idx * 4)) = rgba;
     }
     
-    void packed_image::set_pixel(int x, int y, const uint8_t* rgba)
+    void packed_image::set_pixel(size_t x, size_t y, uint32_t rgba)
     {
-        std::memcpy(_data->data() + safe_mul<size_t>(x, y, _width, 4), rgba, 4);
+        *reinterpret_cast<uint32_t*>(_data->data() + (x * y * _width * 4)) = rgba;
     }
-
-    size_t packed_image::pixel_count() const noexcept { return safe_mul<size_t>(_width, _height); }
-
-    int packed_image::width() const noexcept { return _width; }
-    
-    int packed_image::height() const noexcept  { return _height; }
 
     bool packed_image::save_to_file_png(const std::string& path, int compression_level) const
     {
@@ -91,11 +85,73 @@ namespace ien
         return stbi_write_tga(path.c_str(), _width, _height, 4, _data->data());
     }
 
-    void packed_image::resize_absolute(int w, int h)
+    static void save_to_memory_func(void* ctx, void* data, int size)
+    {
+        printf("STBI REPORTED LEN: %d\n", size);
+        auto* vec = reinterpret_cast<ien::fixed_vector<uint8_t>*>(ctx);
+        
+        *vec = ien::fixed_vector<uint8_t>(size);
+        std::memcpy(vec->data(), data, size);
+    }
+
+    ien::fixed_vector<uint8_t> packed_image::save_to_memory_png(int compression_level) const
+    {
+        ien::fixed_vector<uint8_t> result;
+        bool ok = stbi_write_png_to_func(
+            save_to_memory_func,
+            reinterpret_cast<void*>(&result),
+            _width,
+            _height,
+            4,
+            _data->cdata(),
+            _width * 4
+        );
+        
+        if(!ok) { throw std::runtime_error("Failed to write png data to memory"); }
+
+        return result;
+    }
+
+    ien::fixed_vector<uint8_t> packed_image::save_to_memory_jpeg(int quality) const
+    {
+        ien::fixed_vector<uint8_t> result;        
+        bool ok = stbi_write_jpg_to_func(
+            save_to_memory_func,
+            reinterpret_cast<void*>(&result), 
+            _width, 
+            _height,
+            4,
+            _data->data(),
+            quality
+        );
+
+        if(!ok) { throw std::runtime_error("Failed to write jpeg data to memory"); }
+
+        return result;
+    }
+
+    ien::fixed_vector<uint8_t> packed_image::save_to_memory_tga() const
+    {
+        ien::fixed_vector<uint8_t> result;
+        bool ok = stbi_write_tga_to_func(
+            save_to_memory_func,
+            reinterpret_cast<void*>(&result), 
+            _width, 
+            _height,
+            4,
+            _data->data()
+        );
+
+        if(!ok) { throw std::runtime_error("Failed to write tga data to memory"); }
+
+        return result;
+    }
+
+    void packed_image::resize_absolute(size_t w, size_t h)
     {
         std::unique_ptr<ien::fixed_vector<uint8_t>> resized_data = std::make_unique<ien::fixed_vector<uint8_t>>(
-            safe_mul<uint8_t>(w, h, 4), 
-            LIEN_DEFAULT_ALIGNMENT
+            safe_mul<size_t>(w, h, 4), 
+            _data->alignment()
         );
 
         stbir_resize_uint8(_data->cdata(), _width, _height, 4, resized_data->data(), w, h, 4, 4);

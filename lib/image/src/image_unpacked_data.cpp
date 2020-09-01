@@ -88,17 +88,20 @@ namespace ien
         _a = reinterpret_cast<uint8_t*>(LIEN_ALIGNED_REALLOC(_a, pixel_count, LIEN_DEFAULT_ALIGNMENT));
     }
 
-    std::array<uint8_t, 4> image_unpacked_data::read_pixel(int index) const
+    uint32_t image_unpacked_data::get_pixel(size_t index) const
     {
-        return { _r[index], _g[index], _b[index], _a[index] };
+        return static_cast<uint32_t>(_r[index]) >> 24
+            | static_cast<uint32_t>(_g[index]) >> 16
+            | static_cast<uint32_t>(_b[index]) >> 8
+            | static_cast<uint32_t>(_a[index]);
     }
 
-    void image_unpacked_data::set_pixel(int index, const uint8_t* rgba)
+    void image_unpacked_data::set_pixel(size_t index, uint32_t rgba)
     {
-        _r[index] = rgba[0];
-        _g[index] = rgba[1];
-        _b[index] = rgba[2];
-        _a[index] = rgba[3];
+        _r[index] = static_cast<uint8_t>(rgba >> 24);
+        _g[index] = static_cast<uint8_t>(rgba >> 16);
+        _b[index] = static_cast<uint8_t>(rgba >> 8);
+        _a[index] = static_cast<uint8_t>(rgba);
     }
 
     ien::fixed_vector<uint8_t> image_unpacked_data::pack_data() const

@@ -17,22 +17,24 @@
 namespace ien
 {
     image::image(int width, int height)
-        : _data(safe_mul<size_t>(width, height))
-        , _width(width)
-        , _height(height)
+        : generic_image(width, height)
+        , _data(safe_mul<size_t>(width, height))
     { }
 
     image::image(const std::string& path)
-        : _width(0), _height(0)
+        : generic_image()
     {
         int channels_dummy = 0;
+        int w, h;
         uint8_t* packed_data = stbi_load(
             path.c_str(),
-            &_width,
-            &_height,
+            &w,
+            &h,
             &channels_dummy,
             4
         );
+        _width = static_cast<size_t>(w);
+        _height = static_cast<size_t>(h);
 
         if(packed_data == nullptr)
         {
@@ -44,51 +46,40 @@ namespace ien
     }
 
     image::image(const uint8_t* rgba_buff, int w, int h)
-        : _data(image_ops::unpack_image_data(rgba_buff, safe_mul<size_t>(w, h, 4)))
-        , _width(w)
-        , _height(h)
+        : generic_image(w, h)
+        , _data(image_ops::unpack_image_data(rgba_buff, safe_mul<size_t>(w, h, 4)))
     { }
 
     image_unpacked_data* image::data() noexcept { return &_data; }
 
     const image_unpacked_data* image::cdata() const noexcept { return &_data; }
 
-    size_t image::pixel_count() const noexcept
+    uint32_t image::get_pixel(size_t index) const
     {
-        return safe_mul<size_t>(_width, _height);
+        // Expensive, consider using packed_image instead
+        return static_cast<uint32_t>(_data.cdata_r()[index]) << 24
+            | static_cast<uint32_t>(_data.cdata_g()[index]) << 16
+            | static_cast<uint32_t>(_data.cdata_b()[index]) << 8
+            | static_cast<uint32_t>(_data.cdata_a()[index]);
     }
 
-    int image::width() const noexcept { return _width; }
-    
-    int image::height() const noexcept { return _height; }
-
-    std::array<uint8_t, 4> image::get_packed_pixel(int index) const
-    {
-        return { 
-            _data.cdata_r()[index], 
-            _data.cdata_g()[index], 
-            _data.cdata_b()[index],
-            _data.cdata_a()[index] 
-        };
+    // Expensive, consider using packed_image instead
+    uint32_t image::get_pixel(size_t x, size_t y) const
+    {        
+        size_t index = (y * _width) + x;        
+        return static_cast<uint32_t>(_data.cdata_r()[index]) << 24
+            | static_cast<uint32_t>(_data.cdata_g()[index]) << 16
+            | static_cast<uint32_t>(_data.cdata_b()[index]) << 8
+            | static_cast<uint32_t>(_data.cdata_a()[index]);
     }
 
-    std::array<uint8_t, 4> image::get_packed_pixel(int x, int y) const
-    {
-        return {
-            _data.cdata_r()[(y * _height) + x],
-            _data.cdata_g()[(y * _height) + x],
-            _data.cdata_b()[(y * _height) + x],
-            _data.cdata_a()[(y * _height) + x],
-        };
-    }
-
-    void image::set_pixel(int index, const uint8_t* rgba)
+    void image::set_pixel(size_t index, uint32_t rgba)
     {
         LIEN_DEBUG_ASSERT_MSG(index < (_width * _height), "Pixel index out of range!");
         _data.set_pixel(index, rgba);
     }
 
-    void image::set_pixel(int x, int y, const uint8_t* rgba)
+    void image::set_pixel(size_t x, size_t y, uint32_t rgba)
     {
         set_pixel((x * y), rgba);
     }
@@ -113,7 +104,7 @@ namespace ien
         return stbi_write_tga(path.c_str(), _width, _height, 4, packed_data.data());
     }
 
-    void save_to_memory_func(void* ctx, void* data, int size)
+    static void save_to_memory_func(void* ctx, void* data, int size)
     {
         printf("STBI REPORTED LEN: %d\n", size);
         auto* vec = reinterpret_cast<ien::fixed_vector<uint8_t>*>(ctx);
@@ -139,8 +130,7 @@ namespace ien
             _width * 4
         );
 
-        if(!ok)
-            throw std::runtime_error("Failed to write png data to memory");
+        if(!ok) { throw std::runtime_error("Failed to write png data to memory"); }
 
         return result;
     }
@@ -178,7 +168,7 @@ namespace ien
         return result;
     }
 
-    void image::resize_absolute(int w, int h)
+    void image::resize_absolute(size_t w, size_t h)
     {
         const ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
         _data.resize(safe_mul<size_t>(w, h)); // realloc unpacked data buffers

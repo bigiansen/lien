@@ -12,11 +12,16 @@ LIEN_SET_EXECUTABLE_OUTPUT_DIR(${PROJECT_BINARY_DIR}/output/lib/lien)
 option(LIEN_BUILD_STRUTILS "Build String utilities library" ON)
 option(LIEN_BUILD_PARALLEL "Build Parallel utilities library" ON)
 option(LIEN_BUILD_IMAGE "Build Image utilities library" ON)
+option(LIEN_USE_CUSTOM_SIMD "Use custom SIMD implementations" ON)
 
 option(LIEN_BUILD_TESTS "Build Tests" ON)
 option(LIEN_BUILD_TESTS_BENCHMARKS "Build Benchmarks" ON)
 
 option(LIEN_ARM_ENABLE_NEON "Enable NEON code generation on ARM platforms" ON)
+
+if(LIEN_USE_CUSTOM_SIMD)
+    add_compile_definitions(LIEN_USE_CUSTOM_SIMD)
+endif()
 
 # Enable SSE/AVX code generation on X86 platforms
 # This should go in a toolchain, but will remain here for the moment
