@@ -4,12 +4,6 @@
 
 namespace ien
 {
-    bit_view::bit_view(uint8_t* data_ptr, size_t len)
-    {
-        _data_ptr = data_ptr;
-        _len = len;
-    }
-
     bool bit_view::operator[](size_t index) const
     {
         LIEN_DEBUG_ASSERT_MSG((index < (_len * 8)), "Out of range!");
@@ -27,7 +21,7 @@ namespace ien
         return _len * 8;
     }
 
-    ien::fixed_vector<bool> bit_view::get_bits_at(size_t index, size_t count) const
+    ien::fixed_vector<bool> bit_view::get_bits(size_t index, size_t count) const
     {
         ien::fixed_vector<bool> result(count);
         for(size_t i = 0; i < count; ++i)
