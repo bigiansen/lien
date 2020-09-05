@@ -14,7 +14,7 @@ namespace ien
     { static_assert(sizeof(T) == sz, "sizeof(TInt8) differs from specified size!"); }
 
     template<typename TInt>
-    bool get_bit(TInt v, size_t i)
+    constexpr bool get_bit(TInt v, size_t i)
     {
         LIEN_RESTRICT_INTEGRAL<TInt>();
         TInt mask = static_cast<TInt>(1) << i;

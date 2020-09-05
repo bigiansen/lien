@@ -16,7 +16,7 @@
 
 namespace ien
 {
-    image::image(int width, int height)
+    image::image(size_t width, size_t height)
         : generic_image(width, height)
         , _data(safe_mul<size_t>(width, height))
     { }
@@ -45,7 +45,7 @@ namespace ien
         stbi_image_free(packed_data);
     }
 
-    image::image(const uint8_t* rgba_buff, int w, int h)
+    image::image(const uint8_t* rgba_buff, size_t w, size_t h)
         : generic_image(w, h)
         , _data(image_ops::unpack_image_data(rgba_buff, safe_mul<size_t>(w, h, 4)))
     { }
@@ -93,19 +93,39 @@ namespace ien
         ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
 
         stbi_write_png_compression_level = compression_level;
-        return stbi_write_png(path.c_str(), _width, _height, 4, packed_data.data(), _width * 4);
+        return stbi_write_png(
+            path.c_str(), 
+            static_cast<int>(_width), 
+            static_cast<int>(_height), 
+            4, 
+            packed_data.data(), 
+            static_cast<int>(_width * 4)
+        );
     }
 
     bool image::save_to_file_jpeg(const std::string& path, int quality) const
     {
         ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
-        return stbi_write_jpg(path.c_str(), _width, _height, 4, packed_data.data(), quality);
+        return stbi_write_jpg(
+            path.c_str(), 
+            static_cast<int>(_width), 
+            static_cast<int>(_height), 
+            4, 
+            packed_data.data(), 
+            quality
+        );
     }
 
     bool image::save_to_file_tga(const std::string& path) const
     {
         ien::fixed_vector<uint8_t> packed_data = _data.pack_data();
-        return stbi_write_tga(path.c_str(), _width, _height, 4, packed_data.data());
+        return stbi_write_tga(
+            path.c_str(), 
+            static_cast<int>(_width), 
+            static_cast<int>(_height), 
+            4, 
+            packed_data.data()
+        );
     }
 
     static void save_to_memory_func(void* ctx, void* data, int size)
@@ -127,11 +147,11 @@ namespace ien
         bool ok = stbi_write_png_to_func(
             save_to_memory_func, 
             reinterpret_cast<void*>(&result), 
-            _width, 
-            _height, 
+            static_cast<int>(_width), 
+            static_cast<int>(_height), 
             4, 
             packed_data.data(), 
-            _width * 4
+            static_cast<int>(_width * 4)
         );
 
         if(!ok) { throw std::runtime_error("Failed to write png data to memory"); }
@@ -147,8 +167,8 @@ namespace ien
         stbi_write_jpg_to_func(
             save_to_memory_func,
             reinterpret_cast<void*>(&result), 
-            _width, 
-            _height,
+            static_cast<int>(_width), 
+            static_cast<int>(_height),
             4,
             packed_data.data(),
             quality
@@ -164,8 +184,8 @@ namespace ien
         stbi_write_tga_to_func(
             save_to_memory_func,
             reinterpret_cast<void*>(&result), 
-            _width, 
-            _height,
+            static_cast<int>(_width), 
+            static_cast<int>(_height),
             4,
             packed_data.data()
         );
@@ -181,7 +201,15 @@ namespace ien
         resized_packed_data.resize(safe_mul<size_t>(w, h, 4));
 
         stbir_resize_uint8(
-            packed_data.cdata(), _width, _height, 4, resized_packed_data.data(), w, h, 4, 4
+            packed_data.cdata(), 
+            static_cast<int>(_width), 
+            static_cast<int>(_height), 
+            4, 
+            resized_packed_data.data(),
+            static_cast<int>(w), 
+            static_cast<int>(h), 
+            4, 
+            4
         );
         
         uint8_t* r = _data.data_r();

@@ -3,68 +3,97 @@
 #include <cinttypes>
 #include <type_traits>
 
+#include <ien/bit_tools.hpp>
+
 namespace ien
 {
-    template<typename T>
+    enum class bit_iterator_mode
+    {
+        LSB_TO_MSB,
+        MSB_TO_LSB
+    };
+
+    template<typename T, bit_iterator_mode Mode = bit_iterator_mode::LSB_TO_MSB>
     class bit_iterator
     {
         static_assert(std::is_integral_v<T>, "bit_iterator works only with integral types!");
+        static_assert(sizeof(T) <= 64, "Max integral supported size is 64 bits" );
 
     private:
         const T* _data;
         size_t _len;
         size_t _current_item = 0;
-        size_t _current_bit = 0;
-
-        using item_sz = sizeof(T);
+        int8_t _current_bit = 0;        
 
     public:
-        bit_iterator(const T* ptr, size_t len)
+        using data_t = T;
+        constexpr size_t item_size_bits() { return sizeof(T) * 8; }
+
+        bit_iterator(const data_t* ptr, size_t len)
             : _data(ptr)
             , _len(len)
-        { }
-
-        size_t length() const { return len }
-
-        bool operator++()
         {
-            if(++_current_bit == item_sz)
+            if constexpr (Mode == bit_iterator_mode::MSB_TO_LSB)
             {
-                _current_bit = 0;
-                ++_current_item;
-                if(_current_item >= _len)
-                {
-                    return false;
-                }
+                _current_bit = static_cast<int8_t>(item_size_bits() - 1);
             }
-            return true;
         }
 
-        bool operator++(int) { return operator++(); }
+        size_t bitsize() const { return _len * sizeof(data_t); }
 
-        bool operator--()
+        [[nodiscard]] bool next()
         {
-            if(_current_item == 0 && _current_bit == 0)
-            {
-                return false;
-            }
-            if(_current_bit == 0)
-            {
-                _current_bit = item_sz - 1;
-                --_current_item;
+            bool result = get_bit(_data[_current_item], _current_bit);
+            if constexpr (Mode == bit_iterator_mode::MSB_TO_LSB)
+            {                
+                if (--_current_bit == -1)
+                {
+                    _current_bit = static_cast<int8_t>(item_size_bits() - 1);
+                    ++_current_item;
+                }
             }
             else
             {
-                --_current_bit;
+                if (++_current_bit == item_size_bits())
+                {
+                    _current_bit = 0;
+                    ++_current_item;
+                }
             }
+            return result;
         }
 
-        bool operator--(int) { return operator--(); }
-
-        bool operator*()
+        void reset()
         {
-            T item = _data[_current_item];
-            return (item >> _current_bit) | 1 == item;
+            _current_item = 0;
+            _current_bit = 0;
+        }
+
+        void skip(size_t count)
+        {
+            size_t item_count = count / item_size_bits();
+            size_t bit_count = count % item_size_bits();
+
+            _current_item += item_count;
+            
+            if constexpr (Mode == bit_iterator_mode::MSB_TO_LSB)
+            {
+                _current_bit -= bit_count;
+                if (_current_bit < 0)
+                {
+                    ++_current_item;
+                    _current_bit = item_size_bits() - _current_bit;
+                }
+            }
+            else
+            {
+                _current_bit += bit_count;
+                if (_current_bit >= item_size_bits())
+                {
+                    ++_current_item;
+                    _current_bit = _current_bit - item_size_bits();
+                }
+            }
         }
     };
 }

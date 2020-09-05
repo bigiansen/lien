@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ien/alloc.hpp>
 #include <ien/platform.hpp>
 
 namespace ien::allocators
@@ -29,7 +30,7 @@ namespace ien::allocators
 
         [[nodiscard]] T* allocate(size_t n, const void* hint = 0)
         {
-            void* ptr = ien::platform::aligned_alloc(sizeof(T) * n, Alignment);
+            void* ptr = ien::aligned_alloc(sizeof(T) * n, Alignment);
             if(ptr != nullptr) 
             {
                 return reinterpret_cast<T*>(ptr);
@@ -39,7 +40,7 @@ namespace ien::allocators
 
         void deallocate(T* p, size_t n)
         {
-            LIEN_ALIGNED_FREE(p);
+            ien::aligned_free(p);
         }
     };
 

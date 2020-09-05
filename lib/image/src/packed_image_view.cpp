@@ -35,7 +35,7 @@ namespace ien
         
         for(int i = 0; i < _view_rect.h; ++i)
         {
-            int line_idx = ((_image_rect.w * 4) * (_view_rect.y + i)) + (_view_rect.x * 4);
+            size_t line_idx = ((_image_rect.w * 4) * (_view_rect.y + i)) + (_view_rect.x * 4);
 
 			ptrdiff_t dst_offset = static_cast<ptrdiff_t>(i) * 4 * _view_rect.w;
 			size_t copylen = safe_mul<size_t>(_view_rect.w, 4);

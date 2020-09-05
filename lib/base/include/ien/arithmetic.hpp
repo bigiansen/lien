@@ -26,7 +26,7 @@ namespace ien
 		static_assert(std::is_arithmetic_v<TArg1>, "Not an arithmetic type");
 		static_assert(sizeof(TArg0) + sizeof(TArg1) == sizeof(T), "Size sum does not match target type's size");
 
-		return (static_cast<T>(a0) << (sizeof(T) - sizeof(TArg0))) | static_cast<T>(a1);
+		return (static_cast<T>(a0) << ((sizeof(T) - sizeof(TArg0)) * 8)) | static_cast<T>(a1);
 	}
 
 	template<typename T, typename TArg0, typename TArg1, typename TArg2, typename TArg3>
@@ -39,9 +39,9 @@ namespace ien
 		static_assert(std::is_arithmetic_v<TArg3>, "Not an arithmetic type");
 		static_assert(sizeof(TArg0) + sizeof(TArg1) + sizeof(TArg2) + sizeof(TArg3) == sizeof(T), "Size sum does not match target type's size");
 
-		return (static_cast<T>(a0) << (sizeof(T) - sizeof(TArg0)))
-			| (static_cast<T>(a1) << (sizeof(T) - sizeof(TArg0) - sizeof(TArg1)))
-			| (static_cast<T>(a2) << (sizeof(T) - sizeof(TArg0) - sizeof(TArg1) - sizeof(TArg2)))
+		return (static_cast<T>(a0) << ((sizeof(T) - sizeof(TArg0)) * 8))
+			| (static_cast<T>(a1) << ((sizeof(T) - sizeof(TArg0) - sizeof(TArg1)) * 8))
+			| (static_cast<T>(a2) << ((sizeof(T) - sizeof(TArg0) - sizeof(TArg1) - sizeof(TArg2)) * 8))
 			| static_cast<T>(a3);
 	}
 }

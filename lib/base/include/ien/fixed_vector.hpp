@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ien/alloc.hpp>
+#include <ien/assert.hpp>
 #include <ien/platform.hpp>
 
 #include <algorithm>
@@ -110,18 +112,18 @@ namespace ien
 
         constexpr fixed_vector()
             : _len(0)
-            , _alignment(std::max(alignof(T), ien::platform::min_alignment))
+            , _alignment(alignof(T))
         { }
 
         fixed_vector(std::size_t len)
             : _len(len)
-            , _alignment(std::max(alignof(T), ien::platform::min_alignment))
+            , _alignment(alignof(T))
         {
             if(len == 0)
                 return;
 
             _data = reinterpret_cast<T*>(
-                ien::platform::aligned_alloc(len * sizeof(T), _alignment)
+                ien::aligned_alloc(len * sizeof(T), _alignment)
             );
 
             if(_data == nullptr)
@@ -132,13 +134,13 @@ namespace ien
 
         fixed_vector(std::size_t len, std::size_t alignment)
             : _len(len)
-            , _alignment(std::max(alignment, ien::platform::min_alignment))
+            , _alignment(alignment)
         {
             if(len == 0)
                 return;
 
             _data = reinterpret_cast<T*>(
-                ien::platform::aligned_alloc(len * sizeof(T), _alignment)
+                ien::aligned_alloc(len * sizeof(T), _alignment)
             );
 
             if(_data == nullptr)
@@ -148,7 +150,7 @@ namespace ien
         }
 
         fixed_vector(const fixed_vector& cp_src)
-            : _data(reinterpret_cast<T*>(ien::platform::aligned_alloc(cp_src._len, cp_src._alignment)))
+            : _data(reinterpret_cast<T*>(ien::aligned_alloc(cp_src._len, cp_src._alignment)))
             , _len(cp_src._len)
             , _alignment(cp_src._alignment)
         {
@@ -168,7 +170,7 @@ namespace ien
             if (_data == nullptr)
                 return;
 
-            LIEN_ALIGNED_FREE(_data);
+            ien::aligned_free(_data);
         }
 
         std::size_t size() const noexcept { return _len; }

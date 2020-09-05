@@ -22,13 +22,13 @@ namespace ien
             : generic_image()
         { }
 
-        image(int width, int height);
+        image(size_t width, size_t height);
         image(const std::string& path);
 
         image(const image& cp_src) = default;
         image(image&& mv_src) = default;
 
-        image(const uint8_t* rgba_buff, int w, int h);
+        image(const uint8_t* rgba_buff, size_t w, size_t h);
 
         image_unpacked_data* data() noexcept;
         const image_unpacked_data* cdata() const noexcept;

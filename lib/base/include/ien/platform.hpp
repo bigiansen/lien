@@ -78,7 +78,7 @@
 #endif
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-// ALIGNED ALLOCATION
+// ALIGNMENT
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 #include <cstddef>
@@ -104,45 +104,6 @@ namespace ien
     #define LIEN_DEFAULT_ALIGNMENT 16
 #else
     #define LIEN_DEFAULT_ALIGNMENT 32
-#endif
-
-#if defined(LIEN_COMPILER_MSVC)
-    #include <stdlib.h>
-    #define LIEN_ALIGNED_ALLOC(sz, alig) _aligned_malloc(LIEN_ALIGNED_SZ(sz, alig), alig)
-    #define LIEN_ALIGNED_FREE(ptr) _aligned_free(ptr)
-    #define LIEN_ALIGNED_REALLOC(ptr, sz, alig) _aligned_realloc(ptr, LIEN_ALIGNED_SZ(sz, alig), alig)
-#else
-    #include <new>
-    #include <stdio.h>
-    #include <stdlib.h>
-
-    #include <ien/assert.hpp>
-
-    #define LIEN_ALIGNED_ALLOC(sz, alig) aligned_alloc(alig, LIEN_ALIGNED_SZ(sz, alig))
-    #define LIEN_ALIGNED_FREE(ptr) free(ptr)
-
-    namespace ien::platform
-    {
-        static void* aligned_alloc(size_t sz, size_t alig) 
-        {
-            void* ptr = LIEN_ALIGNED_ALLOC(sz, alig);
-            LIEN_DEBUG_ASSERT(ien::is_ptr_aligned(ptr, alig));
-            return ptr;
-        }
-
-        static void* aligned_realloc(void* ptr, size_t sz, size_t alig) 
-        {
-            LIEN_DEBUG_ASSERT(ptr != nullptr);
-            LIEN_ALIGNED_FREE(ptr);
-            return aligned_alloc(sz, alig);
-        }
-
-        static void aligned_free(void* ptr) 
-        {
-            LIEN_DEBUG_ASSERT(ptr != nullptr);
-            LIEN_ALIGNED_FREE(ptr);
-        }
-    }
 #endif
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -200,31 +161,6 @@ namespace ien
         #endif
     #endif
 #endif
-
-//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-// PLATFORM UTILITES
-//+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-namespace ien::platform
-{
-    namespace internal
-    {
-        static inline size_t _minimum_supported_alignment()
-        {
-            size_t result = 1;
-            while(result <= 1024)
-            {
-                void* ptr = LIEN_ALIGNED_ALLOC(result * 4, result);
-                if(ptr != nullptr)
-                    return result;
-                
-                result *= 2;
-            }
-            return 0;
-        }
-    }
-    const size_t min_alignment = internal::_minimum_supported_alignment();
-}
 
 //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 // PLATFORM FEATURES (x86)

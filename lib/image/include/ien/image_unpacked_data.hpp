@@ -38,7 +38,7 @@ namespace ien
         image_unpacked_data(const image_unpacked_data& cp_src);
         image_unpacked_data(image_unpacked_data&& mv_src) noexcept;
 
-        void operator=(image_unpacked_data&& mv_src);
+        void operator=(image_unpacked_data&& mv_src) noexcept;
 
         uint8_t* data_r() noexcept;
         uint8_t* data_g() noexcept;

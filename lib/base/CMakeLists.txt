@@ -1,4 +1,5 @@
 SET(LIEN_BASE_SOURCES
+    src/alloc.cpp    
     src/base64.cpp
     src/bit_view.cpp
 	src/platform.cpp)

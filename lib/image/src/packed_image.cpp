@@ -69,20 +69,51 @@ namespace ien
         *reinterpret_cast<uint32_t*>(_data->data() + (x * y * _width * 4)) = rgba;
     }
 
+    uint32_t packed_image::get_pixel(size_t index) const 
+    {
+        return *reinterpret_cast<const uint32_t*>((*_data).cdata() + (index * 4));
+    }
+
+    uint32_t packed_image::get_pixel(size_t x, size_t y) const
+    {
+        const size_t index = (y * _width) + x;
+        return *reinterpret_cast<const uint32_t*>((*_data).cdata() + (index * 4));
+    }
+
     bool packed_image::save_to_file_png(const std::string& path, int compression_level) const
     {
         stbi_write_png_compression_level = compression_level;
-        return stbi_write_png(path.c_str(), _width, _height, 4, _data->data(), _width * 4);
+        return stbi_write_png(
+            path.c_str(), 
+            static_cast<int>(_width), 
+            static_cast<int>(_height), 
+            4, 
+            _data->data(), 
+            static_cast<int>(_width * 4)
+        );
     }
 
     bool packed_image::save_to_file_jpeg(const std::string& path, int quality) const
     {
-        return stbi_write_jpg(path.c_str(), _width, _height, 4, _data->data(), quality);
+        return stbi_write_jpg(
+            path.c_str(), 
+            static_cast<int>(_width), 
+            static_cast<int>(_height), 
+            4, 
+            _data->data(), 
+            quality
+        );
     }
 
     bool packed_image::save_to_file_tga(const std::string& path) const
     {
-        return stbi_write_tga(path.c_str(), _width, _height, 4, _data->data());
+        return stbi_write_tga(
+            path.c_str(), 
+            static_cast<int>(_width), 
+            static_cast<int>(_height), 
+            4, 
+            _data->data()
+        );
     }
 
     static void save_to_memory_func(void* ctx, void* data, int size)
@@ -100,11 +131,11 @@ namespace ien
         bool ok = stbi_write_png_to_func(
             save_to_memory_func,
             reinterpret_cast<void*>(&result),
-            _width,
-            _height,
+            static_cast<int>(_width),
+            static_cast<int>(_height),
             4,
             _data->cdata(),
-            _width * 4
+            static_cast<int>(_width * 4)
         );
         
         if(!ok) { throw std::runtime_error("Failed to write png data to memory"); }
@@ -118,8 +149,8 @@ namespace ien
         bool ok = stbi_write_jpg_to_func(
             save_to_memory_func,
             reinterpret_cast<void*>(&result), 
-            _width, 
-            _height,
+            static_cast<int>(_width), 
+            static_cast<int>(_height),
             4,
             _data->data(),
             quality
@@ -136,8 +167,8 @@ namespace ien
         bool ok = stbi_write_tga_to_func(
             save_to_memory_func,
             reinterpret_cast<void*>(&result), 
-            _width, 
-            _height,
+            static_cast<int>(_width), 
+            static_cast<int>(_height),
             4,
             _data->data()
         );
@@ -154,14 +185,24 @@ namespace ien
             _data->alignment()
         );
 
-        stbir_resize_uint8(_data->cdata(), _width, _height, 4, resized_data->data(), w, h, 4, 4);
+        stbir_resize_uint8(
+            _data->cdata(), 
+            static_cast<int>(_width), 
+            static_cast<int>(_height), 
+            4, 
+            resized_data->data(), 
+            static_cast<int>(w), 
+            static_cast<int>(h), 
+            4, 
+            4
+        );
         _data = std::move(resized_data);
     }
 
     void packed_image::resize_relative(float w, float h)
     {
-        int real_w = static_cast<int>(safe_mul<float>(_width, w));
-        int real_h = static_cast<int>(safe_mul<float>(_height, h));
+        size_t real_w = static_cast<size_t>(safe_mul<float>(_width, w));
+        size_t real_h = static_cast<size_t>(safe_mul<float>(_height, h));
 
         resize_absolute(real_w, real_h);
     }
