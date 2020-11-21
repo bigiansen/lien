@@ -5,7 +5,7 @@ SET(LIEN_BASE_TESTS_SOURCES
 	src/bit_iterator.cpp
 	src/bit_tools.cpp
 	src/fixed_vector.cpp
-    src/main.cpp
+	src/main.cpp
 )
 
 add_executable(lien_base_tests ${LIEN_BASE_TESTS_SOURCES})

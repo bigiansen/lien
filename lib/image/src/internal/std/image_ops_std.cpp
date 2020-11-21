@@ -1,6 +1,7 @@
 #include <ien/internal/std/image_ops_std.hpp>
 
 #include <ien/internal/image_ops_args.hpp>
+#include <ien/arithmetic.hpp>
 
 #include <algorithm>
 #include <cinttypes>
@@ -59,18 +60,18 @@ namespace ien::image_ops::_internal
         }
     }
 
-    fixed_vector<uint8_t> rgba_average_std(const channel_info_extract_args_rgba& args)
+    fixed_vector<float> rgba_average_std(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;
         
-        fixed_vector<uint8_t> result(args.len);
+        fixed_vector<float> result(args.len);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
         for(size_t i = 0; i < img_sz; ++i)
         {
-            uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i] + a[i];
-            result[i] = static_cast<uint8_t>(sum / 4);
+            float sum = safe_add<float>(r[i], g[i], b[i], a[i]);
+            result[i] = sum / 4;
         }
         return result;
     }
@@ -105,18 +106,18 @@ namespace ien::image_ops::_internal
         return result;
     }
 
-    fixed_vector<uint8_t> rgb_average_std(const channel_info_extract_args_rgb& args)
+    fixed_vector<float> rgb_average_std(const channel_info_extract_args_rgb& args)
     {
         const size_t img_sz = args.len;
         
-        fixed_vector<uint8_t> result(args.len);
+        fixed_vector<float> result(args.len);
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
         for(size_t i = 0; i < img_sz; ++i)
         {
-            uint16_t sum = static_cast<uint16_t>(r[i]) + g[i] + b[i];
-            result[i] = static_cast<uint8_t>(sum / 3);
+            float sum = safe_add<float>(r[i], g[i], b[i]);
+            result[i] = sum / 3;
         }
         return result;
     }

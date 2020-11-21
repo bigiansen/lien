@@ -127,6 +127,56 @@ TEST_CASE("Benchmark rgba average")
 #endif
 };
 
+TEST_CASE("Benchmark rgb average")
+{
+    BENCHMARK_ADVANCED("STD")(Catch::Benchmark::Chronometer meter)
+    {
+        EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
+        meter.measure([&]
+        {
+            return image_ops::_internal::rgb_average_std(args);
+        });
+    };
+    #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
+    BENCHMARK_ADVANCED("SSE2")(Catch::Benchmark::Chronometer meter)
+    {
+        EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
+        meter.measure([&]
+        {
+            return image_ops::_internal::rgb_average_sse2(args);
+        });
+    };
+
+    BENCHMARK_ADVANCED("SSE41")(Catch::Benchmark::Chronometer meter)
+    {
+        EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
+        meter.measure([&]
+        {
+            return image_ops::_internal::rgb_average_sse41(args);
+        });
+    };
+
+    BENCHMARK_ADVANCED("AVX2")(Catch::Benchmark::Chronometer meter)
+    {
+        EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
+        meter.measure([&]
+        {
+            return image_ops::_internal::rgb_average_avx2(args);
+        });
+    };
+
+    #elif defined(LIEN_ARM_NEON)
+    BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)
+    {
+        EXTRACT_CHANNEL_DATA_RGB_SETUP(args);
+        meter.measure([&]
+        {
+            return image_ops::_internal::rgb_average_neon(args);
+        });
+    };
+    #endif
+};
+
 TEST_CASE("Benchmark rgba max")
 {
     BENCHMARK_ADVANCED("STD")(Catch::Benchmark::Chronometer meter)

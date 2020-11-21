@@ -12,8 +12,8 @@ namespace ien::image_ops::_internal
     void truncate_channel_data_sse2(const truncate_channel_args& args);
     void truncate_channel_data_avx2(const truncate_channel_args& args);
 
-    fixed_vector<uint8_t> rgba_average_sse2(const channel_info_extract_args_rgba& args);
-    fixed_vector<uint8_t> rgba_average_avx2(const channel_info_extract_args_rgba& args);
+    fixed_vector<float> rgba_average_sse2(const channel_info_extract_args_rgba& args);
+    fixed_vector<float> rgba_average_avx2(const channel_info_extract_args_rgba& args);
 
     fixed_vector<uint8_t> rgba_max_sse2(const channel_info_extract_args_rgba& args);
     fixed_vector<uint8_t> rgba_max_avx2(const channel_info_extract_args_rgba& args);
@@ -21,8 +21,9 @@ namespace ien::image_ops::_internal
     fixed_vector<uint8_t> rgba_min_sse2(const channel_info_extract_args_rgba& args);
     fixed_vector<uint8_t> rgba_min_avx2(const channel_info_extract_args_rgba& args);
 
-    fixed_vector<uint8_t> rgb_average_sse2(const channel_info_extract_args_rgb& args);
-    fixed_vector<uint8_t> rgb_average_avx2(const channel_info_extract_args_rgb& args);
+    fixed_vector<float> rgb_average_sse2(const channel_info_extract_args_rgb& args);
+    fixed_vector<float> rgb_average_sse41(const channel_info_extract_args_rgb& args);
+    fixed_vector<float> rgb_average_avx2(const channel_info_extract_args_rgb& args);
 
     fixed_vector<uint8_t> rgb_max_sse2(const channel_info_extract_args_rgb& args);
     fixed_vector<uint8_t> rgb_max_avx2(const channel_info_extract_args_rgb& args);

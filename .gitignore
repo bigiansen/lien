@@ -6,3 +6,4 @@ build_release_win32/
 .vscode/
 out/*
 CMakeLists.txt.user
+CMakeSettings.json

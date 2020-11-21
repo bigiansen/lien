@@ -6,6 +6,7 @@
 #include <ien/internal/std/image_ops_std.hpp>
 #include <ien/internal/image_ops_args.hpp>
 
+#include <ien/arithmetic.hpp>
 #include <algorithm>
 #include <immintrin.h>
 
@@ -105,7 +106,7 @@ namespace ien::image_ops::_internal
         }
     }
 
-    fixed_vector<uint8_t> rgba_average_avx2(const channel_info_extract_args_rgba& args)
+    fixed_vector<float> rgba_average_avx2(const channel_info_extract_args_rgba& args)
     {
         return rgba_average_std(args);
         // Not implemented...
@@ -181,10 +182,73 @@ namespace ien::image_ops::_internal
         return result;
     }
 
-    fixed_vector<uint8_t> rgb_average_avx2(const channel_info_extract_args_rgb& args)
-    {
-        return rgb_average_std(args);
-        // Not implemented...
+    fixed_vector<float> rgb_average_avx2(const channel_info_extract_args_rgb& args)
+    {        
+        const size_t img_sz = args.len;
+        
+        if (img_sz < AVX_ALIGNMENT)
+        {
+            return rgb_average_std(args);
+        }
+        
+        fixed_vector<float> result(args.len, AVX_ALIGNMENT);
+        
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);
+        
+        struct vec4x8xf32
+        {
+            __m256 data[4];
+        };
+        
+        auto extract_4x8xf32_from_16xu8 = [](__m256i v) -> vec4x8xf32
+        {
+            __m128i vlh = _mm256_extracti128_si256(v, 0);
+            __m128i vhh = _mm256_extracti128_si256(v, 1);
+
+            __m256i v0i = _mm256_cvtepu8_epi32(vlh);
+            __m256i v1i = _mm256_cvtepu8_epi32(_mm_srli_si128(vlh, 8));
+            __m256i v2i = _mm256_cvtepu8_epi32(vhh);
+            __m256i v3i = _mm256_cvtepu8_epi32(_mm_srli_si128(vhh, 8));
+
+            return { {
+                _mm256_cvtepi32_ps(v0i),
+                _mm256_cvtepi32_ps(v1i),
+                _mm256_cvtepi32_ps(v2i),
+                _mm256_cvtepi32_ps(v3i)
+            } };
+        };
+        
+        const __m256 vmul_div3 = _mm256_set1_ps(0.333334F);
+        
+        size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
+        {
+            __m256i vseg_r = LOAD_SI256_CONST(r + i);
+            __m256i vseg_g = LOAD_SI256_CONST(g + i);
+            __m256i vseg_b = LOAD_SI256_CONST(b + i);
+        
+            vec4x8xf32 vlr = extract_4x8xf32_from_16xu8(vseg_r);
+            vec4x8xf32 vlg = extract_4x8xf32_from_16xu8(vseg_g);
+            vec4x8xf32 vlb = extract_4x8xf32_from_16xu8(vseg_b);
+        
+            for (size_t vidx = 0; vidx < 4; ++vidx)
+            {
+                __m256 vrf = vlr.data[vidx];
+                __m256 vgf = vlg.data[vidx];
+                __m256 vbf = vlb.data[vidx];
+                   
+                __m256 sum = _mm256_add_ps(_mm256_add_ps(vrf, vgf), vbf);
+                __m256 avg = _mm256_mul_ps(sum, vmul_div3);
+        
+                _mm256_store_ps(result.data() + i + (vidx * 8), avg);
+            }
+        }
+        
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            result[i] = ien::safe_add<float>(r[i], g[i], b[i]) / 3;
+        }
+        return result;
     }
 
     fixed_vector<uint8_t> rgb_max_avx2(const channel_info_extract_args_rgb& args)

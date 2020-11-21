@@ -10,13 +10,13 @@ namespace ien::image_ops
 {
     void truncate_channel_data(image_unpacked_data* img, int bits_r, int bits_g, int bits_b, int bits_a);
 
-    fixed_vector<uint8_t> rgba_average(const image& img);
+    fixed_vector<float> rgba_average(const image& img);
 
     fixed_vector<uint8_t> rgba_max(const image& img);
 
     fixed_vector<uint8_t> rgba_min(const image& img);
 
-    fixed_vector<uint8_t> rgb_average(const image& img);
+    fixed_vector<float> rgb_average(const image& img);
 
     fixed_vector<uint8_t> rgb_max(const image& img);
 

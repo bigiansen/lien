@@ -14,16 +14,23 @@
 
 namespace ien::image_ops
 {
-
 #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
+    static bool HAS_SSE2 = platform::x86::get_feature(platform::x86::feature::SSE2);
+    static bool HAS_SSE3 = platform::x86::get_feature(platform::x86::feature::SSE3);
+    static bool HAS_SSSE3 = platform::x86::get_feature(platform::x86::feature::SSSE3);
+    static bool HAS_SSE41 = platform::x86::get_feature(platform::x86::feature::SSE41);
+    static bool HAS_SSE42 = platform::x86::get_feature(platform::x86::feature::SSE42);
+    static bool HAS_AVX = platform::x86::get_feature(platform::x86::feature::AVX);
+    static bool HAS_AVX2 = platform::x86::get_feature(platform::x86::feature::AVX2);
+
     template<typename TFuncPtr>
     TFuncPtr ARCH_X86_OVERLOAD_SELECT(TFuncPtr def, TFuncPtr sse2, TFuncPtr avx2)
     {
         #if defined(LIEN_ARCH_X86_64) // on x86-64 SSE2 is guaranteed
-            return platform::x86::get_feature(platform::x86::feature::AVX2) ? avx2 : sse2;
+            return HAS_AVX2 ? avx2 : sse2;
         #elif defined(LIEN_ARCH_X86)
-            return platform::x86::get_feature(platform::x86::feature::AVX2) ? avx2
-                 : platform::x86::get_feature(platform::x86::feature::SSE2) ? sse2 : def;
+            return HAS_AVX2 ? avx2
+                 : HAS_SSE2 ? sse2 : def;
         #else
             #error "Unable to select x86 overload on non-x86 platform!"
         #endif
@@ -50,9 +57,9 @@ namespace ien::image_ops
         func(args);
     }
 
-    fixed_vector<uint8_t> rgba_average(const image& img)
+    fixed_vector<float> rgba_average(const image& img)
     {
-        typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
+        typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
         #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
@@ -110,16 +117,18 @@ namespace ien::image_ops
         return func(args);
     }
 
-    fixed_vector<uint8_t> rgb_average(const image& img)
+    fixed_vector<float> rgb_average(const image& img)
     {
-        typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
+        typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
         #if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
-            static func_ptr_t func = ARCH_X86_OVERLOAD_SELECT(
-                &_internal::rgb_average_std,
-                &_internal::rgb_average_sse2,
-                &_internal::rgb_average_avx2
-            );
+        static func_ptr_t func = HAS_AVX2
+            ? &_internal::rgb_average_avx2
+            : HAS_SSSE3
+            ? &_internal::rgb_average_sse41
+            : HAS_SSE2
+            ? &_internal::rgb_average_sse2
+            : &_internal::rgb_average_std;
         #elif defined(LIEN_ARM_NEON) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = &_internal::rgb_average_neon;
         #else

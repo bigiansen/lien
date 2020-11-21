@@ -9,13 +9,13 @@ namespace ien::image_ops::_internal
 {
     void truncate_channel_data_std(const truncate_channel_args& args);
 
-    fixed_vector<uint8_t> rgba_average_std(const channel_info_extract_args_rgba& args);
+    fixed_vector<float> rgba_average_std(const channel_info_extract_args_rgba& args);
 
     fixed_vector<uint8_t> rgba_max_std(const channel_info_extract_args_rgba& args);
 
     fixed_vector<uint8_t> rgba_min_std(const channel_info_extract_args_rgba& args);
 
-    fixed_vector<uint8_t> rgb_average_std(const channel_info_extract_args_rgb& args);
+    fixed_vector<float> rgb_average_std(const channel_info_extract_args_rgb& args);
 
     fixed_vector<uint8_t> rgb_max_std(const channel_info_extract_args_rgb& args);
 

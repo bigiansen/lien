@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include <ien/arithmetic.hpp>
 #include <ien/image.hpp>
 #include <ien/platform.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
@@ -92,7 +93,7 @@ TEST_CASE("[x86] Channel average RGBA")
         auto result = image_ops::_internal::rgba_average_sse2(args);
         for (size_t i = 0; i < px_count; ++i)
         {
-            REQUIRE((result[i] == 8 || result[i] == 7));
+            REQUIRE(result[i] == safe_add<float>(1, 5, 10, 15) / 4);
         }
     };
 
@@ -114,7 +115,7 @@ TEST_CASE("[x86] Channel average RGBA")
         auto result = image_ops::_internal::rgba_average_avx2(args);
         for (size_t i = 0; i < px_count; ++i)
         {
-            REQUIRE((result[i] == 8 || result[i] == 7));
+            REQUIRE(result[i] == safe_add<float>(1, 5, 10, 15) / 4);
         }
     };
 };
@@ -139,7 +140,29 @@ TEST_CASE("[x86] Channel average RGB")
         auto result = image_ops::_internal::rgb_average_sse2(args);
         for (size_t i = 0; i < px_count; ++i)
         {
-            REQUIRE((result[i] == 86 || result[i] == 87));
+            REQUIRE(result[i] == Approx(safe_add<float>(10, 50, 200) / 3));
+        }
+    };
+
+    SECTION("SSE41")
+    {
+        CHECK_SSE2("[x86] Channel average RGB");
+        image img(41, 41);
+        size_t px_count = 41 * 41;
+
+        for (size_t i = 0; i < px_count; ++i)
+        {
+            img.data()->data_r()[i] = 10;
+            img.data()->data_g()[i] = 50;
+            img.data()->data_b()[i] = 200;
+            img.data()->data_a()[i] = 15;
+        }
+
+        image_ops::_internal::channel_info_extract_args_rgb args(img);
+        auto result = image_ops::_internal::rgb_average_sse41(args);
+        for (size_t i = 0; i < px_count; ++i)
+        {
+            REQUIRE(result[i] == Approx(safe_add<float>(10, 50, 200) / 3));
         }
     };
 
@@ -161,7 +184,7 @@ TEST_CASE("[x86] Channel average RGB")
         auto result = image_ops::_internal::rgb_average_avx2(args);
         for (size_t i = 0; i < px_count; ++i)
         {
-            REQUIRE((result[i] == 5));
+            REQUIRE(result[i] == Approx(safe_add<float>(1, 5, 10) / 3));
         }
     };
 };

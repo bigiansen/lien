@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include <ien/arithmetic.hpp>
 #include <ien/image.hpp>
 #include <ien/platform.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
@@ -53,7 +54,31 @@ TEST_CASE("[STD] Channel average RGBA")
         auto result = image_ops::_internal::rgba_average_std(args);
         for (size_t i = 0; i < px_count; ++i)
         {
-            REQUIRE(result[i] == 7);
+            REQUIRE(result[i] == (ien::safe_add<float>(1, 5, 10, 15) / 4));
+        }
+    };
+};
+
+TEST_CASE("[STD] Channel average RGB")
+{
+    SECTION("STD")
+    {
+        image img(41, 41);
+        size_t px_count = 41 * 41;
+
+        for (size_t i = 0; i < px_count; ++i)
+        {
+            img.data()->data_r()[i] = 1;
+            img.data()->data_g()[i] = 5;
+            img.data()->data_b()[i] = 10;
+            img.data()->data_a()[i] = 15;
+        }
+
+        image_ops::_internal::channel_info_extract_args_rgb args(img);
+        auto result = image_ops::_internal::rgb_average_std(args);
+        for (size_t i = 0; i < px_count; ++i)
+        {
+            REQUIRE(result[i] == (ien::safe_add<float>(1, 5, 10) / 3));
         }
     };
 };
