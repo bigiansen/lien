@@ -2,6 +2,7 @@
 
 #include <array>
 #include <charconv>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <type_traits>
