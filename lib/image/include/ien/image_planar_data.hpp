@@ -8,10 +8,10 @@
 
 namespace ien
 {
-    class image;
-    class image_unpacked_data
+    class planar_image;
+    class image_planar_data
     {
-        friend class image;
+        friend class planar_image;
 
     private:
         uint8_t* _r;
@@ -22,7 +22,7 @@ namespace ien
         size_t _size;
         bool _moved = false;
 
-        constexpr image_unpacked_data() noexcept 
+        constexpr image_planar_data() noexcept 
             : _r(nullptr)
             , _g(nullptr)
             , _b(nullptr)
@@ -32,13 +32,13 @@ namespace ien
         { }
         
     public:
-        image_unpacked_data(size_t pixel_count);
-        ~image_unpacked_data();
+        image_planar_data(size_t pixel_count);
+        ~image_planar_data();
 
-        image_unpacked_data(const image_unpacked_data& cp_src);
-        image_unpacked_data(image_unpacked_data&& mv_src) noexcept;
+        image_planar_data(const image_planar_data& cp_src);
+        image_planar_data(image_planar_data&& mv_src) noexcept;
 
-        void operator=(image_unpacked_data&& mv_src) noexcept;
+        void operator=(image_planar_data&& mv_src) noexcept;
 
         uint8_t* data_r() noexcept;
         uint8_t* data_g() noexcept;

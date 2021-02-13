@@ -1,7 +1,7 @@
 #include <catch2/catch.hpp>
 
 #include <ien/arithmetic.hpp>
-#include <ien/image.hpp>
+#include <ien/planar_image.hpp>
 #include <ien/platform.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
 
@@ -11,7 +11,7 @@ TEST_CASE("[STD] Channel byte truncation")
 {
     SECTION("STD")
     {
-        image img(41, 41);
+        planar_image img(41, 41);
         size_t px_count = img.pixel_count();
 
         for (size_t i = 0; i < px_count; ++i)
@@ -39,10 +39,9 @@ TEST_CASE("[STD] Channel average RGBA")
 {
     SECTION("STD")
     {
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 1;
             img.data()->data_g()[i] = 5;
@@ -52,7 +51,7 @@ TEST_CASE("[STD] Channel average RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_average_std(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == (ien::safe_add<float>(1, 5, 10, 15) / 4));
         }
@@ -63,10 +62,9 @@ TEST_CASE("[STD] Channel average RGB")
 {
     SECTION("STD")
     {
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 1;
             img.data()->data_g()[i] = 5;
@@ -76,7 +74,7 @@ TEST_CASE("[STD] Channel average RGB")
 
         image_ops::_internal::channel_info_extract_args_rgb args(img);
         auto result = image_ops::_internal::rgb_average_std(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == (ien::safe_add<float>(1, 5, 10) / 3));
         }
@@ -87,10 +85,9 @@ TEST_CASE("[STD] Channel max RGBA")
 {
     SECTION("STD")
     {
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 1;
             img.data()->data_g()[i] = 5;
@@ -100,7 +97,7 @@ TEST_CASE("[STD] Channel max RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_max_std(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 15);
         }
@@ -111,10 +108,9 @@ TEST_CASE("[STD] Channel min RGBA")
 {
     SECTION("STD")
     {
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 7;
             img.data()->data_g()[i] = 5;
@@ -124,7 +120,7 @@ TEST_CASE("[STD] Channel min RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_min_std(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 3);
         }
@@ -135,10 +131,9 @@ TEST_CASE("[STD] Channel max RGB")
 {
     SECTION("STD")
     {
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 1;
             img.data()->data_g()[i] = 5;
@@ -148,7 +143,7 @@ TEST_CASE("[STD] Channel max RGB")
 
         image_ops::_internal::channel_info_extract_args_rgb args(img);
         auto result = image_ops::_internal::rgb_max_std(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 10);
         }
@@ -159,10 +154,9 @@ TEST_CASE("[STD] Channel min RGB")
 {
     SECTION("STD")
     {
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 7;
             img.data()->data_g()[i] = 5;
@@ -172,7 +166,7 @@ TEST_CASE("[STD] Channel min RGB")
 
         image_ops::_internal::channel_info_extract_args_rgb args(img);
         auto result = image_ops::_internal::rgb_min_std(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 3);
         }
@@ -183,10 +177,9 @@ TEST_CASE("[STD] Channel sum saturated RGBA")
 {
     SECTION("Below limit")
     {
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 7;
             img.data()->data_g()[i] = 5;
@@ -196,7 +189,7 @@ TEST_CASE("[STD] Channel sum saturated RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_sum_saturated_std(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 19);
         }
@@ -204,10 +197,9 @@ TEST_CASE("[STD] Channel sum saturated RGBA")
 
     SECTION("Above limit")
     {
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 77;
             img.data()->data_g()[i] = 55;
@@ -217,7 +209,7 @@ TEST_CASE("[STD] Channel sum saturated RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_sum_saturated_std(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 255u);
         }
@@ -228,10 +220,9 @@ TEST_CASE("[STD] Saturation")
 {
     SECTION("STD")
     {
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = static_cast<uint8_t>(1);
             img.data()->data_g()[i] = static_cast<uint8_t>(2);
@@ -254,10 +245,9 @@ TEST_CASE("[STD] Luminance")
 {
     SECTION("STD")
     {
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = static_cast<uint8_t>(1);
             img.data()->data_g()[i] = static_cast<uint8_t>(2);
@@ -290,7 +280,7 @@ TEST_CASE("[STD] Unpack Image Data")
             data[(i * 4) + 3] = 4;
         }
 
-        ien::image_unpacked_data result = image_ops::_internal::unpack_image_data_std(data.data(), data.size());
+        ien::image_planar_data result = image_ops::_internal::unpack_image_data_std(data.data(), data.size());
 
         for(size_t i = 0; i < result.size(); ++i)
         {
@@ -306,10 +296,9 @@ TEST_CASE("[STD] Channel compare")
 {
     SECTION("STD")
     {
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = static_cast<uint8_t>(1 + i);
             img.data()->data_g()[i] = static_cast<uint8_t>(2 + i);

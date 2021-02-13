@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ien/fixed_vector.hpp>
-#include <ien/generic_image.hpp>
+#include <ien/image.hpp>
 
 #include <array>
 #include <cinttypes>
@@ -10,23 +10,22 @@
 
 namespace ien
 { 
-    class image;
-
-    class packed_image : public generic_image
+    class planar_image;
+    class interleaved_image : public image
     {
     private:
         std::unique_ptr<ien::fixed_vector<uint8_t>> _data;
 
     public:
-        constexpr packed_image()
-            : generic_image()
+        constexpr interleaved_image()
+            : image(image_type::INTERLEAVED)
         { }
 
-        packed_image(const packed_image& cp_src);
-        packed_image(packed_image&& mv_src) noexcept;
+        interleaved_image(const interleaved_image& cp_src);
+        interleaved_image(interleaved_image&& mv_src) noexcept;
 
-        packed_image(size_t width, size_t height);
-        packed_image(const std::string& path);
+        interleaved_image(size_t width, size_t height);
+        interleaved_image(const std::string& path);
 
         uint8_t* data() noexcept;
         const uint8_t* cdata() const noexcept;
@@ -50,9 +49,9 @@ namespace ien
 
         ien::fixed_vector<uint8_t> get_rgba_buff_copy();
 
-        ien::image to_image();
+        ien::planar_image to_planar_image();
 
-        packed_image& operator=(const packed_image& cp_src);
-        packed_image& operator=(packed_image&& mv_src) noexcept;
+        interleaved_image& operator=(const interleaved_image& cp_src);
+        interleaved_image& operator=(interleaved_image&& mv_src) noexcept;
     };
 }

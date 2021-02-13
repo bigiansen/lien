@@ -2,15 +2,15 @@ add_subdirectory(third-party)
 
 find_package(Threads REQUIRED)
 
-set(LIEN_IMAGE_SOURCES
-	src/generic_image.cpp
-    src/image.cpp
-    src/image_ops.cpp
-	src/image_unpacked_data.cpp
-	src/image_view.cpp
-	src/packed_image.cpp
-	src/packed_image_view.cpp
-	src/internal/std/image_ops_std.cpp	
+set(LIEN_IMAGE_SOURCES	    
+	"src/image.cpp"
+    "src/image_ops.cpp"
+	"src/image_planar_data.cpp"
+	"src/planar_image.cpp"
+	"src/planar_image_view.cpp"
+	"src/interleaved_image.cpp"
+	"src/interleaved_image_view.cpp"
+	"src/internal/std/image_ops_std.cpp"
 )
 
 set(LIEN_IMAGE_SOURCES_X86

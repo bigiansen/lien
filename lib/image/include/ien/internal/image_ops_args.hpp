@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ien/image.hpp>
+#include <ien/planar_image.hpp>
 #include <ien/rgba_channel.hpp>
 #include <cinttypes>
 
@@ -20,7 +20,7 @@ namespace ien::image_ops::_internal
 
         constexpr truncate_channel_args() { }
 
-        truncate_channel_args(image& img, int r, int g, int b, int a)
+        truncate_channel_args(planar_image& img, int r, int g, int b, int a)
             : len(img.pixel_count())
             , ch_r(img.data()->data_r())
             , ch_g(img.data()->data_g())
@@ -32,7 +32,7 @@ namespace ien::image_ops::_internal
             , bits_a(a)
         { }
 
-        truncate_channel_args(image_unpacked_data& img, int r, int g, int b, int a)
+        truncate_channel_args(image_planar_data& img, int r, int g, int b, int a)
             : len(img.size())
             , ch_r(img.data_r())
             , ch_g(img.data_g())
@@ -55,7 +55,7 @@ namespace ien::image_ops::_internal
 
         constexpr channel_info_extract_args_rgba() { }
 
-        channel_info_extract_args_rgba(const image& img)
+        channel_info_extract_args_rgba(const planar_image& img)
             : len(img.pixel_count())
             , ch_r(img.cdata()->cdata_r())
             , ch_g(img.cdata()->cdata_g())
@@ -73,7 +73,7 @@ namespace ien::image_ops::_internal
 
         constexpr channel_info_extract_args_rgb() { }
 
-        channel_info_extract_args_rgb(const image& img)
+        channel_info_extract_args_rgb(const planar_image& img)
             : len(img.pixel_count())
             , ch_r(img.cdata()->cdata_r())
             , ch_g(img.cdata()->cdata_g())
@@ -87,7 +87,7 @@ namespace ien::image_ops::_internal
         const uint8_t* ch = nullptr;
         const uint8_t threshold = 0;
 
-        channel_compare_args(const image& img, rgba_channel channel, uint8_t thres)
+        channel_compare_args(const planar_image& img, rgba_channel channel, uint8_t thres)
             : len(img.pixel_count())
             , threshold(thres)
         {

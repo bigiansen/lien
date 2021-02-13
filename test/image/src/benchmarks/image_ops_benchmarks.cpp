@@ -15,7 +15,7 @@
 
 using namespace ien;
 
-void fill_image_random(image& img)
+void fill_image_random(planar_image& img)
 {
     size_t imgsz = img.pixel_count();
     for (size_t i = 0; i < imgsz; ++i)
@@ -28,7 +28,7 @@ void fill_image_random(image& img)
 }
 
 #define TRUNCATE_CHANNEL_BITS_SETUP(args) \
-    image img(IMG_DIM, IMG_DIM); \
+    planar_image img(IMG_DIM, IMG_DIM); \
     fill_image_random(img);\
     image_ops::_internal::truncate_channel_args args(img, 1, 2, 3, 4)
 
@@ -77,12 +77,12 @@ TEST_CASE("Benchmark truncate channel bits")
 }
 
 #define EXTRACT_CHANNEL_DATA_RGBA_SETUP(args) \
-    image img(IMG_DIM, IMG_DIM); \
+    planar_image img(IMG_DIM, IMG_DIM); \
     fill_image_random(img);\
     image_ops::_internal::channel_info_extract_args_rgba args(img)
 
 #define EXTRACT_CHANNEL_DATA_RGB_SETUP(args) \
-    image img(IMG_DIM, IMG_DIM); \
+    planar_image img(IMG_DIM, IMG_DIM); \
     fill_image_random(img);\
     image_ops::_internal::channel_info_extract_args_rgb args(img)
 
@@ -529,7 +529,7 @@ TEST_CASE("Benchmark unpack image data")
 };
 
 #define COMPARE_CHANNEL_SETUP(args) \
-    image img(IMG_DIM, IMG_DIM); \
+    planar_image img(IMG_DIM, IMG_DIM); \
     fill_image_random(img);\
     image_ops::_internal::channel_compare_args args(img, rgba_channel::R, 123)
 

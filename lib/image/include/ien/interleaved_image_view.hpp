@@ -1,11 +1,11 @@
 #pragma once
 
-#include <ien/packed_image.hpp>
+#include <ien/interleaved_image.hpp>
 #include <ien/rect.hpp>
 
 namespace ien
 {
-    class packed_image_view
+    class interleaved_image_view
     {
     private:
         const uint8_t* _ptr;
@@ -13,11 +13,11 @@ namespace ien
         rect<size_t> _image_rect;
     
     public:
-        packed_image_view(const packed_image*, const rect<size_t>& view_rect);
+        interleaved_image_view(const interleaved_image*, const rect<size_t>& view_rect);
 
         uint32_t read_pixel(size_t index) const;
         uint32_t read_pixel(size_t x, size_t y) const;
 
-        packed_image build_packed_image() const;
+        interleaved_image build_interleaved_image() const;
     };
 }

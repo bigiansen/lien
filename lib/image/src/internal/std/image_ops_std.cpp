@@ -206,9 +206,9 @@ namespace ien::image_ops::_internal
         return result;
     }
 
-	image_unpacked_data unpack_image_data_std(const uint8_t* data, size_t len)
+	image_planar_data unpack_image_data_std(const uint8_t* data, size_t len)
 	{
-		image_unpacked_data result(len / 4);
+		image_planar_data result(len / 4);
 
 		uint8_t* r = result.data_r();
 		uint8_t* g = result.data_g();

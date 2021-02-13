@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ien/image.hpp>
-#include <ien/image_unpacked_data.hpp>
+#include <ien/planar_image.hpp>
+#include <ien/image_planar_data.hpp>
 #include <ien/rect.hpp>
 #include <array>
 #include <cinttypes>
@@ -13,11 +13,11 @@ namespace ien
     namespace _internal
     {
         template<bool Mutable>
-        class image_view_base
+        class planar_image_view_base
         {
         protected:
-            using dataptr_t = std::conditional_t<Mutable, image_unpacked_data*, const image_unpacked_data*>;
-            using imgptr_t = std::conditional_t<Mutable, image*, const image*>;
+            using dataptr_t = std::conditional_t<Mutable, image_planar_data*, const image_planar_data*>;
+            using imgptr_t = std::conditional_t<Mutable, planar_image*, const planar_image*>;
 
             dataptr_t _ptr;
             rect<int> _view_rect;
@@ -40,7 +40,7 @@ namespace ien
             }
             
     	public:
-            image_view_base(imgptr_t img, const rect<int>& view_rect)
+            planar_image_view_base(imgptr_t img, const rect<int>& view_rect)
                 : _ptr(img->cdata())
                 , _view_rect(view_rect)
                 , _image_rect(0, 0, img->width(), img->height())
@@ -56,9 +56,9 @@ namespace ien
                 return _ptr->read_pixel(cvt2_real_idx(xy_2_abs_idx(x, y)));
             }
 
-            image build_image()
+            planar_image build_planar_image()
             {
-                image result(_view_rect.w, _view_rect.h);
+                planar_image result(_view_rect.w, _view_rect.h);
 
                 int start_idx = (_view_rect.y * _image_rect.w) + _view_rect.x;
                 for(int i = 0; i < _view_rect.h; ++i)
@@ -95,10 +95,10 @@ namespace ien
         };
     }
 
-    class image_view : public _internal::image_view_base<false>
+    class planar_image_view : public _internal::planar_image_view_base<false>
     { };
 
-    class mutable_image_view : public _internal::image_view_base<true>
+    class planar_mutable_image_view : public _internal::planar_image_view_base<true>
     {
         void set_pixel(int index, uint8_t* rgba);
         void set_pixel(int x, int y, uint8_t* rgba);

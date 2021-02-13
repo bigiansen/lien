@@ -40,7 +40,7 @@
 
 #else
 	#define LIEN_DEBUG_ASSERT(cond)
-	#define LIEN_DEBUG_ASSERT_MSG(cond)
+	#define LIEN_DEBUG_ASSERT_MSG(cond, msg)
 #endif
 
 #define LIEN_NOT_IMPLEMENTED() runtime_assert(false, "Method not implemented!")

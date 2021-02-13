@@ -1,7 +1,7 @@
 #include <catch2/catch.hpp>
 
 #include <ien/arithmetic.hpp>
-#include <ien/image.hpp>
+#include <ien/planar_image.hpp>
 #include <ien/platform.hpp>
 #include <ien/internal/std/image_ops_std.hpp>
 
@@ -23,8 +23,8 @@ TEST_CASE("[x86] Channel byte truncation")
     SECTION("SSE2")
     {
         CHECK_SSE2("[x86] Channel byte truncation");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
+        auto px_count = 41 * 41;
 
         for (size_t i = 0; i < px_count; ++i)
         {
@@ -49,8 +49,8 @@ TEST_CASE("[x86] Channel byte truncation")
     SECTION("AVX2")
     {
         CHECK_AVX2("[x86] Channel byte truncation");
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
+        auto px_count = 71 * 71;
 
         for (size_t i = 0; i < px_count; ++i)
         {
@@ -78,10 +78,9 @@ TEST_CASE("[x86] Channel average RGBA")
     SECTION("SSE2")
     {
         CHECK_SSE2("[x86] Channel average RGBA");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 1;
             img.data()->data_g()[i] = 5;
@@ -91,7 +90,7 @@ TEST_CASE("[x86] Channel average RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_average_sse2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == safe_add<float>(1, 5, 10, 15) / 4);
         }
@@ -100,10 +99,9 @@ TEST_CASE("[x86] Channel average RGBA")
     SECTION("AVX2")
     {
         CHECK_AVX2("[x86] Channel average RGBA");
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 1;
             img.data()->data_g()[i] = 5;
@@ -113,7 +111,7 @@ TEST_CASE("[x86] Channel average RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_average_avx2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == safe_add<float>(1, 5, 10, 15) / 4);
         }
@@ -125,10 +123,9 @@ TEST_CASE("[x86] Channel average RGB")
     SECTION("SSE2")
     {
         CHECK_SSE2("[x86] Channel average RGB");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 10;
             img.data()->data_g()[i] = 50;
@@ -138,7 +135,7 @@ TEST_CASE("[x86] Channel average RGB")
 
         image_ops::_internal::channel_info_extract_args_rgb args(img);
         auto result = image_ops::_internal::rgb_average_sse2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == Approx(safe_add<float>(10, 50, 200) / 3));
         }
@@ -147,10 +144,9 @@ TEST_CASE("[x86] Channel average RGB")
     SECTION("SSE41")
     {
         CHECK_SSE2("[x86] Channel average RGB");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 10;
             img.data()->data_g()[i] = 50;
@@ -160,7 +156,7 @@ TEST_CASE("[x86] Channel average RGB")
 
         image_ops::_internal::channel_info_extract_args_rgb args(img);
         auto result = image_ops::_internal::rgb_average_sse41(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == Approx(safe_add<float>(10, 50, 200) / 3));
         }
@@ -169,10 +165,9 @@ TEST_CASE("[x86] Channel average RGB")
     SECTION("AVX2")
     {
         CHECK_AVX2("[x86] Channel average RGB");
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 1;
             img.data()->data_g()[i] = 5;
@@ -182,7 +177,7 @@ TEST_CASE("[x86] Channel average RGB")
 
         image_ops::_internal::channel_info_extract_args_rgb args(img);
         auto result = image_ops::_internal::rgb_average_avx2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == Approx(safe_add<float>(1, 5, 10) / 3));
         }
@@ -194,10 +189,9 @@ TEST_CASE("[x86] Channel max RGBA")
     SECTION("SSE2")
     {
         CHECK_SSE2("[x86] Channel max RGBA");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 1;
             img.data()->data_g()[i] = 5;
@@ -207,7 +201,7 @@ TEST_CASE("[x86] Channel max RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_max_sse2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 15);
         }
@@ -216,10 +210,9 @@ TEST_CASE("[x86] Channel max RGBA")
     SECTION("AVX2")
     {
         CHECK_AVX2("[x86] Channel max RGBA");
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 1;
             img.data()->data_g()[i] = 5;
@@ -229,7 +222,7 @@ TEST_CASE("[x86] Channel max RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_max_avx2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 15);
         }
@@ -241,10 +234,9 @@ TEST_CASE("[x86] Channel min RGBA")
     SECTION("SSE2")
     {
         CHECK_SSE2("[x86] Channel min RGBA");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 7;
             img.data()->data_g()[i] = 5;
@@ -254,7 +246,7 @@ TEST_CASE("[x86] Channel min RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_min_sse2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 3);
         }
@@ -263,10 +255,9 @@ TEST_CASE("[x86] Channel min RGBA")
     SECTION("AVX2")
     {
         CHECK_AVX2("[x86] Channel min RGBA");
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 7;
             img.data()->data_g()[i] = 5;
@@ -276,7 +267,7 @@ TEST_CASE("[x86] Channel min RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_min_avx2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 3);
         }
@@ -288,10 +279,9 @@ TEST_CASE("[x86] Channel max RGB")
     SECTION("SSE2")
     {
         CHECK_SSE2("[x86] Channel max RGB");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 1;
             img.data()->data_g()[i] = 5;
@@ -301,7 +291,7 @@ TEST_CASE("[x86] Channel max RGB")
 
         image_ops::_internal::channel_info_extract_args_rgb args(img);
         auto result = image_ops::_internal::rgb_max_sse2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 10);
         }
@@ -310,10 +300,9 @@ TEST_CASE("[x86] Channel max RGB")
     SECTION("AVX2")
     {
         CHECK_AVX2("[x86] Channel max RGB");
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 1;
             img.data()->data_g()[i] = 5;
@@ -323,7 +312,7 @@ TEST_CASE("[x86] Channel max RGB")
 
         image_ops::_internal::channel_info_extract_args_rgb args(img);
         auto result = image_ops::_internal::rgb_max_avx2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 10);
         }
@@ -335,10 +324,9 @@ TEST_CASE("[x86] Channel min RGB")
     SECTION("SSE2")
     {
         CHECK_SSE2("[x86] Channel min RGB");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 7;
             img.data()->data_g()[i] = 5;
@@ -348,7 +336,7 @@ TEST_CASE("[x86] Channel min RGB")
 
         image_ops::_internal::channel_info_extract_args_rgb args(img);
         auto result = image_ops::_internal::rgb_min_sse2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 3);
         }
@@ -357,10 +345,9 @@ TEST_CASE("[x86] Channel min RGB")
     SECTION("AVX2")
     {
         CHECK_AVX2("[x86] Channel min RGB");
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 7;
             img.data()->data_g()[i] = 5;
@@ -370,7 +357,7 @@ TEST_CASE("[x86] Channel min RGB")
 
         image_ops::_internal::channel_info_extract_args_rgb args(img);
         auto result = image_ops::_internal::rgb_min_avx2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 3);
         }
@@ -382,10 +369,9 @@ TEST_CASE("[x86] Channel sum saturated RGBA")
     SECTION("SSE2 - Below limit")
     {
         CHECK_SSE2("[x86] Channel sum saturated RGBA");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 7;
             img.data()->data_g()[i] = 5;
@@ -395,7 +381,7 @@ TEST_CASE("[x86] Channel sum saturated RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_sum_saturated_sse2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 19);
         }
@@ -404,10 +390,9 @@ TEST_CASE("[x86] Channel sum saturated RGBA")
     SECTION("SSE2 - Above limit")
     {
         CHECK_SSE2("[x86] Channel sum saturated RGBA");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 77;
             img.data()->data_g()[i] = 55;
@@ -417,7 +402,7 @@ TEST_CASE("[x86] Channel sum saturated RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_sum_saturated_sse2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 255u);
         }
@@ -426,10 +411,9 @@ TEST_CASE("[x86] Channel sum saturated RGBA")
     SECTION("AVX2 - Below limit")
     {
         CHECK_AVX2("[x86] Channel sum saturated RGBA");
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 7;
             img.data()->data_g()[i] = 5;
@@ -439,7 +423,7 @@ TEST_CASE("[x86] Channel sum saturated RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_sum_saturated_avx2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 19);
         }
@@ -448,10 +432,9 @@ TEST_CASE("[x86] Channel sum saturated RGBA")
     SECTION("AVX - Above limit")
     {
         CHECK_SSE2("[x86] Channel sum saturated RGBA");
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = 77;
             img.data()->data_g()[i] = 55;
@@ -461,7 +444,7 @@ TEST_CASE("[x86] Channel sum saturated RGBA")
 
         image_ops::_internal::channel_info_extract_args_rgba args(img);
         auto result = image_ops::_internal::rgba_sum_saturated_avx2(args);
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             REQUIRE(result[i] == 255u);
         }
@@ -473,10 +456,9 @@ TEST_CASE("[x86] Saturation")
     SECTION("STD == SSE2")
     {
         CHECK_SSE2("[x86] Saturation");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = static_cast<uint8_t>(i + 1);
             img.data()->data_g()[i] = static_cast<uint8_t>(i + 2);
@@ -499,10 +481,9 @@ TEST_CASE("[x86] Saturation")
     SECTION("STD == AVX2")
     {
         CHECK_AVX2("[x86] Saturation");
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = static_cast<uint8_t>(i + 1);
             img.data()->data_g()[i] = static_cast<uint8_t>(i + 2);
@@ -525,10 +506,9 @@ TEST_CASE("[x86] Saturation")
     SECTION("SSE2")
     {
         CHECK_SSE2("[x86] Saturation");
-        image img(41, 41);
-        size_t px_count = 41 * 41;
+        planar_image img(41, 41);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = static_cast<uint8_t>(1);
             img.data()->data_g()[i] = static_cast<uint8_t>(2);
@@ -549,10 +529,9 @@ TEST_CASE("[x86] Saturation")
     SECTION("AVX2")
     {
         CHECK_AVX2("[x86] Saturation");
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = static_cast<uint8_t>(1);
             img.data()->data_g()[i] = static_cast<uint8_t>(2);
@@ -575,10 +554,9 @@ TEST_CASE("[x86] Luminance")
 {
     SECTION("SSE2")
     {
-        image img(39, 39);
-        size_t px_count = 39 * 39;
+        planar_image img(39, 39);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = static_cast<uint8_t>(1);
             img.data()->data_g()[i] = static_cast<uint8_t>(2);
@@ -598,10 +576,9 @@ TEST_CASE("[x86] Luminance")
 
     SECTION("AVX2")
     {
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = static_cast<uint8_t>(i % 32);
             img.data()->data_g()[i] = static_cast<uint8_t>(i % 32);
@@ -635,7 +612,7 @@ TEST_CASE("[x86] Unpack Image Data")
             data[(i * 4) + 3] = 4;
         }
 
-        ien::image_unpacked_data result = image_ops::_internal::unpack_image_data_ssse3(data.data(), data.size());
+        ien::image_planar_data result = image_ops::_internal::unpack_image_data_ssse3(data.data(), data.size());
 
         for(size_t i = 0; i < result.size(); ++i)
         {
@@ -651,10 +628,9 @@ TEST_CASE("[X86] Channel compare")
 {
     SECTION("SSE2")
     {
-        image img(39, 39);
-        size_t px_count = 39 * 39;
+        planar_image img(39, 39);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = static_cast<uint8_t>(1 + i);
             img.data()->data_g()[i] = static_cast<uint8_t>(2 + i);
@@ -676,10 +652,9 @@ TEST_CASE("[X86] Channel compare")
 
     SECTION("AVX2")
     {
-        image img(71, 71);
-        size_t px_count = 71 * 71;
+        planar_image img(71, 71);
 
-        for (size_t i = 0; i < px_count; ++i)
+        for (size_t i = 0; i < img.pixel_count(); ++i)
         {
             img.data()->data_r()[i] = static_cast<uint8_t>(1 + i);
             img.data()->data_g()[i] = static_cast<uint8_t>(2 + i);

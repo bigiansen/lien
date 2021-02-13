@@ -37,7 +37,7 @@ namespace ien::image_ops
     }
 #endif
 
-    void truncate_channel_data(image_unpacked_data* img, int bits_r, int bits_g, int bits_b, int bits_a)
+    void truncate_channel_data(image_planar_data* img, int bits_r, int bits_g, int bits_b, int bits_a)
     {
         typedef void(*func_ptr_t)(const _internal::truncate_channel_args& args);
 
@@ -57,7 +57,7 @@ namespace ien::image_ops
         func(args);
     }
 
-    fixed_vector<float> rgba_average(const image& img)
+    fixed_vector<float> rgba_average(const planar_image& img)
     {
         typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
@@ -77,7 +77,7 @@ namespace ien::image_ops
         return func(args);
     }    
 
-    fixed_vector<uint8_t> rgba_max(const image& img)
+    fixed_vector<uint8_t> rgba_max(const planar_image& img)
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
@@ -97,7 +97,7 @@ namespace ien::image_ops
         return func(args);
     }
 
-    fixed_vector<uint8_t> rgba_min(const image& img)
+    fixed_vector<uint8_t> rgba_min(const planar_image& img)
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
@@ -117,7 +117,7 @@ namespace ien::image_ops
         return func(args);
     }
 
-    fixed_vector<float> rgb_average(const image& img)
+    fixed_vector<float> rgb_average(const planar_image& img)
     {
         typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
@@ -139,7 +139,7 @@ namespace ien::image_ops
         return func(args);
     }
 
-    fixed_vector<uint8_t> rgb_max(const image& img)
+    fixed_vector<uint8_t> rgb_max(const planar_image& img)
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
@@ -159,7 +159,7 @@ namespace ien::image_ops
         return func(args);
     }
 
-    fixed_vector<uint8_t> rgb_min(const image& img)
+    fixed_vector<uint8_t> rgb_min(const planar_image& img)
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
@@ -179,7 +179,7 @@ namespace ien::image_ops
         return func(args);
     }
 
-    fixed_vector<uint8_t> rgba_sum_saturated(const image& img)
+    fixed_vector<uint8_t> rgba_sum_saturated(const planar_image& img)
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_info_extract_args_rgba&);
 
@@ -199,7 +199,7 @@ namespace ien::image_ops
         return func(args);
     }
 
-    fixed_vector<float> rgb_saturation(const image& img)
+    fixed_vector<float> rgb_saturation(const planar_image& img)
     {
         typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
@@ -219,7 +219,7 @@ namespace ien::image_ops
         return func(args);
     }
 
-    fixed_vector<float> rgb_luminance(const image& img)
+    fixed_vector<float> rgb_luminance(const planar_image& img)
     {
         typedef fixed_vector<float>(*func_ptr_t)(const _internal::channel_info_extract_args_rgb&);
 
@@ -239,9 +239,9 @@ namespace ien::image_ops
         return func(args);
     }
 
-	image_unpacked_data unpack_image_data(const uint8_t* data, size_t len)
+	image_planar_data unpack_image_data(const uint8_t* data, size_t len)
 	{
-		typedef image_unpacked_data(*func_ptr_t)(const uint8_t*, size_t len);
+		typedef image_planar_data(*func_ptr_t)(const uint8_t*, size_t len);
 
 		#if (defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)) && defined(LIEN_USE_CUSTOM_SIMD)
             static func_ptr_t func = platform::x86::get_feature(platform::x86::feature::SSSE3)
@@ -256,7 +256,7 @@ namespace ien::image_ops
 		return func(data, len);
 	}
 
-    fixed_vector<uint8_t> channel_compare(const image& img, rgba_channel channel, uint8_t threshold)
+    fixed_vector<uint8_t> channel_compare(const planar_image& img, rgba_channel channel, uint8_t threshold)
     {
         typedef fixed_vector<uint8_t>(*func_ptr_t)(const _internal::channel_compare_args& args);
         

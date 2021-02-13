@@ -1,59 +1,67 @@
 #pragma once
 
-#include <ien/generic_image.hpp>
-#include <ien/image_unpacked_data.hpp>
+#include <ien/fixed_vector.hpp>
+#include <ien/rect.hpp>
 
-#include <array>
 #include <cinttypes>
+#include <cstddef>
 #include <string>
 #include <vector>
 
 namespace ien
 {
-    class packed_image;
-
-    class image : public generic_image
+    enum class image_type
     {
-    private:
-        image_unpacked_data _data;
+        INTERLEAVED,
+        PLANAR
+    };
+
+    class image
+    {
+    protected:
+        size_t _width, _height;
+        image_type _imgtype;
 
     public:
-        constexpr image() 
-            : generic_image()
+        constexpr image(image_type imgtype)
+            : _width(0)
+            , _height(0)
+            , _imgtype(imgtype)
         { }
 
-        image(size_t width, size_t height);
-        image(const std::string& path);
+        constexpr image(size_t w, size_t h, image_type imgtype)
+            : _width(w)
+            , _height(h)
+            , _imgtype(imgtype)
+        { }
 
-        image(const image& cp_src) = default;
-        image(image&& mv_src) = default;
+        inline size_t width() const noexcept { return _width; }
+        inline size_t height() const noexcept { return _height; }
 
-        image(const uint8_t* rgba_buff, size_t w, size_t h);
+        size_t pixel_count() const noexcept;
+        size_t size() const noexcept;
 
-        image_unpacked_data* data() noexcept;
-        const image_unpacked_data* cdata() const noexcept;
+        virtual uint32_t get_pixel(size_t idx) const = 0;
+        virtual uint32_t get_pixel(size_t x, size_t y) const = 0;
+ 
+        std::vector<uint32_t> get_chunk(const rect<size_t>& r) const;
+ 
+        virtual void set_pixel(size_t idx, uint32_t px) = 0;
+        virtual void set_pixel(size_t x, size_t y, uint32_t px) = 0;
 
-        uint32_t get_pixel(size_t index) const override;
-        uint32_t get_pixel(size_t x, size_t y) const override;
+        virtual bool save_to_file_png(const std::string& path, int compression_level = 4) const = 0;
+        virtual bool save_to_file_jpeg(const std::string& path, int quality = 100) const = 0;
+        virtual bool save_to_file_tga(const std::string& path) const = 0;
 
-        void set_pixel(size_t idx, uint32_t px) override;
-        void set_pixel(size_t x, size_t y, uint32_t px) override;
+        virtual ien::fixed_vector<uint8_t> save_to_memory_png(int compression_level = 4) const = 0;
+        virtual ien::fixed_vector<uint8_t> save_to_memory_jpeg(int quality = 100) const = 0;
+        virtual ien::fixed_vector<uint8_t> save_to_memory_tga() const = 0;
 
-        bool save_to_file_png(const std::string& path, int compression_level = 4) const override;
-        bool save_to_file_jpeg(const std::string& path, int quality = 100) const override;
-        bool save_to_file_tga(const std::string& path) const override;
+        virtual void resize_absolute(size_t w, size_t h) = 0;
+        virtual void resize_relative(float w, float h) = 0;
 
-        ien::fixed_vector<uint8_t> save_to_memory_png(int compression_level = 4) const override;
-        ien::fixed_vector<uint8_t> save_to_memory_jpeg(int quality = 100) const override;
-        ien::fixed_vector<uint8_t> save_to_memory_tga() const override;
-
-        void resize_absolute(size_t w, size_t h) override;
-        void resize_relative(float w, float h) override;
-
-        packed_image to_packed_image();
-        std::string to_png_base64(int comp_level = 4);
-
-        image& operator=(const image& cp_src);
-        image& operator=(image&& mv_src) noexcept;
+        image_type imgtype() const { return _imgtype; }
     };
+
+    extern std::unique_ptr<ien::image> read_image(const std::string& imgpath, image_type type);
 }
