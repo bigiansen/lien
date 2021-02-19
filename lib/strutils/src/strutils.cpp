@@ -2,123 +2,75 @@
 
 #include <algorithm>
 #include <sstream>
+#include <type_traits>
 
 namespace ien::strutils
 {
-    std::vector<std::string> split(const std::string& str, char delim)
+    template<typename TRetVecVal, typename TArg>
+    std::vector<TRetVecVal> split(TArg str, char delim)
     {
-        std::vector<std::string> result;
+        static_assert(
+            std::is_same_v<std::decay_t<TRetVecVal>, std::string> 
+            || std::is_same_v<std::decay_t<TRetVecVal>, std::string_view>
+        );
+        static_assert(
+            std::is_same_v<std::decay_t<TArg>, std::string> 
+            || std::is_same_v<std::decay_t<TArg>, std::string_view>
+        );
 
-        std::string::const_iterator it = str.cbegin();
-        for(;;)
+        std::vector<TRetVecVal> result;
+        std::decay_t<TArg>::const_iterator it = str.cbegin();
+        std::decay_t<TArg>::const_iterator found_it = std::find(it, str.end(), delim);
+
+        while (found_it != str.end())
         {
-            std::string::const_iterator found_it = std::find(it, str.end(), delim);
-            if(found_it == str.end()) 
-            { 
-                break;
-            }
-            else
+            if (it != found_it)
             {
-                if(it != found_it)
+                if constexpr (std::is_same_v<std::decay_t<TRetVecVal>, std::string>)
                 {
                     result.push_back(std::string(it, found_it));
                 }
-                it = ++found_it;
+                else
+                {
+                    result.push_back(std::string_view(&(*it), std::distance(it, found_it)));
+                }
             }
+            it = ++found_it;
+            found_it = std::find(it, str.end(), delim);
         }
-        if(it != str.end())
+        if (it != str.end())
         {
-            result.push_back(std::string(it, str.end()));
+            if constexpr (std::is_same_v<std::decay_t<TRetVecVal>, std::string>)
+            {
+                result.push_back(std::string(it, str.end()));
+            }
+            else
+            {
+                result.push_back(std::string_view(&(*it), std::distance(it, str.end())));
+            }
         }
 
         return result;
+    }
+
+    std::vector<std::string> split(const std::string& str, char delim)
+    {
+        return split<std::string, const std::string&>(str, delim);        
     }
 
     std::vector<std::string> split(const std::string_view str, char delim)
     {
-        std::vector<std::string> result;
-
-        std::string_view::const_iterator it = str.cbegin();
-        for(;;)
-        {
-            std::string_view::const_iterator found_it = std::find(it, str.end(), delim);
-            if(found_it == str.end()) 
-            { 
-                break;
-            }
-            else
-            {
-                if(it != found_it)
-                {
-                    result.push_back(std::string(it, found_it));
-                }
-                it = ++found_it;
-            }
-        }
-        if(it != str.end())
-        {
-            result.push_back(std::string(it, str.end()));
-        }
-
-        return result;
+        return split<std::string, const std::string_view>(str, delim);
     }
 
     std::vector<std::string_view> split_view(const std::string& str, char delim)
     {
-        std::vector<std::string_view> result;
-
-        std::string::const_iterator it = str.cbegin();
-        for(;;)
-        {
-            std::string::const_iterator found_it = std::find(it, str.end(), delim);
-            if(found_it == str.end()) 
-            { 
-                break;
-            }
-            else
-            {
-                if(it != found_it)
-                {
-                    result.push_back(std::string_view(&(*it), std::distance(it, found_it)));
-                }
-                it = ++found_it;
-            }
-        }
-        if(it != str.end())
-        {
-            result.push_back(std::string_view(&(*it), std::distance(it, str.end())));
-        }
-
-        return result;
+        return split<std::string_view, const std::string&>(str, delim);
     }
 
     std::vector<std::string_view> split_view(const std::string_view str, char delim)
     {
-        std::vector<std::string_view> result;
-
-        std::string_view::const_iterator it = str.cbegin();
-        for(;;)
-        {
-            std::string_view::const_iterator found_it = std::find(it, str.end(), delim);
-            if(found_it == str.end()) 
-            { 
-                break;
-            }
-            else
-            {
-                if(it != found_it)
-                {
-                    result.push_back(std::string_view(&(*it), std::distance(it, found_it)));
-                }
-                it = ++found_it;
-            }
-        }
-        if(it != str.end())
-        {
-            result.push_back(std::string_view(&(*it), std::distance(it, str.end())));
-        }
-
-        return result;
+        return split<std::string_view, const std::string_view>(str, delim);
     }
 
     bool contains(const std::string& str, char ocurrence)
@@ -170,18 +122,12 @@ namespace ien::strutils
         std::stringstream sstr;
         
         size_t current_offset = 0;
-        for(;;)
+        size_t idx = str.find(ocurrence, current_offset);
+        while(idx != std::string::npos)
         {
-            size_t idx = str.find(ocurrence, current_offset);
-            if(idx == std::string::npos)
-            {
-                break;
-            }
-            else
-            {
-                sstr << str.substr(current_offset, (idx - current_offset)) << replacement;
-                current_offset = (idx + ocurrence.size());
-            }
+            sstr << str.substr(current_offset, (idx - current_offset)) << replacement;
+            current_offset = (idx + ocurrence.size());            
+            idx = str.find(ocurrence, current_offset);
         }
         if(current_offset == 0) 
         {
@@ -203,7 +149,7 @@ namespace ien::strutils
     {
         std::string result;
         result.reserve(str.size());
-        std::transform(str.cbegin(), str.cend(), std::back_inserter(result), toupper);
+        std::transform(str.cbegin(), str.cend(), std::back_inserter(result), std::toupper);
         return result;
     }
 
@@ -211,18 +157,18 @@ namespace ien::strutils
     {
         std::string result;
         result.reserve(str.size());
-        std::transform(str.cbegin(), str.cend(), std::back_inserter(result), tolower);
+        std::transform(str.cbegin(), str.cend(), std::back_inserter(result), std::tolower);
         return result;
     }
 
     void to_upper_in_place(std::string& str)
     {
-        std::transform(str.begin(), str.end(), str.begin(), toupper);
+        std::transform(str.begin(), str.end(), str.begin(), std::toupper);
     }
 
     void to_lower_in_place(std::string& str)
     {
-        std::transform(str.begin(), str.end(), str.begin(), tolower);
+        std::transform(str.begin(), str.end(), str.begin(), std::tolower);
     }
 
     std::string_view trim_start(std::string_view str)

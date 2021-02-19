@@ -39,6 +39,8 @@ namespace ien
         void set_pixel(size_t idx, uint32_t px) override;
         void set_pixel(size_t x, size_t y, uint32_t px) override;
 
+        std::vector<uint32_t> get_chunk(const rect<size_t>& r) const override;
+
         bool save_to_file_png(const std::string& path, int compression_level = 4) const override;
         bool save_to_file_jpeg(const std::string& path, int quality = 100) const override;
         bool save_to_file_tga(const std::string& path) const override;

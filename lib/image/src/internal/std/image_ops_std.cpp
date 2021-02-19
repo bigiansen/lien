@@ -60,18 +60,17 @@ namespace ien::image_ops::_internal
         }
     }
 
-    fixed_vector<float> rgba_average_std(const channel_info_extract_args_rgba& args)
+    fixed_vector<uint8_t> rgba_average_std(const channel_info_extract_args_rgba& args)
     {
         const size_t img_sz = args.len;
         
-        fixed_vector<float> result(args.len);
+        fixed_vector<uint8_t> result(args.len);
 
         BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
 
         for(size_t i = 0; i < img_sz; ++i)
         {
-            float sum = safe_add<float>(r[i], g[i], b[i], a[i]);
-            result[i] = sum / 4;
+            result[i] = average<uint8_t>(r[i], g[i], b[i], a[i]);
         }
         return result;
     }
@@ -86,7 +85,13 @@ namespace ien::image_ops::_internal
 
         for (size_t i = 0; i < img_sz; ++i)
         {
-            result[i] = std::max({ r[i], g[i], b[i], a[i] });
+            // std::max({a,b,c,d}) results in worse assembly with clang and msvc (GCC generates identical code)
+            uint8_t max = r[i];            
+            if (max < g[i]) { max = g[i]; }
+            if (max < b[i]) { max = b[i]; }
+            if (max < a[i]) { max = a[i]; }
+
+            result[i] = max;
         }
         return result;
     }
@@ -193,14 +198,9 @@ namespace ien::image_ops::_internal
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
-        // LUMINANCE(r, g, b) = (((MAX(r, b, g) + MIN(r, g, b)) * 0.5) / 255.0F
-
         for (size_t i = 0; i < img_sz; ++i)
         {
-            float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] }));
-            float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] }));
-            float vsum = (vmax + vmin) * 0.5F;
-            result[i] = (vsum / 255.0F);
+            result[i] = (r[i] * 0.2126F / 255) + (g[i] * 0.7152F / 255) + (b[i] * 0.0722F / 255);
         }
 
         return result;

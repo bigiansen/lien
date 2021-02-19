@@ -9,7 +9,7 @@ namespace ien::image_ops::_internal
 {
     void truncate_channel_data_neon(const truncate_channel_args& args);
 
-    fixed_vector<float> rgba_average_neon(const channel_info_extract_args_rgba& args);
+    fixed_vector<uint8_t> rgba_average_neon(const channel_info_extract_args_rgba& args);
 
     fixed_vector<uint8_t> rgba_max_neon(const channel_info_extract_args_rgba& args);
 

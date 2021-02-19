@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION "3.7.0")
+cmake_minimum_required (VERSION "3.10.0")
 
 project(lien LANGUAGES CXX C)
 set(CMAKE_CXX_STANDARD 17)
@@ -9,7 +9,7 @@ include(cmake/lien.cmake)
 
 LIEN_SET_SHARED_LIB_OUTPUT_DIR(${PROJECT_BINARY_DIR}/output/lib/shared)
 LIEN_SET_STATIC_LIB_OUTPUT_DIR(${PROJECT_BINARY_DIR}/output/lib/static)
-LIEN_SET_EXECUTABLE_OUTPUT_DIR(${PROJECT_BINARY_DIR}/output/lib/lien)
+LIEN_SET_EXECUTABLE_OUTPUT_DIR(${PROJECT_BINARY_DIR}/output/bin/lien)
 
 # -- OPTIONS --
 option(LIEN_BUILD_STRUTILS "Build String utilities library" ON)

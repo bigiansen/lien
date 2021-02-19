@@ -10,7 +10,7 @@ namespace ien::image_ops
 {
     void truncate_channel_data(image_planar_data* img, int bits_r, int bits_g, int bits_b, int bits_a);
 
-    fixed_vector<float> rgba_average(const planar_image& img);
+    fixed_vector<uint8_t> rgba_average(const planar_image& img);
 
     fixed_vector<uint8_t> rgba_max(const planar_image& img);
 

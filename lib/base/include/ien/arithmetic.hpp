@@ -44,4 +44,35 @@ namespace ien
 			| (static_cast<T>(a2) << ((sizeof(T) - sizeof(TArg0) - sizeof(TArg1) - sizeof(TArg2)) * 8))
 			| static_cast<T>(a3);
 	}
+
+	template<typename T> 
+	struct superior_integral
+	{ 
+		static_assert(std::is_integral_v<T>, "Not an integral type");
+		typedef T type;
+	};
+	template<> struct superior_integral<uint8_t>	{ typedef uint16_t type; };
+	template<> struct superior_integral<uint16_t>	{ typedef uint32_t type; };
+	template<> struct superior_integral<uint32_t>	{ typedef uint64_t type; };
+	template<> struct superior_integral<int8_t>	{ typedef int16_t  type; };
+	template<> struct superior_integral<int16_t>	{ typedef int32_t  type; };
+	template<> struct superior_integral<int32_t>	{ typedef int64_t  type; };
+
+	template<typename T>
+	using superior_integral_t = typename superior_integral<T>::type;
+
+	template<typename TRet, typename ... TArgs>
+	constexpr TRet average(const TArgs& ...args)
+	{
+		constexpr auto argc = sizeof...(TArgs);
+		if constexpr (std::is_integral_v<TRet>)
+		{
+			superior_integral_t<TRet> result = (args + ...);
+			return static_cast<TRet>(result / argc);
+		}
+		else
+		{
+			return ((args + ...) / argc);
+		}
+	}
 }

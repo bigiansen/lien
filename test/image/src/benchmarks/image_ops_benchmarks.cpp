@@ -507,6 +507,23 @@ TEST_CASE("Benchmark unpack image data")
             return image_ops::_internal::unpack_image_data_ssse3(data.data(), data.size());
         });
     };
+
+    BENCHMARK_ADVANCED("AVX2")(Catch::Benchmark::Chronometer meter)
+    {
+        std::vector<uint8_t> data(IMG_DIM_UNPACK * IMG_DIM_UNPACK);
+        for (size_t i = 0; i < ((IMG_DIM_UNPACK * IMG_DIM_UNPACK) / 4); ++i)
+        {
+            data[(i * 4) + 0] = 1;
+            data[(i * 4) + 1] = 2;
+            data[(i * 4) + 2] = 3;
+            data[(i * 4) + 3] = 4;
+        }
+
+        meter.measure([&]
+        {
+            return image_ops::_internal::unpack_image_data_avx2(data.data(), data.size());
+        });
+    };
     
 #elif defined(LIEN_ARM_NEON)
     BENCHMARK_ADVANCED("NEON")(Catch::Benchmark::Chronometer meter)

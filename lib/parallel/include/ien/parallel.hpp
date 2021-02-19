@@ -6,9 +6,6 @@
 
 namespace ien
 {
-    //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    // PARALLEL FOR
-    //+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     struct parallel_for_params
     {
         long offset = 0;
@@ -21,5 +18,5 @@ namespace ien
     };
 
     using parallel_for_pred_t = std::function<void(long)>;
-    extern void parallel_for(parallel_for_params desc, parallel_for_pred_t pred);
+    extern void parallel_for(parallel_for_params desc, parallel_for_pred_t pred, bool detached = false);
 }

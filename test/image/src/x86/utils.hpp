@@ -4,50 +4,33 @@
 #include <iostream>
 #include <string>
 
-inline bool sse2_enabled()
-{
-    #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
-        return ien::platform::x86::get_feature(ien::platform::x86::feature::SSE2);
-    #else
-        return false;
-    #endif
-}
+#if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
+    #define LIEN_SIMD_TEMPLATE_ENABLED_X86(feat) ien::platform::x86::get_feature(ien::platform::x86::feature:: ##feat)
+#else
+    #define LIEN_SIMD_TEMPLATE_ENABLED_X86(feat) false
+#endif
 
-inline bool avx2_enabled()
-{
-    #if defined(LIEN_ARCH_X86) || defined(LIEN_ARCH_X86_64)
-        return ien::platform::x86::get_feature(ien::platform::x86::feature::AVX2);
-    #else
-        return false;
-    #endif
-}
+#define LIEN_SSE2_ENABLED() LIEN_SIMD_TEMPLATE_ENABLED_X86(SSE2)
+#define LIEN_SSE3_ENABLED() LIEN_SIMD_TEMPLATE_ENABLED_X86(SSE3)
+#define LIEN_SSE41_ENABLED() LIEN_SIMD_TEMPLATE_ENABLED_X86(SSE41)
+#define LIEN_AVX_ENABLED() LIEN_SIMD_TEMPLATE_ENABLED_X86(AVX)
+#define LIEN_AVX2_ENABLED() LIEN_SIMD_TEMPLATE_ENABLED_X86(AVX2)
 
-inline void skip_sse2_msg(const std::string& method_name)
-{
-    std::cout 
-            << "[WARNING]: SSE2 appears to be unavailable." 
-            << "Skipping test: "
-            << method_name
-            << std::endl;
-}
+#define LIEN_SKIP_SIMD_TEMPLATE(feat, method) \
+    std::cout << "[WARNING]: feature \"" << #feat << "\" appears to be unavailable." \
+        << "Skipping test: " << method << "\n";
 
-inline void skip_avx2_msg(const std::string& method_name)
-{
-    std::cout 
-            << "[WARNING]: AVX2 appears to be unavailable." 
-            << "Skipping test: "
-            << method_name
-            << std::endl;
-}
+#define LIEN_SKIP_SSE2_MSG(method) LIEN_SKIP_SIMD_TEMPLATE(SSE2, method)
+#define LIEN_SKIP_SSE3_MSG(method) LIEN_SKIP_SIMD_TEMPLATE(SSE3, method)
+#define LIEN_SKIP_SSE41_MSG(method) LIEN_SKIP_SIMD_TEMPLATE(SSE41, method)
+#define LIEN_SKIP_AVX_MSG(method) LIEN_SKIP_SIMD_TEMPLATE(AVX, method)
+#define LIEN_SKIP_AVX2_MSG(method) LIEN_SKIP_SIMD_TEMPLATE(AVX2, method)
 
-#define CHECK_SSE2(method_name) \
-    if(!sse2_enabled()){ \
-        skip_sse2_msg(method_name); \
-        return; \
-    }
+#define LIEN_CHECK_SIMD_TEMPLATE(feat, method, fail) \
+    if(!LIEN_ ##feat ##_ENABLED()) { LIEN_SKIP_ ##feat ##_MSG(method); fail;}
 
-#define CHECK_AVX2(method_name) \
-    if(!avx2_enabled()){ \
-        skip_avx2_msg(method_name); \
-        return; \
-    }
+#define LIEN_CHECK_SSE2(method, fail) LIEN_CHECK_SIMD_TEMPLATE(SSE2, method, fail)
+#define LIEN_CHECK_SSE3(method, fail) LIEN_CHECK_SIMD_TEMPLATE(SSE3, method, fail)
+#define LIEN_CHECK_SSE41(method, fail) LIEN_CHECK_SIMD_TEMPLATE(SSE41, method, fail)
+#define LIEN_CHECK_AVX(method, fail) LIEN_CHECK_SIMD_TEMPLATE(AVX, method, fail)
+#define LIEN_CHECK_AVX2(method, fail) LIEN_CHECK_SIMD_TEMPLATE(AVX2, method, fail)

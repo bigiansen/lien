@@ -62,6 +62,28 @@ namespace ien::image_ops::_internal
         0xF0F0F0F0, 0xE0E0E0E0, 0xC0C0C0C0, 0x80808080
     };
 
+    struct vec4x4xf32
+    {
+        __m128 data[4];
+    };
+
+    inline vec4x4xf32 extract_4x4xf32_from_8xu8(__m128i v)
+    {
+        const __m128i vand_mask = _mm_set1_epi32(0x000000FF);
+
+        __m128i vi32_0 = _mm_and_si128(v, vand_mask);
+        __m128i vi32_1 = _mm_and_si128(_mm_srli_si128(v, 1), vand_mask);
+        __m128i vi32_2 = _mm_and_si128(_mm_srli_si128(v, 2), vand_mask);
+        __m128i vi32_3 = _mm_and_si128(_mm_srli_si128(v, 3), vand_mask);
+
+        return {{
+            _mm_cvtepi32_ps(vi32_0),
+            _mm_cvtepi32_ps(vi32_1),
+            _mm_cvtepi32_ps(vi32_2),
+            _mm_cvtepi32_ps(vi32_3)
+        }};
+    };
+
     void truncate_channel_data_sse2(const truncate_channel_args& args)
     {
         const size_t img_sz = args.len;
@@ -106,10 +128,54 @@ namespace ien::image_ops::_internal
         }
     }
 
-    fixed_vector<float> rgba_average_sse2(const channel_info_extract_args_rgba& args)
+    inline __m128i emulate_mm_srli_epi8(__m128i v, int bits)
     {
-        return rgba_average_std(args);
-        // Not implemented...
+        const __m128i mask = _mm_set1_epi8(0xFFu >> bits);
+        return _mm_and_si128(_mm_srli_epi16(v, bits), mask);
+    }
+
+    fixed_vector<uint8_t> rgba_average_sse2(const channel_info_extract_args_rgba& args)
+    {
+        const size_t img_sz = args.len;
+
+        if (img_sz < SSE_ALIGNMENT)
+        {
+            return rgba_average_std(args);
+        }
+
+        fixed_vector<uint8_t> result(args.len, SSE_ALIGNMENT);
+
+        BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
+
+        const __m128i vchk_odd = _mm_set1_epi8(0x01);
+
+        size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
+        for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
+        {
+            __m128i vseg_r = LOAD_SI128_CONST(r + i);
+            __m128i vseg_g = LOAD_SI128_CONST(g + i);
+            __m128i vseg_b = LOAD_SI128_CONST(b + i);
+            __m128i vseg_a = LOAD_SI128_CONST(a + i);
+
+            __m128i vavg_rg = _mm_avg_epu8(vseg_r, vseg_g);
+            __m128i vavg_ba = _mm_avg_epu8(vseg_b, vseg_a);
+            __m128i vavg_rgba = _mm_avg_epu8(vavg_rg, vavg_ba);
+
+            // Compensate upwards rounding
+            __m128i vcar_rg = _mm_and_si128(_mm_sub_epi8(vseg_r, vseg_g), vchk_odd);
+            __m128i vcar_ba = _mm_and_si128(_mm_sub_epi8(vseg_b, vseg_a), vchk_odd);
+            __m128i vcar_rgba = _mm_avg_epu8(vcar_rg, vcar_ba);
+
+            vavg_rgba = _mm_sub_epi8(vavg_rgba, vcar_rgba);
+
+            STOREU_SI128((result.data() + i), vavg_rgba);
+        }
+
+        for (size_t i = last_v_idx; i < img_sz; ++i)
+        {
+            result[i] = average<uint8_t>(r[i], g[i], b[i], a[i]);
+        }
+        return result;
     }
 
     fixed_vector<uint8_t> rgba_max_sse2(const channel_info_extract_args_rgba& args)
@@ -195,31 +261,7 @@ namespace ien::image_ops::_internal
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
-        struct vec4x4xf32
-        {
-            __m128 data[4];
-        };
-
         const __m128i lo_4i_mask_0 = _mm_set1_epi32(0x000000FF);
-
-        //TODO: Improve u8 -> f32 extraction+conversion for SSE2 exclusively
-        auto extract_4x4xf32_from_16xu8 = [&lo_4i_mask_0](__m128i v) -> vec4x4xf32
-        {
-            __m128i v01i = _mm_unpacklo_epi8(v, v);
-            __m128i v23i = _mm_unpackhi_epi8(v, v);
-
-            __m128i v0i  = _mm_and_si128(_mm_unpacklo_epi8(v01i, v01i), lo_4i_mask_0);
-            __m128i v1i  = _mm_and_si128(_mm_unpackhi_epi8(v01i, v01i), lo_4i_mask_0);
-            __m128  v0f  = _mm_cvtepi32_ps(v0i);
-            __m128  v1f  = _mm_cvtepi32_ps(v1i);
-            
-            __m128i v2i  = _mm_and_si128(_mm_unpacklo_epi8(v23i, v23i), lo_4i_mask_0);
-            __m128i v3i  = _mm_and_si128(_mm_unpackhi_epi8(v23i, v23i), lo_4i_mask_0);
-            __m128  v2f  = _mm_cvtepi32_ps(v2i);
-            __m128  v3f  = _mm_cvtepi32_ps(v3i);
-
-            return {{v0f, v1f, v2f, v3f}};
-        };
 
         const __m128 vmul_div3 = _mm_set1_ps(0.333334F);
 
@@ -230,21 +272,24 @@ namespace ien::image_ops::_internal
             __m128i vseg_g = LOAD_SI128_CONST(g + i);
             __m128i vseg_b = LOAD_SI128_CONST(b + i);
 
-            vec4x4xf32 vlr = extract_4x4xf32_from_16xu8(vseg_r);
-            vec4x4xf32 vlg = extract_4x4xf32_from_16xu8(vseg_g);
-            vec4x4xf32 vlb = extract_4x4xf32_from_16xu8(vseg_b);
+            vec4x4xf32 vlr = extract_4x4xf32_from_8xu8(vseg_r);
+            vec4x4xf32 vlg = extract_4x4xf32_from_8xu8(vseg_g);
+            vec4x4xf32 vlb = extract_4x4xf32_from_8xu8(vseg_b);
 
-            for (size_t vidx = 0; vidx < 4; ++vidx)
-            {
-                __m128 vrf = vlr.data[vidx];
-                __m128 vgf = vlg.data[vidx];
-                __m128 vbf = vlb.data[vidx];
+            vlr.data[0] = _mm_add_ps(_mm_add_ps(vlr.data[0], vlg.data[0]), vlb.data[0]);
+            vlr.data[1] = _mm_add_ps(_mm_add_ps(vlr.data[1], vlg.data[1]), vlb.data[1]);
+            vlr.data[2] = _mm_add_ps(_mm_add_ps(vlr.data[2], vlg.data[2]), vlb.data[2]);
+            vlr.data[3] = _mm_add_ps(_mm_add_ps(vlr.data[3], vlg.data[3]), vlb.data[3]);
 
-                __m128 sum = _mm_add_ps(_mm_add_ps(vrf, vgf), vbf);
-                __m128 avg = _mm_mul_ps(sum, vmul_div3);
+            vlr.data[0] = _mm_mul_ps(vlr.data[0], vmul_div3);
+            vlr.data[1] = _mm_mul_ps(vlr.data[1], vmul_div3);
+            vlr.data[2] = _mm_mul_ps(vlr.data[2], vmul_div3);
+            vlr.data[3] = _mm_mul_ps(vlr.data[3], vmul_div3);
 
-                _mm_store_ps(result.data() + i + (vidx * 4), avg);
-            }
+            _mm_store_ps(result.data() + i + (0 * 4), vlr.data[0]);
+            _mm_store_ps(result.data() + i + (1 * 4), vlr.data[1]);
+            _mm_store_ps(result.data() + i + (2 * 4), vlr.data[2]);
+            _mm_store_ps(result.data() + i + (3 * 4), vlr.data[3]);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
@@ -515,9 +560,10 @@ namespace ien::image_ops::_internal
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
-        __m128i fpcast_mask = _mm_set1_epi32(0x000000FF);
-        __m128 vhalfmul = _mm_set_ps1(0.5F);
-        __m128 vzeroonediv = _mm_set_ps1(255.F);
+        const __m128 vlum_mul_r = _mm_set1_ps(0.2126F);
+        const __m128 vlum_mul_g = _mm_set1_ps(0.7152F);
+        const __m128 vlum_mul_b = _mm_set1_ps(0.0722F);
+        const __m128 vlum_div_255 = _mm_set1_ps(1.0F / 255);
 
         size_t last_v_idx = img_sz - (img_sz % SSE_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += SSE_ALIGNMENT)
@@ -526,65 +572,45 @@ namespace ien::image_ops::_internal
             __m128i vseg_g = LOAD_SI128_CONST(g + i);
             __m128i vseg_b = LOAD_SI128_CONST(b + i);
 
-            __m128i vmax_rg = _mm_max_epu8(vseg_r, vseg_g);
-            __m128i vmax_rgb = _mm_max_epu8(vseg_b, vmax_rg);
+            vec4x4xf32 vfr = extract_4x4xf32_from_8xu8(vseg_r);
+            vec4x4xf32 vfg = extract_4x4xf32_from_8xu8(vseg_g);
+            vec4x4xf32 vfb = extract_4x4xf32_from_8xu8(vseg_b);
 
-            __m128i vmin_rg = _mm_min_epu8(vseg_r, vseg_g);
-            __m128i vmin_rgb = _mm_min_epu8(vseg_b, vmin_rg);
+            vfr.data[0] = _mm_mul_ps(vfr.data[0], vlum_mul_r);
+            vfr.data[1] = _mm_mul_ps(vfr.data[1], vlum_mul_r);
+            vfr.data[2] = _mm_mul_ps(vfr.data[2], vlum_mul_r);
+            vfr.data[3] = _mm_mul_ps(vfr.data[3], vlum_mul_r);
 
-            __m128i vmax_aux0 = _mm_and_si128(vmax_rgb, fpcast_mask);
-            __m128i vmax_aux1 = _mm_and_si128(_mm_srli_epi32(vmax_rgb, 8), fpcast_mask);
-            __m128i vmax_aux2 = _mm_and_si128(_mm_srli_epi32(vmax_rgb, 16), fpcast_mask);
-            __m128i vmax_aux3 = _mm_and_si128(_mm_srli_epi32(vmax_rgb, 24), fpcast_mask);
+            vfg.data[0] = _mm_mul_ps(vfg.data[0], vlum_mul_g);
+            vfg.data[1] = _mm_mul_ps(vfg.data[1], vlum_mul_g);
+            vfg.data[2] = _mm_mul_ps(vfg.data[2], vlum_mul_g);
+            vfg.data[3] = _mm_mul_ps(vfg.data[3], vlum_mul_g);
 
-            __m128i vmin_aux0 = _mm_and_si128(vmin_rgb, fpcast_mask);
-            __m128i vmin_aux1 = _mm_and_si128(_mm_srli_epi32(vmin_rgb, 8), fpcast_mask);
-            __m128i vmin_aux2 = _mm_and_si128(_mm_srli_epi32(vmin_rgb, 16), fpcast_mask);
-            __m128i vmin_aux3 = _mm_and_si128(_mm_srli_epi32(vmin_rgb, 24), fpcast_mask);
+            vfb.data[0] = _mm_mul_ps(vfb.data[0], vlum_mul_b);
+            vfb.data[1] = _mm_mul_ps(vfb.data[1], vlum_mul_b);
+            vfb.data[2] = _mm_mul_ps(vfb.data[2], vlum_mul_b);
+            vfb.data[3] = _mm_mul_ps(vfb.data[3], vlum_mul_b);
 
-            __m128 vfmax0 = _mm_cvtepi32_ps(vmax_aux0);
-            __m128 vfmax1 = _mm_cvtepi32_ps(vmax_aux1);
-            __m128 vfmax2 = _mm_cvtepi32_ps(vmax_aux2);
-            __m128 vfmax3 = _mm_cvtepi32_ps(vmax_aux3);
+            vec4x4xf32 vlum;
+            vlum.data[0] = _mm_add_ps(_mm_add_ps(vfr.data[0], vfg.data[0]), vfb.data[0]);
+            vlum.data[1] = _mm_add_ps(_mm_add_ps(vfr.data[1], vfg.data[1]), vfb.data[1]);
+            vlum.data[2] = _mm_add_ps(_mm_add_ps(vfr.data[2], vfg.data[2]), vfb.data[2]);
+            vlum.data[3] = _mm_add_ps(_mm_add_ps(vfr.data[3], vfg.data[3]), vfb.data[3]);
 
-            __m128 vfmin0 = _mm_cvtepi32_ps(vmin_aux0);
-            __m128 vfmin1 = _mm_cvtepi32_ps(vmin_aux1);
-            __m128 vfmin2 = _mm_cvtepi32_ps(vmin_aux2);
-            __m128 vfmin3 = _mm_cvtepi32_ps(vmin_aux3);
+            vlum.data[0] = _mm_mul_ps(vlum.data[0], vlum_div_255);
+            vlum.data[1] = _mm_mul_ps(vlum.data[1], vlum_div_255);
+            vlum.data[2] = _mm_mul_ps(vlum.data[2], vlum_div_255);
+            vlum.data[3] = _mm_mul_ps(vlum.data[3], vlum_div_255);
 
-            __m128 vlum0 = _mm_mul_ps(_mm_add_ps(vfmax0, vfmin0), vhalfmul);
-            __m128 vlum1 = _mm_mul_ps(_mm_add_ps(vfmax1, vfmin1), vhalfmul);
-            __m128 vlum2 = _mm_mul_ps(_mm_add_ps(vfmax2, vfmin2), vhalfmul);
-            __m128 vlum3 = _mm_mul_ps(_mm_add_ps(vfmax3, vfmin3), vhalfmul);
-
-            vlum0 = _mm_div_ps(vlum0, vzeroonediv);
-            vlum1 = _mm_div_ps(vlum1, vzeroonediv);
-            vlum2 = _mm_div_ps(vlum2, vzeroonediv);
-            vlum3 = _mm_div_ps(vlum3, vzeroonediv);
-
-            alignas(SSE_ALIGNMENT) float aux_result[SSE_ALIGNMENT];
-
-            _mm_store_ps(aux_result + 0, vlum0);
-            _mm_store_ps(aux_result + 4, vlum1);
-            _mm_store_ps(aux_result + 8, vlum2);
-            _mm_store_ps(aux_result + 12, vlum3);
-
-            for (size_t k = 0; k < 4u; ++k)
-            {
-                size_t offset = i + (k * 4u);
-                result[offset + 0] = aux_result[0 + k];
-                result[offset + 1] = aux_result[4 + k];
-                result[offset + 2] = aux_result[8 + k];
-                result[offset + 3] = aux_result[12 + k];
-            }
+            _mm_store_ps(result.data() + i + 0, vlum.data[0]);
+            _mm_store_ps(result.data() + i + 4, vlum.data[1]);
+            _mm_store_ps(result.data() + i + 8, vlum.data[2]);
+            _mm_store_ps(result.data() + i + 12, vlum.data[3]);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
         {
-            float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] }));
-            float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] }));
-            float vsum = (vmax + vmin) * 0.5F;
-            result[i] = (vsum / 255.0F);
+            result[i] = (r[i] * 0.2126F / 255) + (g[i] * 0.7152F / 255) + (b[i] * 0.0722F / 255);
         }
 
         return result;
@@ -592,7 +618,7 @@ namespace ien::image_ops::_internal
 
     image_planar_data unpack_image_data_ssse3(const uint8_t* data, size_t len)
     {
-        if (len < SSE_ALIGNMENT * 4)
+        if (len < (SSE_ALIGNMENT * 4))
         {
             return unpack_image_data_std(data, len);
         }

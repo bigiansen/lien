@@ -62,6 +62,29 @@ namespace ien::image_ops::_internal
         0xF0F0F0F0, 0xE0E0E0E0, 0xC0C0C0C0, 0x80808080
     };
 
+    struct vec4x8xf32
+    {
+        __m256 data[4];
+    };
+
+    vec4x8xf32 extract_4x8xf32_from_16xu8(__m256i v)
+    {
+        __m128i vlh = _mm256_extracti128_si256(v, 0);
+        __m128i vhh = _mm256_extracti128_si256(v, 1);
+
+        __m256i v0i = _mm256_cvtepu8_epi32(vlh);
+        __m256i v1i = _mm256_cvtepu8_epi32(_mm_srli_si128(vlh, 8));
+        __m256i v2i = _mm256_cvtepu8_epi32(vhh);
+        __m256i v3i = _mm256_cvtepu8_epi32(_mm_srli_si128(vhh, 8));
+
+        return {{
+            _mm256_cvtepi32_ps(v0i),
+            _mm256_cvtepi32_ps(v1i),
+            _mm256_cvtepi32_ps(v2i),
+            _mm256_cvtepi32_ps(v3i)
+        }};
+    };
+
     void truncate_channel_data_avx2(const truncate_channel_args& args)
     {
         const size_t img_sz = args.len;
@@ -106,9 +129,9 @@ namespace ien::image_ops::_internal
         }
     }
 
-    fixed_vector<float> rgba_average_avx2(const channel_info_extract_args_rgba& args)
+    fixed_vector<uint8_t> rgba_average_avx2(const channel_info_extract_args_rgba& args)
     {
-        return rgba_average_std(args);
+        return rgba_average_sse2(args);
         // Not implemented...
     }
 
@@ -193,30 +216,7 @@ namespace ien::image_ops::_internal
         
         fixed_vector<float> result(args.len, AVX_ALIGNMENT);
         
-        BIND_CHANNELS_RGB_CONST(args, r, g, b);
-        
-        struct vec4x8xf32
-        {
-            __m256 data[4];
-        };
-        
-        auto extract_4x8xf32_from_16xu8 = [](__m256i v) -> vec4x8xf32
-        {
-            __m128i vlh = _mm256_extracti128_si256(v, 0);
-            __m128i vhh = _mm256_extracti128_si256(v, 1);
-
-            __m256i v0i = _mm256_cvtepu8_epi32(vlh);
-            __m256i v1i = _mm256_cvtepu8_epi32(_mm_srli_si128(vlh, 8));
-            __m256i v2i = _mm256_cvtepu8_epi32(vhh);
-            __m256i v3i = _mm256_cvtepu8_epi32(_mm_srli_si128(vhh, 8));
-
-            return { {
-                _mm256_cvtepi32_ps(v0i),
-                _mm256_cvtepi32_ps(v1i),
-                _mm256_cvtepi32_ps(v2i),
-                _mm256_cvtepi32_ps(v3i)
-            } };
-        };
+        BIND_CHANNELS_RGB_CONST(args, r, g, b);        
         
         const __m256 vmul_div3 = _mm256_set1_ps(0.333334F);
         
@@ -446,110 +446,124 @@ namespace ien::image_ops::_internal
 
         BIND_CHANNELS_RGB_CONST(args, r, g, b);
 
-        __m256i vfpcast_mask = _mm256_set_epi32(0, 0, 0, 0, 0, 0, 0xFFFFFFFF, 0xFFFFFFFF);
-        __m256 vlum_mulv = _mm256_set1_ps(0.00392156862F / 2);
-
         size_t last_v_idx = img_sz - (img_sz % AVX_ALIGNMENT);
+
+        const __m256 vlum_mul_r = _mm256_set1_ps(0.2126F);
+        const __m256 vlum_mul_g = _mm256_set1_ps(0.7152F);
+        const __m256 vlum_mul_b = _mm256_set1_ps(0.0722F);
+        const __m256 vlum_div_255 = _mm256_set1_ps(1.0F / 255);
+
         for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT)
         {
             __m256i vseg_r = LOAD_SI256_CONST(r + i);
             __m256i vseg_g = LOAD_SI256_CONST(g + i);
             __m256i vseg_b = LOAD_SI256_CONST(b + i);
 
-            __m256i vmax_rg = _mm256_max_epu8(vseg_r, vseg_g);
-            __m256i vmax_rgb = _mm256_max_epu8(vseg_b, vmax_rg);
+            vec4x8xf32 vfr = extract_4x8xf32_from_16xu8(vseg_r);
+            vec4x8xf32 vfg = extract_4x8xf32_from_16xu8(vseg_g);
+            vec4x8xf32 vfb = extract_4x8xf32_from_16xu8(vseg_b);
 
-            __m256i vmin_rg = _mm256_min_epu8(vseg_r, vseg_g);
-            __m256i vmin_rgb = _mm256_min_epu8(vseg_b, vmin_rg);
+            vfr.data[0] = _mm256_mul_ps(vfr.data[0], vlum_mul_r);
+            vfr.data[1] = _mm256_mul_ps(vfr.data[1], vlum_mul_r);
+            vfr.data[2] = _mm256_mul_ps(vfr.data[2], vlum_mul_r);
+            vfr.data[3] = _mm256_mul_ps(vfr.data[3], vlum_mul_r);
 
-            __m256i vspread_shufmask = _mm256_set_epi8(
-                -1,-1,-1,7,-1,-1,-1,6,
-                -1,-1,-1,5,-1,-1,-1,4,
-                -1,-1,-1,3,-1,-1,-1,2,
-                -1,-1,-1,1,-1,-1,-1,0
-            );
+            vfg.data[0] = _mm256_mul_ps(vfg.data[0], vlum_mul_g);
+            vfg.data[1] = _mm256_mul_ps(vfg.data[1], vlum_mul_g);
+            vfg.data[2] = _mm256_mul_ps(vfg.data[2], vlum_mul_g);
+            vfg.data[3] = _mm256_mul_ps(vfg.data[3], vlum_mul_g);
 
-            // Unpack max bytes into 4 float vectors
-            __m256i vmax_0 = _mm256_and_si256(vmax_rgb, vfpcast_mask);
-            __m256i vmax_1 = _mm256_and_si256(_mm256_srli_si256(vmax_rgb, 8), vfpcast_mask);
+            vfb.data[0] = _mm256_mul_ps(vfb.data[0], vlum_mul_b);
+            vfb.data[1] = _mm256_mul_ps(vfb.data[1], vlum_mul_b);
+            vfb.data[2] = _mm256_mul_ps(vfb.data[2], vlum_mul_b);
+            vfb.data[3] = _mm256_mul_ps(vfb.data[3], vlum_mul_b);
 
-            __m256i vmax_rgb_rev = _mm256_permute2x128_si256(vmax_rgb, vmax_rgb, 0x00000001);
+            vec4x8xf32 vlum;
+            vlum.data[0] = _mm256_add_ps(_mm256_add_ps(vfr.data[0], vfg.data[0]), vfb.data[0]);
+            vlum.data[1] = _mm256_add_ps(_mm256_add_ps(vfr.data[1], vfg.data[1]), vfb.data[1]);
+            vlum.data[2] = _mm256_add_ps(_mm256_add_ps(vfr.data[2], vfg.data[2]), vfb.data[2]);
+            vlum.data[3] = _mm256_add_ps(_mm256_add_ps(vfr.data[3], vfg.data[3]), vfb.data[3]);
 
-            __m256i vmax_2 = _mm256_and_si256(vmax_rgb_rev, vfpcast_mask);
-            __m256i vmax_3 = _mm256_and_si256(_mm256_srli_si256(vmax_rgb_rev, 8), vfpcast_mask);
+            vlum.data[0] = _mm256_mul_ps(vlum.data[0], vlum_div_255);
+            vlum.data[1] = _mm256_mul_ps(vlum.data[1], vlum_div_255);
+            vlum.data[2] = _mm256_mul_ps(vlum.data[2], vlum_div_255);
+            vlum.data[3] = _mm256_mul_ps(vlum.data[3], vlum_div_255);
 
-            __m256i vmax_a0 = _mm256_shuffle_epi8(vmax_0, vspread_shufmask);
-            __m256i vmax_a1 = _mm256_shuffle_epi8(vmax_1, vspread_shufmask);
-            __m256i vmax_a2 = _mm256_shuffle_epi8(vmax_2, vspread_shufmask);
-            __m256i vmax_a3 = _mm256_shuffle_epi8(vmax_3, vspread_shufmask);
-
-            __m256i vmax_a4 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmax_0, vmax_0, 0x00000001), vspread_shufmask);
-            __m256i vmax_a5 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmax_1, vmax_1, 0x00000001), vspread_shufmask);
-            __m256i vmax_a6 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmax_2, vmax_2, 0x00000001), vspread_shufmask);
-            __m256i vmax_a7 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmax_3, vmax_3, 0x00000001), vspread_shufmask);
-
-            vmax_0 = _mm256_or_si256(vmax_a0, vmax_a4);
-            vmax_1 = _mm256_or_si256(vmax_a1, vmax_a5);
-            vmax_2 = _mm256_or_si256(vmax_a2, vmax_a6);
-            vmax_3 = _mm256_or_si256(vmax_a3, vmax_a7);
-
-            __m256 vfmax0 = _mm256_cvtepi32_ps(vmax_0);
-            __m256 vfmax1 = _mm256_cvtepi32_ps(vmax_1);
-            __m256 vfmax2 = _mm256_cvtepi32_ps(vmax_2);
-            __m256 vfmax3 = _mm256_cvtepi32_ps(vmax_3);
-
-            // Unpack min bytes into 4 float vectors
-            __m256i vmin_0 = _mm256_and_si256(vmin_rgb, vfpcast_mask);
-            __m256i vmin_1 = _mm256_and_si256(_mm256_srli_si256(vmin_rgb, 8), vfpcast_mask);
-
-            __m256i vmin_rgb_rev = _mm256_permute2x128_si256(vmin_rgb, vmin_rgb, 0x00000001);
-
-            __m256i vmin_2 = _mm256_and_si256(vmin_rgb_rev, vfpcast_mask);
-            __m256i vmin_3 = _mm256_and_si256(_mm256_srli_si256(vmin_rgb_rev, 8), vfpcast_mask);            
-
-            __m256i vmin_a0 = _mm256_shuffle_epi8(vmin_0, vspread_shufmask);
-            __m256i vmin_a1 = _mm256_shuffle_epi8(vmin_1, vspread_shufmask);
-            __m256i vmin_a2 = _mm256_shuffle_epi8(vmin_2, vspread_shufmask);
-            __m256i vmin_a3 = _mm256_shuffle_epi8(vmin_3, vspread_shufmask);
-
-            __m256i vmin_a4 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmin_0, vmin_0, 0x00000001), vspread_shufmask);
-            __m256i vmin_a5 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmin_1, vmin_1, 0x00000001), vspread_shufmask);
-            __m256i vmin_a6 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmin_2, vmin_2, 0x00000001), vspread_shufmask);
-            __m256i vmin_a7 = _mm256_shuffle_epi8(_mm256_permute2x128_si256(vmin_3, vmin_3, 0x00000001), vspread_shufmask);
-
-            vmin_0 = _mm256_or_si256(vmin_a0, vmin_a4);
-            vmin_1 = _mm256_or_si256(vmin_a1, vmin_a5);
-            vmin_2 = _mm256_or_si256(vmin_a2, vmin_a6);
-            vmin_3 = _mm256_or_si256(vmin_a3, vmin_a7);
-
-            __m256 vfmin0 = _mm256_cvtepi32_ps(vmin_0);
-            __m256 vfmin1 = _mm256_cvtepi32_ps(vmin_1);
-            __m256 vfmin2 = _mm256_cvtepi32_ps(vmin_2);
-            __m256 vfmin3 = _mm256_cvtepi32_ps(vmin_3);
-
-            // Calculate luminance = (max + min) / 2
-
-            __m256 vlum0 = _mm256_mul_ps(_mm256_add_ps(vfmin0, vfmax0), vlum_mulv);
-            __m256 vlum1 = _mm256_mul_ps(_mm256_add_ps(vfmin1, vfmax1), vlum_mulv);
-            __m256 vlum2 = _mm256_mul_ps(_mm256_add_ps(vfmin2, vfmax2), vlum_mulv);
-            __m256 vlum3 = _mm256_mul_ps(_mm256_add_ps(vfmin3, vfmax3), vlum_mulv);
-
-            // Store results
-
-            _mm256_store_ps(result.data() + i + 0, vlum0);
-            _mm256_store_ps(result.data() + i + 8, vlum1);
-            _mm256_store_ps(result.data() + i + 16, vlum2);
-            _mm256_store_ps(result.data() + i + 24, vlum3);
+            _mm256_store_ps(result.data() + i + 0, vlum.data[0]);
+            _mm256_store_ps(result.data() + i + 8, vlum.data[1]);
+            _mm256_store_ps(result.data() + i + 16, vlum.data[2]);
+            _mm256_store_ps(result.data() + i + 24, vlum.data[3]);
 
             continue;
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
+        {            
+            result[i] = (r[i] * 0.2126F / 255) + (g[i] * 0.7152F / 255) + (b[i] * 0.0722F / 255);
+        }
+
+        return result;
+    }
+
+    image_planar_data unpack_image_data_avx2(const uint8_t* data, size_t len)
+    {
+        if (len < (AVX_ALIGNMENT * 4))
         {
-            float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] }));
-            float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] }));
-            float vsum = (vmax + vmin) * 0.5F;
-            result[i] = (vsum / 255.0F);
+            return unpack_image_data_ssse3(data, len);
+        }
+
+        image_planar_data result(len / 4);
+        uint8_t* r = result.data_r();
+        uint8_t* g = result.data_g();
+        uint8_t* b = result.data_b();
+        uint8_t* a = result.data_a();
+
+        const __m256i vshufmask = _mm256_set_epi8(
+            19, 15, 11, 7,
+            18, 14, 10, 6,
+            17, 13, 9, 5,
+            16, 12, 8, 4,
+            15, 11, 7, 3,
+            14, 10, 6, 2, 
+            13, 9, 5, 1,
+            12, 8, 4, 0
+        );
+
+        size_t last_v_idx = len - (len % (AVX_ALIGNMENT * 4));
+        for (size_t i = 0; i < last_v_idx; i += AVX_ALIGNMENT * 4)
+        {
+            __m256i vdata0 = LOAD_SI256_CONST(data + i + (AVX_ALIGNMENT * 0));
+            __m256i vdata1 = LOAD_SI256_CONST(data + i + (AVX_ALIGNMENT * 1));
+            __m256i vdata2 = LOAD_SI256_CONST(data + i + (AVX_ALIGNMENT * 2));
+            __m256i vdata3 = LOAD_SI256_CONST(data + i + (AVX_ALIGNMENT * 3));
+
+            __m256i v_di_data0 = _mm256_shuffle_epi8(vdata0, vshufmask);
+            __m256i v_di_data1 = _mm256_shuffle_epi8(vdata1, vshufmask);
+            __m256i v_di_data2 = _mm256_shuffle_epi8(vdata2, vshufmask);
+            __m256i v_di_data3 = _mm256_shuffle_epi8(vdata3, vshufmask);
+                                    
+            __m256i v_r0r1g0g1 = _mm256_unpacklo_epi32(v_di_data0, v_di_data1);
+            __m256i v_r2r3g2g3 = _mm256_unpacklo_epi32(v_di_data2, v_di_data3);
+            __m256i v_r0r1r2r3 = _mm256_unpacklo_epi64(v_r0r1g0g1, v_r2r3g2g3);
+            __m256i v_g0g1g2g3 = _mm256_unpackhi_epi64(v_r0r1g0g1, v_r2r3g2g3);
+                                    
+            __m256i v_b0b1a0a1 = _mm256_unpackhi_epi32(v_di_data0, v_di_data1);
+            __m256i v_b2b3a2a3 = _mm256_unpackhi_epi32(v_di_data2, v_di_data3);
+            __m256i v_b0b1b2b3 = _mm256_unpacklo_epi64(v_b0b1a0a1, v_b2b3a2a3);
+            __m256i v_a0a1a2a3 = _mm256_unpackhi_epi64(v_b0b1a0a1, v_b2b3a2a3);
+
+            STORE_SI256(r + (i / 4), v_r0r1r2r3);
+            STORE_SI256(g + (i / 4), v_g0g1g2g3);
+            STORE_SI256(b + (i / 4), v_b0b1b2b3);
+            STORE_SI256(a + (i / 4), v_a0a1a2a3);
+        }
+
+        for (size_t i = last_v_idx; i < len; ++i)
+        {
+            r[i / 4] = data[i + 0];
+            g[i / 4] = data[i + 1];
+            b[i / 4] = data[i + 2];
+            a[i / 4] = data[i + 3];
         }
 
         return result;

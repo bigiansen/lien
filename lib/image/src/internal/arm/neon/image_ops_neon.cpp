@@ -140,50 +140,10 @@ namespace ien::image_ops::_internal
         }
     }
 
-    fixed_vector<float> rgba_average_neon(const channel_info_extract_args_rgba& args)
-    {
-        const size_t img_sz = args.len;
-        if(img_sz < NEON_ALIGNMENT)
-        {
-            return rgba_average_std(args);
-        }
-
-        BIND_CHANNELS_RGBA_CONST(args, r, g, b, a);
-
-        fixed_vector<uint8_t> result(args.len, NEON_ALIGNMENT);
-        size_t last_v_idx = img_sz - (img_sz % NEON_ALIGNMENT);
-        for (size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
-        {
-            uint8x16_t vseg_r = vld1q_u8(r + i);
-            uint8x16_t vseg_g = vld1q_u8(g + i);
-            uint8x16_t vseg_b = vld1q_u8(b + i);
-            uint8x16_t vseg_a = vld1q_u8(a + i);
-
-            auto v4r = extract_4x4f32_from_8x16u8(vseg_r);
-            auto v4g = extract_4x4f32_from_8x16u8(vseg_g);
-            auto v4b = extract_4x4f32_from_8x16u8(vseg_b);
-            auto v4a = extract_4x4f32_from_8x16u8(vseg_a);
-
-            for(auto vidx = 0; vidx < 4; ++vidx)
-            {
-                float32x4_t v4rx = v4r.val[vidx];
-                float32x4_t v4gx = v4g.val[vidx];
-                float32x4_t v4bx = v4b.val[vidx];
-                float32x4_t v4ax = v4a.val[vidx];
-
-                float32x4_t vavg_rg = vhadd_s32(v4rx, v4gx);
-                float32x4_t vavg_ba = vhadd_s32(v4bx, v4ax);
-                float32x4_t vavg_rgba = vhadd_s32(vavg_rg, vavg_ba);
-
-                vst1q_f32(result.data() + i + (vidx * 4), vavg_rgba);
-            }
-        }
-
-        for (size_t i = last_v_idx; i < img_sz; ++i)
-        {            
-            result[i] = safe_add<float>(r[i], g[i], b[i], a[i]) / 4;
-        }
-        return result;
+    fixed_vector<uint8_t> rgba_average_neon(const channel_info_extract_args_rgba& args)
+    {        
+        // not implemented
+        return rgba_average_std(args);
     }
 
     fixed_vector<uint8_t> rgba_max_neon(const channel_info_extract_args_rgba& args)

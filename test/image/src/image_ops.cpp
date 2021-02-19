@@ -53,7 +53,7 @@ TEST_CASE("[STD] Channel average RGBA")
         auto result = image_ops::_internal::rgba_average_std(args);
         for (size_t i = 0; i < img.pixel_count(); ++i)
         {
-            REQUIRE(result[i] == (ien::safe_add<float>(1, 5, 10, 15) / 4));
+            REQUIRE(result[i] == ien::average<uint8_t>(1, 5, 10, 15));
         }
     };
 };
@@ -261,7 +261,7 @@ TEST_CASE("[STD] Luminance")
         REQUIRE(result.size() == img.pixel_count());
         for(size_t i = 0; i < result.size(); ++i)
         {
-            REQUIRE(result[i] == Approx(0.007843137254902F));
+            REQUIRE(result[i] == (1.0F * 0.2126F / 255) + (2.0F * 0.7152F / 255) + (3.0F * 0.0722F / 255));
         }
     };
 };
@@ -270,9 +270,9 @@ TEST_CASE("[STD] Unpack Image Data")
 {
     SECTION("STD")
     {
-        std::vector<uint8_t> data(1024);
+        std::vector<uint8_t> data(1024*1024);
 
-        for (size_t i = 0; i < 256; ++i)
+        for (size_t i = 0; i < data.size() / 4; ++i)
         {
             data[(i * 4) + 0] = 1;
             data[(i * 4) + 1] = 2;

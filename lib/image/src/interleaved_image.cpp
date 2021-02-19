@@ -81,6 +81,24 @@ namespace ien
         return *reinterpret_cast<const uint32_t*>((*_data).cdata() + (index * 4));
     }
 
+    std::vector<uint32_t> interleaved_image::get_chunk(const rect<size_t>& r) const
+    {
+        std::vector<uint32_t> result;
+        result.resize(r.w * r.h);
+
+        for (size_t y = r.y; y < (r.y + r.h); ++y)
+        {
+            size_t offset = (y * _width) + r.x;            
+            std::memcpy(
+                result.data() + (y * r.w * 4), 
+                _data.get()->cdata() + (offset * 4), 
+                (r.w * 4)
+            );
+        }
+
+        return result;
+    }
+
     bool interleaved_image::save_to_file_png(const std::string& path, int compression_level) const
     {
         stbi_write_png_compression_level = compression_level;

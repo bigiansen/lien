@@ -44,7 +44,7 @@ namespace ien
         virtual uint32_t get_pixel(size_t idx) const = 0;
         virtual uint32_t get_pixel(size_t x, size_t y) const = 0;
  
-        std::vector<uint32_t> get_chunk(const rect<size_t>& r) const;
+        virtual std::vector<uint32_t> get_chunk(const rect<size_t>& r) const = 0;
  
         virtual void set_pixel(size_t idx, uint32_t px) = 0;
         virtual void set_pixel(size_t x, size_t y, uint32_t px) = 0;
@@ -60,7 +60,7 @@ namespace ien
         virtual void resize_absolute(size_t w, size_t h) = 0;
         virtual void resize_relative(float w, float h) = 0;
 
-        image_type imgtype() const { return _imgtype; }
+        inline image_type imgtype() const { return _imgtype; }
     };
 
     extern std::unique_ptr<ien::image> read_image(const std::string& imgpath, image_type type);
