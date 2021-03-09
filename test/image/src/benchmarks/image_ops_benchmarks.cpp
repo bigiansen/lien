@@ -10,7 +10,7 @@
 #if defined(LIEN_ARCH_X86_64) || defined(LIEN_ARCH_X86)
     #include <ien/internal/x86/image_ops_x86.hpp>
 #elif defined(LIEN_ARM_NEON)
-    #include <ien/internal/arm/image_ops_arm.hpp>
+    #include <ien/internal/arm/neon/image_ops_neon.hpp>
 #endif
 
 using namespace ien;

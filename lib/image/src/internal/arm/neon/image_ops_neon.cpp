@@ -367,8 +367,14 @@ namespace ien::image_ops::_internal
 
         fixed_vector<float> result(args.len, NEON_ALIGNMENT);
 
-        const float lum_mul = 0.0019607843137254F;
-        float32x4_t vlum_mul = vld1q_dup_f32(&lum_mul);
+        const float div_255 = 1.0F / 255;
+        const float lum_mul_r = 0.2126F;
+        const float lum_mul_g = 0.7152F;
+        const float lum_mul_b = 0.0722F;
+        float32x4_t vlum_mul_r = vld1q_dup_f32(&lum_mul_r);
+        float32x4_t vlum_mul_g = vld1q_dup_f32(&lum_mul_g);
+        float32x4_t vlum_mul_b = vld1q_dup_f32(&lum_mul_b);
+        float32x4_t vdiv_255 = vld1q_dup_f32(&div_255);
 
         size_t last_v_idx = img_sz - (img_sz % NEON_ALIGNMENT);
         for (size_t i = 0; i < last_v_idx; i += NEON_ALIGNMENT)
@@ -377,47 +383,57 @@ namespace ien::image_ops::_internal
             uint8x16_t vseg_g = vld1q_u8(g + i);
             uint8x16_t vseg_b = vld1q_u8(b + i);
 
-            uint8x16_t vmax_rg = vmaxq_u8(vseg_r, vseg_g);
-            uint8x16_t vmax_rgb = vmaxq_u8(vmax_rg, vseg_b);
+            float32x4x4_t vfr = extract_4x4f32_from_8x16u8(vseg_r);
+            float32x4x4_t vfg = extract_4x4f32_from_8x16u8(vseg_g);
+            float32x4x4_t vfb = extract_4x4f32_from_8x16u8(vseg_b);
 
-            uint8x16_t vmin_rg = vminq_u8(vseg_r, vseg_g);
-            uint8x16_t vmin_rgb = vminq_u8(vmin_rg, vseg_b);
+            vfr.val[0] = vmulq_f32(vfr.val[0], vlum_mul_r);
+            vfr.val[1] = vmulq_f32(vfr.val[1], vlum_mul_r);
+            vfr.val[2] = vmulq_f32(vfr.val[2], vlum_mul_r);
+            vfr.val[3] = vmulq_f32(vfr.val[3], vlum_mul_r);
 
-            float32x4x4_t vmaxq = extract_4x4f32_from_8x16u8(vmax_rgb);
-            float32x4x4_t vminq = extract_4x4f32_from_8x16u8(vmin_rgb);
+            vfg.val[0] = vmulq_f32(vfg.val[0], vlum_mul_g);
+            vfg.val[1] = vmulq_f32(vfg.val[1], vlum_mul_g);
+            vfg.val[2] = vmulq_f32(vfg.val[2], vlum_mul_g);
+            vfg.val[3] = vmulq_f32(vfg.val[3], vlum_mul_g);
 
-            float32x4x4_t vsumq = {
-                vaddq_f32(vmaxq.val[0], vminq.val[0]),
-                vaddq_f32(vmaxq.val[1], vminq.val[1]),
-                vaddq_f32(vmaxq.val[2], vminq.val[2]),
-                vaddq_f32(vmaxq.val[3], vminq.val[3])
-            };
+            vfb.val[0] = vmulq_f32(vfb.val[0], vlum_mul_b);
+            vfb.val[1] = vmulq_f32(vfb.val[1], vlum_mul_b);
+            vfb.val[2] = vmulq_f32(vfb.val[2], vlum_mul_b);
+            vfb.val[3] = vmulq_f32(vfb.val[3], vlum_mul_b);
 
-            for(int vidx = 0; vidx < 4; ++vidx)
-            {
-                float32x4_t vflum = vmulq_f32(vsumq.val[vidx], vlum_mul);
-                float* dest_ptr = result.data() + i + (vidx * 4);
-                vst1q_f32(dest_ptr, vflum);
-            }
+            float32x4x4_t vlum;
+            vlum.val[0] = vaddq_f32(vaddq_f32(vfr.val[0], vfg.val[0]), vfb.val[0]);
+            vlum.val[1] = vaddq_f32(vaddq_f32(vfr.val[1], vfg.val[1]), vfb.val[1]);
+            vlum.val[2] = vaddq_f32(vaddq_f32(vfr.val[2], vfg.val[2]), vfb.val[2]);
+            vlum.val[3] = vaddq_f32(vaddq_f32(vfr.val[3], vfg.val[3]), vfb.val[3]);
+
+            vlum.val[0] = vmulq_f32(vlum.val[0], vdiv_255);
+            vlum.val[1] = vmulq_f32(vlum.val[1], vdiv_255);
+            vlum.val[2] = vmulq_f32(vlum.val[2], vdiv_255);
+            vlum.val[3] = vmulq_f32(vlum.val[3], vdiv_255);
+
+            vst1q_f32(result.data() + i + 0, vlum.val[0]);
+            vst1q_f32(result.data() + i + 4, vlum.val[1]);
+            vst1q_f32(result.data() + i + 8, vlum.val[2]);
+            vst1q_f32(result.data() + i + 12, vlum.val[3]);
         }
 
         for (size_t i = last_v_idx; i < img_sz; ++i)
-        {
-            float vmax = static_cast<float>(std::max({ r[i], g[i], b[i] })) / 255.0F;
-            float vmin = static_cast<float>(std::min({ r[i], g[i], b[i] })) / 255.0F;
-            result[i] = (vmax - vmin) / vmax;
+        {            
+            result[i] = (r[i] * 0.2126F / 255) + (g[i] * 0.7152F / 255) + (b[i] * 0.0722F / 255);
         }
 
         return result;
     }
 
-    image_unpacked_data unpack_image_data_neon(const uint8_t* data, size_t len)
+    image_planar_data unpack_image_data_neon(const uint8_t* data, size_t len)
     {
         if(len < NEON_ALIGNMENT)
         {
             return unpack_image_data_std(data, len);
         }
-        image_unpacked_data result(len / 4);
+        image_planar_data result(len / 4);
 
         uint8_t* r = result.data_r();
         uint8_t* g = result.data_g();

@@ -261,7 +261,7 @@ TEST_CASE("[STD] Luminance")
         REQUIRE(result.size() == img.pixel_count());
         for(size_t i = 0; i < result.size(); ++i)
         {
-            REQUIRE(result[i] == (1.0F * 0.2126F / 255) + (2.0F * 0.7152F / 255) + (3.0F * 0.0722F / 255));
+            REQUIRE(result[i] == Approx((1.0F * 0.2126F / 255) + (2.0F * 0.7152F / 255) + (3.0F * 0.0722F / 255)).margin(0.0001F));
         }
     };
 };

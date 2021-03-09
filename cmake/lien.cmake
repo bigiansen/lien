@@ -65,9 +65,9 @@ function(LIEN_INIT_GIT_SUBMODULES)
         RESULT_VARIABLE GIT_SM_INIT_OK
     )
 
-    if(NOT GIT_SM_INIT_OK EQUAL "0")
-        message(FATAL_ERROR "Failure to initialize git submodules! Error code: ${GIT_SM_INIT_OK}")
-    endif()
+    #if(NOT GIT_SM_INIT_OK EQUAL "0")
+    #    message(FATAL_ERROR "Failure to initialize git submodules! Error code: ${GIT_SM_INIT_OK}")
+    #endif()
 
     message(STATUS "-- INITIALIZING GIT SUBMODULES -- [OK]")
 

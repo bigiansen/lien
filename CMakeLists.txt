@@ -38,6 +38,11 @@ elseif(EMSCRIPTEN)
     add_definitions(-msimd128)
 endif()
 
+# Disable ABI warnings on GCC/Clang
+if(NOT MSVC)
+    add_definitions(-Wno-psabi)
+endif()
+
 # Enable NEON code generation on ARM platforms, if enabled by the LIEN_ARM_ENABLE_NEON option
 # This should go in a toolchain, but will remain here for the moment
 if(LIEN_ARCH_ARM AND LIEN_ARM_ENABLE_NEON)

@@ -1,6 +1,7 @@
 #include <ien/strutils.hpp>
 
 #include <algorithm>
+#include <cctype>
 #include <sstream>
 #include <type_traits>
 
@@ -10,17 +11,17 @@ namespace ien::strutils
     std::vector<TRetVecVal> split(TArg str, char delim)
     {
         static_assert(
-            std::is_same_v<std::decay_t<TRetVecVal>, std::string> 
+            std::is_same_v<std::decay_t<TRetVecVal>, std::string>
             || std::is_same_v<std::decay_t<TRetVecVal>, std::string_view>
         );
         static_assert(
-            std::is_same_v<std::decay_t<TArg>, std::string> 
+            std::is_same_v<std::decay_t<TArg>, std::string>
             || std::is_same_v<std::decay_t<TArg>, std::string_view>
         );
 
         std::vector<TRetVecVal> result;
-        std::decay_t<TArg>::const_iterator it = str.cbegin();
-        std::decay_t<TArg>::const_iterator found_it = std::find(it, str.end(), delim);
+        auto it = str.cbegin();
+        auto found_it = std::find(it, str.end(), delim);
 
         while (found_it != str.end())
         {
@@ -55,7 +56,7 @@ namespace ien::strutils
 
     std::vector<std::string> split(const std::string& str, char delim)
     {
-        return split<std::string, const std::string&>(str, delim);        
+        return split<std::string, const std::string&>(str, delim);
     }
 
     std::vector<std::string> split(const std::string_view str, char delim)
@@ -120,16 +121,16 @@ namespace ien::strutils
     std::string replace(const std::string& str, const std::string& ocurrence, const std::string& replacement)
     {
         std::stringstream sstr;
-        
+
         size_t current_offset = 0;
         size_t idx = str.find(ocurrence, current_offset);
         while(idx != std::string::npos)
         {
             sstr << str.substr(current_offset, (idx - current_offset)) << replacement;
-            current_offset = (idx + ocurrence.size());            
+            current_offset = (idx + ocurrence.size());
             idx = str.find(ocurrence, current_offset);
         }
-        if(current_offset == 0) 
+        if(current_offset == 0)
         {
             return str;
         }
@@ -149,7 +150,7 @@ namespace ien::strutils
     {
         std::string result;
         result.reserve(str.size());
-        std::transform(str.cbegin(), str.cend(), std::back_inserter(result), std::toupper);
+        std::transform(str.cbegin(), str.cend(), std::back_inserter(result), toupper);
         return result;
     }
 
@@ -157,18 +158,18 @@ namespace ien::strutils
     {
         std::string result;
         result.reserve(str.size());
-        std::transform(str.cbegin(), str.cend(), std::back_inserter(result), std::tolower);
+        std::transform(str.cbegin(), str.cend(), std::back_inserter(result), tolower);
         return result;
     }
 
     void to_upper_in_place(std::string& str)
     {
-        std::transform(str.begin(), str.end(), str.begin(), std::toupper);
+        std::transform(str.begin(), str.end(), str.begin(), toupper);
     }
 
     void to_lower_in_place(std::string& str)
     {
-        std::transform(str.begin(), str.end(), str.begin(), std::tolower);
+        std::transform(str.begin(), str.end(), str.begin(), tolower);
     }
 
     std::string_view trim_start(std::string_view str)
